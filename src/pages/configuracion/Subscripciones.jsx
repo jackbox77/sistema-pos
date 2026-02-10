@@ -16,7 +16,7 @@ export default function Subscripciones() {
           <span>✓ Soporte por email</span>
         </div>
         <button className="btn-primary" style={{ marginTop: '16px' }}>
-          Ver planes disponibles.
+          Ver planes disponibles
         </button>
       </div>
     </PageModule>
