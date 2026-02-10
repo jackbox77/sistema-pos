@@ -1,0 +1,42 @@
+.layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.layout-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+.layout-content {
+  flex: 1;
+  padding: 24px;
+  background: #fff;
+  margin: 16px 16px 16px 0;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+/* Tablet */
+@media (max-width: 1024px) {
+  .layout-content {
+    padding: 16px;
+    margin: 12px 12px 12px 0;
+  }
+}
+
+/* Móvil: espacio para sidebar colapsado (64px) */
+@media (max-width: 768px) {
+  .layout-content {
+    padding: 12px;
+    margin: 8px;
+    margin-left: 72px;
+    border-radius: 8px;
+  }
+}
+

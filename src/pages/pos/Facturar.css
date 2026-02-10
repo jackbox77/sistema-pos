@@ -1,0 +1,22 @@
+.facturar-page {
+  position: relative;
+}
+
+.facturar-desc {
+  color: #6b7280;
+  margin-bottom: 24px;
+}
+
+.facturar-btn-new {
+  padding: 10px 20px;
+  background: #0d9488;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.facturar-btn-new:hover {
+  background: #0f766e;
+}

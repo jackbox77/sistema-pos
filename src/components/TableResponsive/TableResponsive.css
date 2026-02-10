@@ -1,0 +1,72 @@
+/* Scroll horizontal en pantallas pequeñas */
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 0 -4px;
+}
+
+.table-responsive .page-module-table {
+  min-width: 600px;
+}
+
+/* Tablet */
+@media (max-width: 1024px) {
+  .table-responsive {
+    margin: 0 -2px;
+  }
+}
+
+/* Móvil: tabla con scroll o cards si tienen data-label */
+@media (max-width: 768px) {
+  .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  }
+
+  .table-responsive .page-module-table {
+    min-width: 500px;
+  }
+
+  /* Cards: cuando los td tienen data-label */
+  .table-responsive .page-module-table thead {
+    display: none;
+  }
+
+  .table-responsive .page-module-table tbody tr {
+    display: block;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    padding: 12px;
+    background: #fff;
+  }
+
+  .table-responsive .page-module-table tbody tr:last-child {
+    margin-bottom: 0;
+  }
+
+  .table-responsive .page-module-table tbody td {
+    display: block;
+    border: none;
+    padding: 6px 0;
+  }
+
+  .table-responsive .page-module-table tbody td[data-label]::before {
+    content: attr(data-label);
+    font-weight: 600;
+    font-size: 12px;
+    color: #6b7280;
+    display: block;
+    margin-bottom: 2px;
+  }
+
+  .table-responsive .page-module-table tbody tr {
+    min-width: auto;
+  }
+
+  .table-responsive .page-module-table {
+    min-width: 100%;
+  }
+}
