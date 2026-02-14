@@ -1,0 +1,201 @@
+/* Vista previa tipo "Platos en horizontal": tarjetas de platos en fila con scroll horizontal */
+
+.menu-preview-platos-h {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.menu-preview-platos-h .menu-preview-platos-h-inner {
+  display: flex;
+  flex-direction: column;
+  min-height: 520px;
+  max-height: 80vh;
+  overflow: hidden;
+  border-radius: 8px;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.menu-preview-platos-h-header {
+  text-align: center;
+  padding: 16px;
+  flex-shrink: 0;
+}
+
+.menu-preview-platos-h-logo,
+.menu-preview-platos-h-logo-img {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 10px;
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.menu-preview-platos-h-logo {
+  border: 2px dashed;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.menu-preview-platos-h-logo-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.menu-preview-platos-h-titulo {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.menu-preview-platos-h-body {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0 16px 20px;
+  min-width: 0;
+  -webkit-overflow-scrolling: touch;
+}
+
+.menu-preview-platos-h-empty {
+  text-align: center;
+  font-size: 14px;
+  padding: 32px 16px;
+  margin: 0;
+}
+
+/* Sección por categoría */
+.menu-preview-platos-h-seccion {
+  margin-bottom: 24px;
+}
+
+.menu-preview-platos-h-seccion:last-child {
+  margin-bottom: 0;
+}
+
+.menu-preview-platos-h-seccion-titulo {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0 0 6px;
+}
+
+.menu-preview-platos-h-seccion-desc {
+  font-size: 13px;
+  margin: 0 0 14px;
+  line-height: 1.4;
+}
+
+.menu-preview-platos-h-sin-productos {
+  font-size: 13px;
+  margin: 0;
+}
+
+/* Fila horizontal de platos (scroll horizontal) */
+.menu-preview-platos-h-fila {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 8px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+
+.menu-preview-platos-h-fila::-webkit-scrollbar {
+  height: 6px;
+}
+
+.menu-preview-platos-h-fila::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+}
+
+/* Tarjeta de plato (imagen arriba, texto abajo) */
+.menu-preview-platos-h-card {
+  flex-shrink: 0;
+  width: 180px;
+  display: flex;
+  flex-direction: column;
+  border-radius: 12px;
+  border: 1px solid;
+  overflow: hidden;
+  background: #fff;
+}
+
+.menu-preview-platos-h-card-img {
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.menu-preview-platos-h-card-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.menu-preview-platos-h-card-img-sin {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.menu-preview-platos-h-card-content {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-height: 0;
+}
+
+.menu-preview-platos-h-card-nombre {
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.2;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.menu-preview-platos-h-card-desc {
+  font-size: 11px;
+  line-height: 1.35;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.menu-preview-platos-h-card-precio {
+  font-size: 13px;
+  font-weight: 700;
+  margin-top: 4px;
+}
+
+.menu-preview-platos-h-card-btn {
+  margin: 0 12px 12px;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.menu-preview-platos-h-card-btn:hover {
+  opacity: 0.9;
+}

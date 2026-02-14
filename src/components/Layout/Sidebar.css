@@ -1,6 +1,7 @@
 .sidebar {
   width: 64px;
   min-width: 64px;
+  height: 100%;
   background: #fff;
   border-right: 1px solid #e5e7eb;
   display: flex;
@@ -119,8 +120,29 @@
 
 .sidebar-nav {
   flex: 1;
+  min-height: 0;
   padding: 16px 0;
   overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Scrollbar del sidebar */
+.sidebar-nav::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar-nav::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
 }
 
 .sidebar-link,
@@ -153,7 +175,10 @@
 }
 
 .sidebar-icon {
-  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 .sidebar-group {

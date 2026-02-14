@@ -1,0 +1,454 @@
+/* Vista final estilo Pirpos/Loggro - menú digital con barra de categorías y tarjetas */
+
+.menu-preview-pirpos.menu-preview-tarjetas .menu-preview-tarjetas-inner {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 0;
+}
+
+/* Header: logo centrado + nombre (estilo Pirpos) */
+.menu-preview-pirpos .menu-preview-tarjetas-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 20px 20px 18px;
+  border-bottom: 1px solid;
+  flex-shrink: 0;
+}
+
+.menu-preview-pirpos .menu-preview-tarjetas-header-top {
+  margin-bottom: 12px;
+}
+
+.menu-preview-pirpos .menu-preview-tarjetas-empresa-logo,
+.menu-preview-pirpos .menu-preview-tarjetas-empresa-logo-img {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.menu-preview-pirpos .menu-preview-tarjetas-empresa-logo {
+  border: 2px dashed;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.menu-preview-pirpos .menu-preview-tarjetas-empresa-logo-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.menu-preview-pirpos .menu-preview-tarjetas-logo-text {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 0 0 4px;
+}
+
+.menu-preview-pirpos .menu-preview-tarjetas-subtitulo {
+  font-size: 13px;
+  margin: 0;
+  opacity: 0.85;
+}
+
+/* Barra de categorías sticky (estilo Pirpos) */
+.menu-preview-pirpos .menu-preview-tarjetas-bar-wrap {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  padding: 12px 16px 12px;
+  border-bottom: 1px solid;
+  flex-shrink: 0;
+  background: inherit;
+}
+
+.menu-preview-pirpos .menu-preview-tarjetas-bar {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 2px;
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
+  -ms-overflow-style: none;
+}
+
+.menu-preview-pirpos .menu-preview-tarjetas-bar::-webkit-scrollbar {
+  height: 4px;
+}
+
+.menu-preview-pirpos .menu-preview-tarjetas-bar::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 4px;
+}
+
+.menu-preview-pirpos .menu-preview-tarjetas-pill {
+  flex-shrink: 0;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 9999px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s, transform 0.1s;
+}
+
+.menu-preview-pirpos .menu-preview-tarjetas-pill:hover {
+  transform: translateY(-1px);
+}
+
+.menu-preview-pirpos .menu-preview-tarjetas-pill-active {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Área de contenido con scroll */
+.menu-preview-pirpos .menu-preview-tarjetas-body {
+  flex: 1;
+  padding: 20px 16px 24px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+.menu-preview-pirpos .menu-preview-tarjetas-empty {
+  text-align: center;
+  font-size: 14px;
+  padding: 48px 24px;
+  margin: 0;
+}
+
+/* Tarjetas de producto (estilo Pirpos - imagen + contenido + botón) */
+.menu-preview-pirpos .menu-preview-tarjetas-lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.menu-preview-pirpos .menu-preview-tarjetas-card {
+  display: flex;
+  align-items: stretch;
+  gap: 16px;
+  padding: 16px;
+  border-radius: 14px;
+  border: 1px solid;
+  min-height: 120px;
+  transition: box-shadow 0.2s;
+}
+
+.menu-preview-pirpos .menu-preview-tarjetas-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+/* Imagen del producto - aspecto cuadrado/redondeado */
+.menu-preview-pirpos .menu-preview-tarjetas-card-img {
+  width: 100px;
+  height: 100px;
+  min-width: 100px;
+  min-height: 100px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.menu-preview-pirpos .menu-preview-tarjetas-card-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.menu-preview-pirpos .menu-preview-tarjetas-card-img-sin {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Contenido: nombre, descripción, precio */
+.menu-preview-pirpos .menu-preview-tarjetas-card-content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  justify-content: center;
+  padding-right: 0;
+}
+
+.menu-preview-pirpos .menu-preview-tarjetas-card-nombre {
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.25;
+  display: block;
+}
+
+.menu-preview-pirpos .menu-preview-tarjetas-card-desc {
+  font-size: 13px;
+  line-height: 1.4;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  opacity: 0.9;
+}
+
+.menu-preview-pirpos .menu-preview-tarjetas-card-precio {
+  font-size: 16px;
+  font-weight: 700;
+  margin-top: 4px;
+}
+
+/* Botón Agregar */
+.menu-preview-pirpos .menu-preview-tarjetas-btn-agregar {
+  align-self: center;
+  flex-shrink: 0;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 9999px;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.1s;
+}
+
+.menu-preview-pirpos .menu-preview-tarjetas-btn-agregar:hover {
+  opacity: 0.92;
+}
+
+.menu-preview-pirpos .menu-preview-tarjetas-btn-agregar:active {
+  transform: scale(0.97);
+}
+
+/* Fallback para MenuPreviewTarjetas sin clase pirpos (editor) */
+.menu-preview-tarjetas .menu-preview-tarjetas-inner {
+  display: flex;
+  flex-direction: column;
+  min-height: 520px;
+  max-height: 80vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  border-radius: 8px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.menu-preview-tarjetas-header {
+  display: flex;
+  flex-direction: column;
+  padding: 12px 16px 14px;
+  border-bottom: 1px solid;
+  flex-shrink: 0;
+}
+
+.menu-preview-tarjetas-header-top {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.menu-preview-tarjetas-empresa-logo,
+.menu-preview-tarjetas-empresa-logo-img {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.menu-preview-tarjetas-empresa-logo {
+  border: 2px dashed;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.menu-preview-tarjetas-empresa-logo-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.menu-preview-tarjetas-logo-text {
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.menu-preview-tarjetas-subtitulo {
+  font-size: 12px;
+  margin: 0;
+}
+
+.menu-preview-tarjetas-bar-wrap {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  padding: 12px 16px 14px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  flex-shrink: 0;
+}
+
+.menu-preview-tarjetas-bar {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 4px;
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
+}
+
+.menu-preview-tarjetas-bar::-webkit-scrollbar {
+  height: 4px;
+}
+
+.menu-preview-tarjetas-bar::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+.menu-preview-tarjetas-pill {
+  flex-shrink: 0;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 9999px;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.menu-preview-tarjetas-pill:hover {
+  opacity: 0.9;
+}
+
+.menu-preview-tarjetas-pill-active {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+.menu-preview-tarjetas-body {
+  flex: 1;
+  padding: 16px;
+}
+
+.menu-preview-tarjetas-empty {
+  text-align: center;
+  font-size: 14px;
+  padding: 32px 16px;
+  margin: 0;
+}
+
+.menu-preview-tarjetas-lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.menu-preview-tarjetas-card {
+  display: flex;
+  align-items: stretch;
+  gap: 14px;
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  min-height: 100px;
+}
+
+.menu-preview-tarjetas-card-img {
+  width: 88px;
+  height: 88px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #f3f4f6;
+}
+
+.menu-preview-tarjetas-card-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.menu-preview-tarjetas-card-img-sin {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.menu-preview-tarjetas-card-content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  justify-content: center;
+}
+
+.menu-preview-tarjetas-card-nombre {
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.2;
+  display: block;
+}
+
+.menu-preview-tarjetas-card-desc {
+  font-size: 12px;
+  line-height: 1.35;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.menu-preview-tarjetas-card-precio {
+  font-size: 14px;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.menu-preview-tarjetas-btn-agregar {
+  align-self: center;
+  flex-shrink: 0;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 9999px;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.1s;
+}
+
+.menu-preview-tarjetas-btn-agregar:hover {
+  opacity: 0.92;
+}
+
+.menu-preview-tarjetas-btn-agregar:active {
+  transform: scale(0.98);
+}

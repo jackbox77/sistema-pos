@@ -1,0 +1,273 @@
+.config-empresa-form {
+  background: #f3f4f6;
+  padding: 24px;
+  border-radius: 8px;
+  margin-top: 8px;
+}
+
+.config-empresa-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  max-width: 100%;
+}
+
+.config-empresa-col {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.config-empresa-card {
+  background: #fff;
+  border-radius: 8px;
+  padding: 24px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.config-empresa-card-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #374151;
+  margin: 0 0 20px;
+}
+
+.config-empresa-card-title svg {
+  color: #6b7280;
+  flex-shrink: 0;
+}
+
+.config-empresa-logo-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.config-empresa-logo-preview {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  border: 2px solid #e5e7eb;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f9fafb;
+}
+
+.config-empresa-logo-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.config-empresa-logo-placeholder {
+  font-size: 14px;
+  color: #9ca3af;
+  font-weight: 500;
+}
+
+.config-empresa-input-file {
+  position: absolute;
+  width: 0.1px;
+  height: 0.1px;
+  opacity: 0;
+  overflow: hidden;
+  z-index: -1;
+}
+
+.config-empresa-btn-upload {
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 18px;
+  background: #2563eb;
+  color: #fff;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.config-empresa-btn-upload:hover {
+  background: #1d4ed8;
+}
+
+.config-empresa-btn-remove {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: transparent;
+  color: #ea580c;
+  border: 1px solid #ea580c;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.config-empresa-btn-remove:hover {
+  background: #fff7ed;
+}
+
+.config-empresa-hint {
+  font-size: 13px;
+  color: #ea580c;
+  margin: 12px 0 0;
+  line-height: 1.4;
+}
+
+.config-empresa-fotos {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.config-empresa-foto-slot {
+  aspect-ratio: 16 / 9;
+  border-radius: 8px;
+  border: 1px dashed #d1d5db;
+  overflow: hidden;
+  background: #f9fafb;
+}
+
+.config-empresa-foto-preview {
+  width: 100%;
+  height: 100%;
+}
+
+.config-empresa-foto-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.config-empresa-foto-upload {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  color: #2563eb;
+}
+
+.config-empresa-foto-upload:hover {
+  background: #eff6ff;
+  border-color: #93c5fd;
+}
+
+.config-empresa-foto-plus {
+  font-size: 28px;
+  font-weight: 300;
+  line-height: 1;
+  color: #2563eb;
+}
+
+.config-empresa-foto-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.config-empresa-color-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.config-empresa-color-input {
+  width: 48px;
+  height: 48px;
+  padding: 4px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  cursor: pointer;
+  background: #fff;
+}
+
+.config-empresa-color-hex {
+  width: 120px;
+  padding: 10px 14px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: ui-monospace, monospace;
+}
+
+.config-empresa-color-hex:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+}
+
+.config-empresa-datos {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.config-empresa-datos .config-field label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 6px;
+}
+
+.config-empresa-datos .config-field input,
+.config-empresa-datos .config-field textarea {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.config-empresa-datos .config-field textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.config-empresa-actions {
+  margin-top: 24px;
+}
+
+.config-empresa-btn-guardar {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 28px;
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.config-empresa-btn-guardar:hover {
+  background: #1d4ed8;
+}
+
+@media (max-width: 900px) {
+  .config-empresa-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .config-empresa-fotos {
+    grid-template-columns: 1fr;
+  }
+}

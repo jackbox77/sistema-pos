@@ -1,0 +1,94 @@
+/* Vista completa: menú a toda la página, sin bordes ni card */
+.vista-completa-menu {
+  min-height: 100vh;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #f8f9fa;
+}
+
+.vista-completa-menu-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  background: transparent;
+  flex-shrink: 0;
+}
+
+.vista-completa-menu-volver {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #374151;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.vista-completa-menu-volver:hover {
+  color: #1d4ed8;
+}
+
+/* Main: ocupa todo el espacio sin padding ni márgenes */
+.vista-completa-menu-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+/* Frame: sin bordes, sin sombra, sin límite de ancho - toda la página */
+.vista-completa-menu-frame {
+  flex: 1;
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+  min-height: 0;
+  box-shadow: none;
+  border-radius: 0;
+  overflow: hidden;
+  margin: 0;
+}
+
+.vista-completa-menu-frame .menu-preview {
+  min-height: 600px;
+  max-height: none;
+  border-radius: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* Vista Pirpos: menú digital full-height */
+.vista-completa-menu-pirpos {
+  display: flex;
+  flex-direction: column;
+  min-height: 600px;
+}
+
+.vista-completa-menu-pirpos .menu-preview-tarjetas {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.vista-completa-menu-pirpos .menu-preview-tarjetas-inner {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.vista-completa-menu-frame .menu-preview-inner,
+.vista-completa-menu-frame .menu-preview-tarjetas-inner,
+.vista-completa-menu-frame .menu-preview-cat-primero-inner,
+.vista-completa-menu-frame .menu-preview-platos-h-inner {
+  min-height: 600px;
+  max-height: 75vh;
+  width: 100%;
+  box-sizing: border-box;
+}

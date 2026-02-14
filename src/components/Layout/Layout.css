@@ -1,12 +1,15 @@
 .layout {
+  height: 100vh;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .layout-body {
   display: flex;
   flex: 1;
+  min-height: 0;
   overflow: hidden;
   position: relative;
 }
@@ -20,6 +23,16 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
   overflow-x: hidden;
   overflow-y: auto;
+}
+
+/* Vista menú completa: sin bordes, toda la página */
+.layout-content-fullscreen {
+  padding: 0;
+  margin: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: #f8f9fa;
+  overflow: hidden;
 }
 
 /* Tablet */

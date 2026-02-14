@@ -27,9 +27,9 @@ export default function Inicio() {
       <div className="dashboard-quick-actions">
         <h4>Acciones rápidas</h4>
         <div className="quick-actions-list">
-          <Link to="/pos/facturar" className="quick-action">Nueva venta</Link>
-          <Link to="/ingresos/factura-ventas" className="quick-action">Nueva factura</Link>
-          <Link to="/ingresos/pagos-recibidos" className="quick-action">Registrar pago</Link>
+          <Link to="/app/pos/facturar" className="quick-action">Nueva venta</Link>
+          <Link to="/app/ingresos/factura-ventas" className="quick-action">Nueva factura</Link>
+          <Link to="/app/ingresos/pagos-recibidos" className="quick-action">Registrar pago</Link>
         </div>
       </div>
     </PageModule>
