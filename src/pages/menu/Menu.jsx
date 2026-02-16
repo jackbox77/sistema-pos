@@ -1,19 +1,25 @@
 import { Link } from 'react-router-dom'
 import PageModule from '../../components/PageModule/PageModule'
 import MenuPreview from './MenuPreview'
-import { useMenu, TIPOS_MENU } from './MenuContext'
+import { useMenu, TIPOS_MENU, TIPOS_HEADER } from './MenuContext'
 import { Trash2, Settings } from 'lucide-react'
 import './Menu.css'
 import './ConfigurarEmpresa.css'
 
 export default function Menu() {
-  const { apariencia, setApariencia, empresaInfo, setEmpresaInfo, categoriasConProductos, tipoMenu, setTipoMenu } = useMenu()
+  const { apariencia, setApariencia, empresaInfo, setEmpresaInfo, categoriasConProductos, tipoMenu, setTipoMenu, mostrarImagenes, setMostrarImagenes, mostrarVerMas, setMostrarVerMas, tipoHeader, setTipoHeader } = useMenu()
 
   const handleLogoChange = (e) => {
     const file = e.target.files?.[0]
     if (file) setEmpresaInfo((prev) => ({ ...prev, logoUrl: URL.createObjectURL(file) }))
   }
   const handleLogoRemove = () => setEmpresaInfo((prev) => ({ ...prev, logoUrl: '' }))
+
+  const handleHeaderFondoChange = (e) => {
+    const file = e.target.files?.[0]
+    if (file) setApariencia((prev) => ({ ...prev, imagenHeaderFondo: URL.createObjectURL(file) }))
+  }
+  const handleHeaderFondoRemove = () => setApariencia((prev) => ({ ...prev, imagenHeaderFondo: '' }))
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -78,6 +84,40 @@ export default function Menu() {
               </div>
             </section>
             <section className="menu-editor-section">
+              <h3 className="menu-editor-title">Tipo de encabezado</h3>
+              <div className="menu-tipo-opciones">
+                {TIPOS_HEADER.map((tipo) => (
+                  <label key={tipo.id} className="menu-tipo-opcion">
+                    <input type="radio" name="tipoHeader" value={tipo.id} checked={tipoHeader === tipo.id} onChange={() => setTipoHeader(tipo.id)} />
+                    <span>{tipo.label}</span>
+                  </label>
+                ))}
+              </div>
+              {tipoHeader === 'imagen-fondo' && (
+                <div className="menu-header-imagen-wrap">
+                  <div className="config-empresa-card" style={{ marginTop: 12 }}>
+                    <h4 className="config-empresa-card-title">Imagen de fondo del encabezado</h4>
+                    <div className="config-empresa-logo-wrap">
+                      <div className="config-empresa-logo-preview config-empresa-header-fondo-preview">
+                        {apariencia.imagenHeaderFondo ? (
+                          <img src={apariencia.imagenHeaderFondo} alt="Fondo del encabezado" />
+                        ) : (
+                          <span className="config-empresa-logo-placeholder">Imagen de fondo</span>
+                        )}
+                      </div>
+                      <input type="file" accept=".png,.jpg,.jpeg" className="config-empresa-input-file" id="header-fondo" onChange={handleHeaderFondoChange} />
+                      <label htmlFor="header-fondo" className="config-empresa-btn-upload">Seleccionar imagen</label>
+                      {apariencia.imagenHeaderFondo && (
+                        <button type="button" className="config-empresa-btn-remove" onClick={handleHeaderFondoRemove}>
+                          <Trash2 size={16} /> Eliminar
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </section>
+            <section className="menu-editor-section">
               <h3 className="menu-editor-title">Tipo de menú</h3>
               <div className="menu-tipo-opciones">
                 {TIPOS_MENU.map((tipo) => (
@@ -86,6 +126,46 @@ export default function Menu() {
                     <span>{tipo.label}</span>
                   </label>
                 ))}
+              </div>
+              <div className="menu-tipo-visual">
+                <div className="menu-tipo-visual-row">
+                  <span className="menu-tipo-visual-label">Visualización:</span>
+                  <div className="menu-tipo-visual-btns">
+                    <button
+                      type="button"
+                      className={`menu-tipo-visual-btn ${!mostrarImagenes ? 'active' : ''}`}
+                      onClick={() => setMostrarImagenes(false)}
+                    >
+                      Solo texto
+                    </button>
+                    <button
+                      type="button"
+                      className={`menu-tipo-visual-btn ${mostrarImagenes ? 'active' : ''}`}
+                      onClick={() => setMostrarImagenes(true)}
+                    >
+                      Con imágenes
+                    </button>
+                  </div>
+                </div>
+                <div className="menu-tipo-visual-row">
+                  <span className="menu-tipo-visual-label">Botón Ver más:</span>
+                  <div className="menu-tipo-visual-btns">
+                    <button
+                      type="button"
+                      className={`menu-tipo-visual-btn ${mostrarVerMas ? 'active' : ''}`}
+                      onClick={() => setMostrarVerMas(true)}
+                    >
+                      Sí
+                    </button>
+                    <button
+                      type="button"
+                      className={`menu-tipo-visual-btn ${!mostrarVerMas ? 'active' : ''}`}
+                      onClick={() => setMostrarVerMas(false)}
+                    >
+                      No
+                    </button>
+                  </div>
+                </div>
               </div>
             </section>
             <section className="menu-editor-section">
@@ -135,7 +215,7 @@ export default function Menu() {
                 Ver menú completo
               </Link>
             </div>
-            <MenuPreview categorias={categoriasConProductos} apariencia={apariencia} tipoMenu={tipoMenu} empresaInfo={empresaInfo} />
+            <MenuPreview categorias={categoriasConProductos} apariencia={apariencia} tipoMenu={tipoMenu} empresaInfo={empresaInfo} mostrarImagenes={mostrarImagenes} mostrarVerMas={mostrarVerMas} tipoHeader={tipoHeader} />
           </div>
         </div>
       </form>

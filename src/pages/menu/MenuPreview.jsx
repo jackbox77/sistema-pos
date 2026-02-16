@@ -2,6 +2,7 @@ import { Image as ImageIcon } from 'lucide-react'
 import MenuPreviewTarjetas from './MenuPreviewTarjetas'
 import MenuPreviewCategoriasPrimero from './MenuPreviewCategoriasPrimero'
 import MenuPreviewPlatosHorizontal from './MenuPreviewPlatosHorizontal'
+import MenuHeader from './MenuHeader'
 import './Menu.css'
 
 const aparienciaDefault = {
@@ -14,21 +15,21 @@ const aparienciaDefault = {
 
 const empresaDefault = { logoUrl: '', nombreEmpresa: '', subtitulo: '', tipoNegocio: '', descripcion: '' }
 
-export default function MenuPreview({ categorias, apariencia = aparienciaDefault, tipoMenu = 'clasico', empresaInfo = empresaDefault }) {
+export default function MenuPreview({ categorias, apariencia = aparienciaDefault, tipoMenu = 'clasico', empresaInfo = empresaDefault, mostrarImagenes = true, mostrarVerMas = true, tipoHeader = 'clasico' }) {
   const empresa = { ...empresaDefault, ...empresaInfo }
   if (tipoMenu === 'tarjetas-categorias') {
     return (
-      <MenuPreviewTarjetas categorias={categorias} apariencia={apariencia} empresaInfo={empresa} />
+      <MenuPreviewTarjetas categorias={categorias} apariencia={apariencia} empresaInfo={empresa} mostrarImagenes={mostrarImagenes} mostrarVerMas={mostrarVerMas} tipoHeader={tipoHeader} />
     )
   }
   if (tipoMenu === 'categorias-primero') {
     return (
-      <MenuPreviewCategoriasPrimero categorias={categorias} apariencia={apariencia} empresaInfo={empresa} />
+      <MenuPreviewCategoriasPrimero categorias={categorias} apariencia={apariencia} empresaInfo={empresa} mostrarImagenes={mostrarImagenes} mostrarVerMas={mostrarVerMas} tipoHeader={tipoHeader} />
     )
   }
   if (tipoMenu === 'platos-horizontal') {
     return (
-      <MenuPreviewPlatosHorizontal categorias={categorias} apariencia={apariencia} empresaInfo={empresa} />
+      <MenuPreviewPlatosHorizontal categorias={categorias} apariencia={apariencia} empresaInfo={empresa} mostrarImagenes={mostrarImagenes} mostrarVerMas={mostrarVerMas} tipoHeader={tipoHeader} />
     )
   }
   const {
@@ -46,26 +47,13 @@ export default function MenuPreview({ categorias, apariencia = aparienciaDefault
   return (
     <div className="menu-preview" style={styleFondo}>
       <div className="menu-preview-inner" style={{ backgroundColor: colorContenido }}>
-        <header
+        <MenuHeader
+          tipoHeader={tipoHeader}
+          empresaInfo={empresa}
+          apariencia={apariencia}
           className="menu-preview-header"
           style={{ borderBottomColor: colorTitulo }}
-        >
-          {empresa.logoUrl ? (
-            <div className="menu-preview-empresa-logo-img">
-              <img src={empresa.logoUrl} alt="" />
-            </div>
-          ) : (
-            <div className="menu-preview-empresa-logo" style={{ borderColor: `${colorTexto}40`, color: colorTexto }}>
-              Logo
-            </div>
-          )}
-          <h2 className="menu-preview-titulo" style={{ color: colorTitulo }}>
-            {empresa.nombreEmpresa || 'Menú'}
-          </h2>
-          <p className="menu-preview-subtitulo" style={{ color: colorTexto }}>
-            {empresa.subtitulo || 'Tu restaurante'}
-          </p>
-        </header>
+        />
         {categorias.length === 0 ? (
           <p className="menu-preview-empty" style={{ color: colorTexto }}>
             Añade categorías y platos para ver la vista previa.
@@ -93,12 +81,14 @@ export default function MenuPreview({ categorias, apariencia = aparienciaDefault
                         style={{ borderBottomColor: `${colorTexto}20` }}
                       >
                         <div className="menu-preview-item-content">
-                          {item.imagen ? (
-                            <img src={item.imagen} alt="" className="menu-preview-item-img" />
-                          ) : (
-                            <span className="menu-preview-item-img-sin">
-                              <ImageIcon size={24} />
-                            </span>
+                          {mostrarImagenes && (
+                            item.imagen ? (
+                              <img src={item.imagen} alt="" className="menu-preview-item-img" />
+                            ) : (
+                              <span className="menu-preview-item-img-sin">
+                                <ImageIcon size={24} />
+                              </span>
+                            )
                           )}
                           <div className="menu-preview-item-texto">
                             <span

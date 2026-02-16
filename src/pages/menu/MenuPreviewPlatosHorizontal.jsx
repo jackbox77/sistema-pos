@@ -1,4 +1,5 @@
 import { Image as ImageIcon } from 'lucide-react'
+import MenuHeader from './MenuHeader'
 import './MenuPreviewPlatosHorizontal.css'
 
 const aparienciaDefault = {
@@ -11,7 +12,7 @@ const aparienciaDefault = {
 
 const empresaDefault = { logoUrl: '', nombreEmpresa: '', subtitulo: '' }
 
-export default function MenuPreviewPlatosHorizontal({ categorias, apariencia = aparienciaDefault, empresaInfo = empresaDefault }) {
+export default function MenuPreviewPlatosHorizontal({ categorias, apariencia = aparienciaDefault, empresaInfo = empresaDefault, mostrarImagenes = true, mostrarVerMas = true, tipoHeader = 'clasico' }) {
   const empresa = { ...empresaDefault, ...empresaInfo }
   const { colorFondo, colorContenido, colorTexto, colorTitulo, imagenFondo } = {
     ...aparienciaDefault,
@@ -25,26 +26,13 @@ export default function MenuPreviewPlatosHorizontal({ categorias, apariencia = a
   return (
     <div className="menu-preview menu-preview-platos-h" style={styleFondo}>
       <div className="menu-preview-platos-h-inner" style={{ backgroundColor: colorContenido }}>
-        <header
+        <MenuHeader
+          tipoHeader={tipoHeader}
+          empresaInfo={empresa}
+          apariencia={apariencia}
           className="menu-preview-platos-h-header"
           style={{ borderBottomColor: `${colorTexto}20` }}
-        >
-          {empresa.logoUrl ? (
-            <div className="menu-preview-platos-h-logo-img">
-              <img src={empresa.logoUrl} alt="" />
-            </div>
-          ) : (
-            <div
-              className="menu-preview-platos-h-logo"
-              style={{ borderColor: `${colorTexto}40`, color: colorTexto }}
-            >
-              Logo
-            </div>
-          )}
-          <h2 className="menu-preview-platos-h-titulo" style={{ color: colorTitulo }}>
-            {empresa.nombreEmpresa || 'Menú'}
-          </h2>
-        </header>
+        />
 
         <div className="menu-preview-platos-h-body">
           {categorias.length === 0 ? (
@@ -71,21 +59,23 @@ export default function MenuPreviewPlatosHorizontal({ categorias, apariencia = a
                     {cat.items.map((item) => (
                       <article
                         key={item.id}
-                        className="menu-preview-platos-h-card"
+                        className={`menu-preview-platos-h-card ${!mostrarImagenes ? 'menu-preview-platos-h-card-solo-texto' : ''}`}
                         style={{ borderColor: `${colorTexto}25` }}
                       >
-                        <div className="menu-preview-platos-h-card-img">
-                          {item.imagen ? (
-                            <img src={item.imagen} alt="" />
-                          ) : (
-                            <span
-                              className="menu-preview-platos-h-card-img-sin"
-                              style={{ color: `${colorTexto}40` }}
-                            >
-                              <ImageIcon size={32} />
-                            </span>
-                          )}
-                        </div>
+                        {mostrarImagenes && (
+                          <div className="menu-preview-platos-h-card-img">
+                            {item.imagen ? (
+                              <img src={item.imagen} alt="" />
+                            ) : (
+                              <span
+                                className="menu-preview-platos-h-card-img-sin"
+                                style={{ color: `${colorTexto}40` }}
+                              >
+                                <ImageIcon size={32} />
+                              </span>
+                            )}
+                          </div>
+                        )}
                         <div className="menu-preview-platos-h-card-content">
                           <span
                             className="menu-preview-platos-h-card-nombre"
@@ -108,13 +98,15 @@ export default function MenuPreviewPlatosHorizontal({ categorias, apariencia = a
                             $ {typeof item.precio === 'number' ? item.precio.toLocaleString('es-CO') : item.precio}
                           </span>
                         </div>
-                        <button
-                          type="button"
-                          className="menu-preview-platos-h-card-btn"
-                          style={{ backgroundColor: colorTitulo, color: colorContenido }}
-                        >
-                          Agregar
-                        </button>
+                        {mostrarVerMas && (
+                          <button
+                            type="button"
+                            className="menu-preview-platos-h-card-btn"
+                            style={{ backgroundColor: colorTitulo, color: colorContenido }}
+                          >
+                            Ver más
+                          </button>
+                        )}
                       </article>
                     ))}
                   </div>

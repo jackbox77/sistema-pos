@@ -27,7 +27,6 @@ const menuItems = [
       { path: '/app/menu', label: 'Editor de menú' },
       { path: '/app/menu/categoria', label: 'Categoría' },
       { path: '/app/menu/productos', label: 'Productos' },
-      { path: '/app/menu/vista-completa', label: 'Vista completa' },
     ],
   },
   {

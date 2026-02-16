@@ -1,0 +1,173 @@
+/* MenuHeader: componente reutilizable para encabezados del menú */
+
+.menu-header {
+  flex-shrink: 0;
+}
+
+/* ---- Clásico: logo centrado + nombre + subtítulo ---- */
+.menu-header-clasico {
+  text-align: center;
+  padding: 20px 16px 20px;
+  border-bottom: 2px solid;
+}
+
+.menu-header-clasico-logo,
+.menu-header-clasico-logo-img {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 14px;
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.menu-header-clasico-logo {
+  border: 2px dashed;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.menu-header-clasico-logo-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.menu-header-clasico-titulo {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin: 0 0 4px;
+  letter-spacing: 0.02em;
+}
+
+.menu-header-clasico-sub {
+  font-size: 13px;
+  margin: 0;
+}
+
+/* ---- Imagen de fondo: overlay oscuro, texto blanco ---- */
+.menu-header-imagen-fondo {
+  min-height: 140px;
+  padding: 28px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.menu-header-imagen-fondo-content {
+  max-width: 320px;
+}
+
+.menu-header-imagen-fondo-logo {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 12px;
+  border-radius: 50%;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.menu-header-imagen-fondo-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.menu-header-imagen-fondo-titulo {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 4px;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+.menu-header-imagen-fondo-sub {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+}
+
+/* ---- Minimalista: solo tipografía elegante ---- */
+.menu-header-minimalista {
+  padding: 24px 20px 16px;
+  border-bottom: 1px solid;
+  text-align: center;
+}
+
+.menu-header-minimalista-titulo {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0 0 2px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.menu-header-minimalista-sub {
+  font-size: 12px;
+  margin: 0;
+  letter-spacing: 0.05em;
+  opacity: 0.85;
+}
+
+/* ---- Editorial: alineado a la izquierda con barra de acento ---- */
+.menu-header-editorial {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 20px 20px 24px;
+  border-left: 4px solid;
+  margin: 0 16px 16px;
+  background: rgba(0, 0, 0, 0.02);
+  border-radius: 0 8px 8px 0;
+}
+
+.menu-header-editorial-logo {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.menu-header-editorial-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.menu-header-editorial-texto {
+  min-width: 0;
+  flex: 1;
+}
+
+.menu-header-editorial-titulo {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0 0 2px;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.menu-header-editorial-sub {
+  font-size: 12px;
+  margin: 0;
+  opacity: 0.9;
+}
+
+/* Integración con previews que añaden padding al contenedor */
+.menu-preview-tarjetas-inner .menu-header-editorial,
+.menu-preview-cat-primero-inner .menu-header-editorial,
+.menu-preview-platos-h-inner .menu-header-editorial {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.menu-preview-inner .menu-header-editorial {
+  margin-left: 0;
+  margin-right: 0;
+}

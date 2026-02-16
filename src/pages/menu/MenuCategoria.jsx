@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import PageModule from '../../components/PageModule/PageModule'
 import { useMenu } from './MenuContext'
 import './MenuCategoria.css'
@@ -28,7 +29,7 @@ export default function MenuCategoria() {
         })}
       </div>
       <p className="menu-categoria-hint">
-        Las categorías se gestionan en Maestros - Categorías. Aquí solo defines cuáles se reflejan en el menú.
+        Las categorías se gestionan en <strong>Maestros → Categorías</strong>. Aquí defines cuáles se reflejan en el menú. Luego en <Link to="/app/menu/productos">Productos</Link> eliges qué productos de cada categoría mostrar.
       </p>
     </PageModule>
   )

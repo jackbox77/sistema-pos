@@ -9,9 +9,7 @@
 .menu-preview-platos-h .menu-preview-platos-h-inner {
   display: flex;
   flex-direction: column;
-  min-height: 520px;
-  max-height: 80vh;
-  overflow: hidden;
+  overflow: visible;
   border-radius: 8px;
   width: 100%;
   min-width: 0;
@@ -57,11 +55,9 @@
 
 .menu-preview-platos-h-body {
   flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: visible;
   padding: 0 16px 20px;
   min-width: 0;
-  -webkit-overflow-scrolling: touch;
 }
 
 .menu-preview-platos-h-empty {
@@ -198,4 +194,9 @@
 
 .menu-preview-platos-h-card-btn:hover {
   opacity: 0.9;
+}
+
+/* Modo solo texto: sin imagen en tarjetas */
+.menu-preview-platos-h-card-solo-texto {
+  width: 140px;
 }

@@ -72,6 +72,14 @@
   font-weight: 500;
 }
 
+/* Preview de imagen de fondo del encabezado (rectangular) */
+.config-empresa-header-fondo-preview {
+  width: 100%;
+  max-width: 280px;
+  height: 80px;
+  border-radius: 8px;
+}
+
 .config-empresa-input-file {
   position: absolute;
   width: 0.1px;

@@ -6,7 +6,7 @@ import './VistaCompletaMenu.css'
 
 /** Vista final estilo Pirpos/Loggro: barra de categorías + tarjetas de productos */
 export default function VistaCompletaMenu() {
-  const { empresaInfo, apariencia, categoriasConProductos } = useMenu()
+  const { empresaInfo, apariencia, categoriasConProductos, tipoMenu, mostrarImagenes, mostrarVerMas, tipoHeader } = useMenu()
 
   return (
     <div className="vista-completa-menu">
@@ -22,6 +22,9 @@ export default function VistaCompletaMenu() {
             categorias={categoriasConProductos}
             apariencia={apariencia}
             empresaInfo={empresaInfo}
+            mostrarImagenes={mostrarImagenes}
+            mostrarVerMas={mostrarVerMas}
+            tipoHeader={tipoHeader}
           />
         </div>
       </main>

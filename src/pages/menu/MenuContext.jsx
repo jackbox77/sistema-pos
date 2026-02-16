@@ -7,7 +7,16 @@ const aparienciaInicial = {
   colorTexto: '#4a5568',
   colorTitulo: '#1a202c',
   imagenFondo: '',
+  imagenHeaderFondo: '',
 }
+
+/** Tipos de encabezado del menú */
+export const TIPOS_HEADER = [
+  { id: 'clasico', label: 'Clásico (logo centrado)' },
+  { id: 'imagen-fondo', label: 'Imagen de fondo' },
+  { id: 'minimalista', label: 'Minimalista (solo tipografía)' },
+  { id: 'editorial', label: 'Editorial (acento lateral)' },
+]
 
 const empresaInfoInicial = {
   logoUrl: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=120&h=120&fit=crop',
@@ -61,6 +70,9 @@ export default function MenuProvider({ children }) {
   const [apariencia, setApariencia] = useState(aparienciaInicial)
   const [empresaInfo, setEmpresaInfo] = useState(empresaInfoInicial)
   const [tipoMenu, setTipoMenu] = useState('tarjetas-categorias')
+  const [mostrarImagenes, setMostrarImagenes] = useState(true)
+  const [mostrarVerMas, setMostrarVerMas] = useState(true)
+  const [tipoHeader, setTipoHeader] = useState('clasico')
 
   const toggleCategoriaEnMenu = (id) => {
     setCategoriasEnMenu((prev) =>
@@ -99,6 +111,12 @@ export default function MenuProvider({ children }) {
     setEmpresaInfo,
     tipoMenu,
     setTipoMenu,
+    mostrarImagenes,
+    setMostrarImagenes,
+    mostrarVerMas,
+    setMostrarVerMas,
+    tipoHeader,
+    setTipoHeader,
     toggleCategoriaEnMenu,
     toggleProductoEnMenu,
     categoriasConProductos,

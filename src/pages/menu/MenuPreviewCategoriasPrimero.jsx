@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Image as ImageIcon, ChevronLeft, UtensilsCrossed } from 'lucide-react'
+import MenuHeader from './MenuHeader'
 import './MenuPreviewCategoriasPrimero.css'
 
 const aparienciaDefault = {
@@ -12,7 +13,7 @@ const aparienciaDefault = {
 
 const empresaDefault = { logoUrl: '', nombreEmpresa: '', subtitulo: '' }
 
-export default function MenuPreviewCategoriasPrimero({ categorias, apariencia = aparienciaDefault, empresaInfo = empresaDefault }) {
+export default function MenuPreviewCategoriasPrimero({ categorias, apariencia = aparienciaDefault, empresaInfo = empresaDefault, mostrarImagenes = true, mostrarVerMas = true, tipoHeader = 'clasico' }) {
   const empresa = { ...empresaDefault, ...empresaInfo }
   const [vista, setVista] = useState('categorias') // 'categorias' | 'menu'
   const [categoriaSeleccionada, setCategoriaSeleccionada] = useState(null)
@@ -48,23 +49,13 @@ export default function MenuPreviewCategoriasPrimero({ categorias, apariencia = 
         {vista === 'categorias' ? (
           <>
             {/* Pantalla 1: Logo + lista de categorías */}
-            <header className="menu-preview-cat-primero-header" style={{ borderBottomColor: `${colorTexto}20` }}>
-              {empresa.logoUrl ? (
-                <div className="menu-preview-cat-primero-logo-img">
-                  <img src={empresa.logoUrl} alt="" />
-                </div>
-              ) : (
-                <div className="menu-preview-cat-primero-logo" style={{ borderColor: `${colorTexto}40`, color: colorTexto }}>
-                  Logo
-                </div>
-              )}
-              <h2 className="menu-preview-cat-primero-titulo" style={{ color: colorTitulo }}>
-                {empresa.nombreEmpresa || 'Menú'}
-              </h2>
-              <p className="menu-preview-cat-primero-subtitulo" style={{ color: colorTexto }}>
-                {empresa.subtitulo || 'Elige una categoría'}
-              </p>
-            </header>
+            <MenuHeader
+              tipoHeader={tipoHeader}
+              empresaInfo={{ ...empresa, subtitulo: empresa.subtitulo || 'Elige una categoría' }}
+              apariencia={apariencia}
+              className="menu-preview-cat-primero-header"
+              style={{ borderBottomColor: `${colorTexto}20` }}
+            />
             <div className="menu-preview-cat-primero-body">
               {categorias.length === 0 ? (
                 <p className="menu-preview-cat-primero-empty" style={{ color: colorTexto }}>
@@ -102,7 +93,7 @@ export default function MenuPreviewCategoriasPrimero({ categorias, apariencia = 
         ) : (
           <>
             {/* Pantalla 2: Volver + nombre categoría + productos */}
-            <header className="menu-preview-cat-primero-header menu-preview-cat-primero-header-menu" style={{ borderBottomColor: `${colorTexto}20` }}>
+            <div className="menu-preview-cat-primero-header menu-preview-cat-primero-header-menu" style={{ borderBottomColor: `${colorTexto}20` }}>
               <button
                 type="button"
                 className="menu-preview-cat-primero-back"
@@ -115,7 +106,7 @@ export default function MenuPreviewCategoriasPrimero({ categorias, apariencia = 
               <h2 className="menu-preview-cat-primero-titulo-menu" style={{ color: colorTitulo }}>
                 {categoria?.nombre ?? 'Menú'}
               </h2>
-            </header>
+            </div>
             <div className="menu-preview-cat-primero-body">
               {items.length === 0 ? (
                 <p className="menu-preview-cat-primero-empty" style={{ color: colorTexto }}>
@@ -124,16 +115,18 @@ export default function MenuPreviewCategoriasPrimero({ categorias, apariencia = 
               ) : (
                 <ul className="menu-preview-cat-primero-lista">
                   {items.map((item) => (
-                    <li key={item.id} className="menu-preview-cat-primero-item" style={{ borderColor: `${colorTexto}15` }}>
-                      <div className="menu-preview-cat-primero-item-img">
-                        {item.imagen ? (
-                          <img src={item.imagen} alt="" />
-                        ) : (
-                          <span style={{ color: `${colorTexto}50` }}>
-                            <ImageIcon size={24} />
-                          </span>
-                        )}
-                      </div>
+                    <li key={item.id} className={`menu-preview-cat-primero-item ${!mostrarImagenes ? 'menu-preview-cat-primero-item-solo-texto' : ''}`} style={{ borderColor: `${colorTexto}15` }}>
+                      {mostrarImagenes && (
+                        <div className="menu-preview-cat-primero-item-img">
+                          {item.imagen ? (
+                            <img src={item.imagen} alt="" />
+                          ) : (
+                            <span style={{ color: `${colorTexto}50` }}>
+                              <ImageIcon size={24} />
+                            </span>
+                          )}
+                        </div>
+                      )}
                       <div className="menu-preview-cat-primero-item-content">
                         <span className="menu-preview-cat-primero-item-nombre" style={{ color: colorTitulo }}>
                           {item.nombre}
@@ -147,13 +140,15 @@ export default function MenuPreviewCategoriasPrimero({ categorias, apariencia = 
                           $ {typeof item.precio === 'number' ? item.precio.toLocaleString('es-CO') : item.precio}
                         </span>
                       </div>
-                      <button
-                        type="button"
-                        className="menu-preview-cat-primero-btn-agregar"
-                        style={{ backgroundColor: colorTitulo, color: colorContenido }}
-                      >
-                        Agregar
-                      </button>
+                      {mostrarVerMas && (
+                        <button
+                          type="button"
+                          className="menu-preview-cat-primero-btn-agregar"
+                          style={{ backgroundColor: colorTitulo, color: colorContenido }}
+                        >
+                          Ver más
+                        </button>
+                      )}
                     </li>
                   ))}
                 </ul>

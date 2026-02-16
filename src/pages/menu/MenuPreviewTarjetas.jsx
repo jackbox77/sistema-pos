@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Image as ImageIcon } from 'lucide-react'
+import MenuHeader from './MenuHeader'
 import './MenuPreviewTarjetas.css'
 
 const aparienciaDefault = {
@@ -13,7 +14,7 @@ const aparienciaDefault = {
 const empresaDefault = { logoUrl: '', nombreEmpresa: '', subtitulo: '' }
 
 /** Vista estilo Pirpos/Loggro: header limpio, barra de categorías, tarjetas de productos */
-export default function MenuPreviewTarjetas({ categorias, apariencia = aparienciaDefault, empresaInfo = empresaDefault }) {
+export default function MenuPreviewTarjetas({ categorias, apariencia = aparienciaDefault, empresaInfo = empresaDefault, mostrarImagenes = true, mostrarVerMas = true, tipoHeader = 'clasico' }) {
   const empresa = { ...empresaDefault, ...empresaInfo }
   const [categoriaActiva, setCategoriaActiva] = useState(categorias[0]?.id ?? null)
 
@@ -35,22 +36,13 @@ export default function MenuPreviewTarjetas({ categorias, apariencia = aparienci
   return (
     <div className="menu-preview menu-preview-tarjetas menu-preview-pirpos" style={styleFondo}>
       <div className="menu-preview-tarjetas-inner" style={{ backgroundColor: colorContenido }}>
-        {/* Header estilo Pirpos: logo centrado + nombre */}
-        <header className="menu-preview-tarjetas-header" style={{ borderBottomColor: `${colorTexto}15` }}>
-          <div className="menu-preview-tarjetas-header-top">
-            {empresa.logoUrl ? (
-              <div className="menu-preview-tarjetas-empresa-logo-img">
-                <img src={empresa.logoUrl} alt="" />
-              </div>
-            ) : (
-              <div className="menu-preview-tarjetas-empresa-logo" style={{ borderColor: `${colorTexto}30`, color: colorTexto }}>
-                Logo
-              </div>
-            )}
-          </div>
-          <h1 className="menu-preview-tarjetas-logo-text" style={{ color: colorTitulo }}>{empresa.nombreEmpresa || 'Menú'}</h1>
-          {empresa.subtitulo && <p className="menu-preview-tarjetas-subtitulo" style={{ color: colorTexto }}>{empresa.subtitulo}</p>}
-        </header>
+        <MenuHeader
+          tipoHeader={tipoHeader}
+          empresaInfo={empresa}
+          apariencia={apariencia}
+          className="menu-preview-tarjetas-header"
+          style={{ borderBottomColor: `${colorTexto}15` }}
+        />
 
         {/* Barra de categorías sticky (estilo Pirpos) */}
         {categorias.length > 0 && (
@@ -93,16 +85,18 @@ export default function MenuPreviewTarjetas({ categorias, apariencia = aparienci
           ) : (
             <ul className="menu-preview-tarjetas-lista">
               {items.map((item) => (
-                <li key={item.id} className="menu-preview-tarjetas-card" style={{ backgroundColor: colorContenido, borderColor: `${colorTexto}12` }}>
-                  <div className="menu-preview-tarjetas-card-img">
-                    {item.imagen ? (
-                      <img src={item.imagen} alt="" />
-                    ) : (
-                      <span className="menu-preview-tarjetas-card-img-sin" style={{ color: `${colorTexto}35` }}>
-                        <ImageIcon size={32} />
-                      </span>
-                    )}
-                  </div>
+                <li key={item.id} className={`menu-preview-tarjetas-card ${!mostrarImagenes ? 'menu-preview-tarjetas-card-solo-texto' : ''}`} style={{ backgroundColor: colorContenido, borderColor: `${colorTexto}12` }}>
+                  {mostrarImagenes && (
+                    <div className="menu-preview-tarjetas-card-img">
+                      {item.imagen ? (
+                        <img src={item.imagen} alt="" />
+                      ) : (
+                        <span className="menu-preview-tarjetas-card-img-sin" style={{ color: `${colorTexto}35` }}>
+                          <ImageIcon size={32} />
+                        </span>
+                      )}
+                    </div>
+                  )}
                   <div className="menu-preview-tarjetas-card-content">
                     <span className="menu-preview-tarjetas-card-nombre" style={{ color: colorTitulo }}>
                       {item.nombre}
@@ -116,13 +110,15 @@ export default function MenuPreviewTarjetas({ categorias, apariencia = aparienci
                       $ {typeof item.precio === 'number' ? item.precio.toLocaleString('es-CO') : item.precio}
                     </span>
                   </div>
-                  <button
-                    type="button"
-                    className="menu-preview-tarjetas-btn-agregar"
-                    style={{ backgroundColor: colorTitulo, color: colorContenido }}
-                  >
-                    Agregar
-                  </button>
+                  {mostrarVerMas && (
+                    <button
+                      type="button"
+                      className="menu-preview-tarjetas-btn-agregar"
+                      style={{ backgroundColor: colorTitulo, color: colorContenido }}
+                    >
+                      Ver más
+                    </button>
+                  )}
                 </li>
               ))}
             </ul>

@@ -9,9 +9,7 @@
 .menu-preview-cat-primero .menu-preview-cat-primero-inner {
   display: flex;
   flex-direction: column;
-  min-height: 520px;
-  max-height: 80vh;
-  overflow: hidden;
+  overflow: visible;
   border-radius: 8px;
   width: 100%;
   min-width: 0;
@@ -62,11 +60,9 @@
 
 .menu-preview-cat-primero-body {
   flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: visible;
   padding: 16px;
   min-width: 0;
-  -webkit-overflow-scrolling: touch;
 }
 
 .menu-preview-cat-primero-empty {
@@ -240,5 +236,10 @@
 
 .menu-preview-cat-primero-btn-agregar:hover {
   opacity: 0.9;
+}
+
+/* Modo solo texto: sin imagen en productos */
+.menu-preview-cat-primero-item-solo-texto {
+  /* el item ya tiene gap; sin img el contenido se ajusta */
 }
 

@@ -3,9 +3,7 @@
 .menu-preview-pirpos.menu-preview-tarjetas .menu-preview-tarjetas-inner {
   display: flex;
   flex-direction: column;
-  min-height: 100%;
-  height: 100%;
-  overflow: hidden;
+  overflow: visible;
   border-radius: 0;
 }
 
@@ -111,13 +109,11 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
-/* Área de contenido con scroll */
+/* Área de contenido (sin scroll) */
 .menu-preview-pirpos .menu-preview-tarjetas-body {
   flex: 1;
   padding: 20px 16px 24px;
-  overflow-y: auto;
-  overflow-x: hidden;
-  -webkit-overflow-scrolling: touch;
+  overflow: visible;
 }
 
 .menu-preview-pirpos .menu-preview-tarjetas-empty {
@@ -213,7 +209,7 @@
   margin-top: 4px;
 }
 
-/* Botón Agregar */
+/* Botón Ver más */
 .menu-preview-pirpos .menu-preview-tarjetas-btn-agregar {
   align-self: center;
   flex-shrink: 0;
@@ -239,12 +235,8 @@
 .menu-preview-tarjetas .menu-preview-tarjetas-inner {
   display: flex;
   flex-direction: column;
-  min-height: 520px;
-  max-height: 80vh;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: visible;
   border-radius: 8px;
-  -webkit-overflow-scrolling: touch;
 }
 
 .menu-preview-tarjetas-header {
@@ -451,4 +443,13 @@
 
 .menu-preview-tarjetas-btn-agregar:active {
   transform: scale(0.98);
+}
+
+/* Modo solo texto: sin imagen en tarjetas */
+.menu-preview-tarjetas-card-solo-texto {
+  min-height: 80px;
+}
+
+.menu-preview-pirpos .menu-preview-tarjetas-card-solo-texto {
+  min-height: 90px;
 }
