@@ -48,6 +48,16 @@
   gap: 20px;
 }
 
+.auth-error {
+  font-size: 14px;
+  color: #dc2626;
+  margin: 0;
+  padding: 10px 12px;
+  background: #fef2f2;
+  border-radius: 8px;
+  border: 1px solid #fecaca;
+}
+
 .auth-form label {
   display: block;
   font-size: 14px;

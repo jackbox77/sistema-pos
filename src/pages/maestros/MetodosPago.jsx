@@ -1,50 +1,86 @@
-import { useState } from 'react'
-import { Pencil, Trash2, X } from 'lucide-react'
+import { useState, useEffect, useCallback } from 'react'
+import { X, Info } from 'lucide-react'
 import PageModule from '../../components/PageModule/PageModule'
 import TableResponsive from '../../components/TableResponsive/TableResponsive'
 import '../../components/TableResponsive/TableResponsive.css'
 import '../../components/FormularioProductos/FormularioProductos.css'
+import {
+  getPaymentMethodsUseCase,
+  createPaymentMethodUseCase,
+  updatePaymentMethodUseCase,
+} from '../../feature/masters/payment-methods/use-case'
 
-const metodosPagoIniciales = [
-  { id: 1, codigo: 'EF', nombre: 'Efectivo', descripcion: 'Pago en efectivo', estado: 'Activo' },
-  { id: 2, codigo: 'TD', nombre: 'Tarjeta débito', descripcion: 'Pago con tarjeta débito', estado: 'Activo' },
-  { id: 3, codigo: 'TC', nombre: 'Tarjeta crédito', descripcion: 'Pago con tarjeta de crédito', estado: 'Activo' },
-  { id: 4, codigo: 'TR', nombre: 'Transferencia', descripcion: 'Transferencia bancaria', estado: 'Inactivo' },
-]
+function normalizarCodigo(s) {
+  return (s ?? '').toString().trim().replace(/\s+/g, '-').toUpperCase()
+}
+
+function mapApiToUI(m) {
+  return {
+    id: m.id,
+    codigo: m.code ?? '',
+    nombre: m.method_name ?? '',
+    descripcion: m.description ?? '',
+    estado: m.status === 'active' ? 'Activo' : 'Inactivo',
+  }
+}
+
+function mapFormToApi(data) {
+  return {
+    code: data.codigo ?? '',
+    method_name: data.nombre ?? '',
+    description: data.descripcion ?? '',
+    status: data.estado === 'Activo' ? 'active' : 'inactive',
+  }
+}
 
 export default function MetodosPago() {
-  const [metodos, setMetodos] = useState(metodosPagoIniciales)
+  const [metodos, setMetodos] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [updatingEstadoId, setUpdatingEstadoId] = useState(null)
   const [showCreateModal, setShowCreateModal] = useState(false)
-  const [showEditModal, setShowEditModal] = useState(false)
-  const [showDeleteModal, setShowDeleteModal] = useState(false)
-  const [metodoEditando, setMetodoEditando] = useState(null)
-  const [metodoEliminar, setMetodoEliminar] = useState(null)
   const [listaPrecios, setListaPrecios] = useState('general')
   const [filtrosActivos, setFiltrosActivos] = useState([{ id: 'estado', label: 'Estado: activos' }])
+  const [showInfoSoporte, setShowInfoSoporte] = useState(false)
+
+  const cargarMetodos = useCallback(async () => {
+    setLoading(true)
+    try {
+      const res = await getPaymentMethodsUseCase(1, 100)
+      const list = res?.data?.data ?? res?.data ?? (Array.isArray(res) ? res : [])
+      setMetodos(Array.isArray(list) ? list.map(mapApiToUI) : [])
+    } catch {
+      setMetodos([])
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    cargarMetodos()
+  }, [cargarMetodos])
 
   const quitarFiltro = (id) => {
     setFiltrosActivos((prev) => prev.filter((f) => f.id !== id))
   }
 
-  const cambiarEstado = (id) => {
-    setMetodos((prev) =>
-      prev.map((m) =>
-        m.id === id
-          ? { ...m, estado: m.estado === 'Activo' ? 'Inactivo' : 'Activo' }
-          : m
-      )
-    )
+  const cambiarEstado = async (m) => {
+    const nuevoEstado = m.estado === 'Activo' ? 'inactive' : 'active'
+    setUpdatingEstadoId(m.id)
+    try {
+      await updatePaymentMethodUseCase(m.id, {
+        code: m.codigo,
+        method_name: m.nombre,
+        description: m.descripcion,
+        status: nuevoEstado,
+      })
+      await cargarMetodos()
+    } catch (_) {}
+    finally {
+      setUpdatingEstadoId(null)
+    }
   }
 
   const handleCrear = () => setShowCreateModal(true)
-  const handleEditar = (m) => {
-    setMetodoEditando(m)
-    setShowEditModal(true)
-  }
-  const handleEliminar = (m) => {
-    setMetodoEliminar(m)
-    setShowDeleteModal(true)
-  }
 
   return (
     <PageModule title="" description="">
@@ -93,9 +129,36 @@ export default function MetodosPago() {
           </div>
         </div>
       </header>
-      <div className="page-module-toolbar" style={{ marginTop: '16px' }}>
-        <input type="search" className="input-search" placeholder="Buscar métodos de pago..." />
+      <div className="page-module-toolbar" style={{ marginTop: '16px', display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+        <input type="search" className="input-search" placeholder="Buscar métodos de pago..." style={{ flex: '1', minWidth: '200px' }} />
+        <button
+          type="button"
+          onClick={() => setShowInfoSoporte(true)}
+          style={{ background: 'transparent', color: '#dc2626', border: 'none', width: '40px', height: '40px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0, padding: 0 }}
+          title="Para editar o eliminar métodos de pago, comuníquese con soporte"
+          aria-label="Información sobre edición y eliminación"
+        >
+          <Info size={22} strokeWidth={2.5} />
+        </button>
       </div>
+      {showInfoSoporte && (
+        <div className="form-overlay" onClick={() => setShowInfoSoporte(false)} role="dialog" aria-modal="true" aria-labelledby="info-soporte-metodos">
+          <div className="form-modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '380px' }}>
+            <div className="form-header">
+              <h3 id="info-soporte-metodos">Información</h3>
+              <button className="form-close" onClick={() => setShowInfoSoporte(false)} aria-label="Cerrar">✕</button>
+            </div>
+            <div className="form-body">
+              <p style={{ margin: 0, color: '#374151' }}>
+                Para editar o eliminar métodos de pago debe comunicarse con soporte.
+              </p>
+              <div className="form-footer" style={{ marginTop: '1rem' }}>
+                <button type="button" className="form-btn-primary" onClick={() => setShowInfoSoporte(false)}>Entendido</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       <TableResponsive>
         <table className="page-module-table">
           <thead>
@@ -104,35 +167,41 @@ export default function MetodosPago() {
               <th>Método de pago</th>
               <th>Descripción</th>
               <th>Estado</th>
-              <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
-            {metodos.map((m) => (
-              <tr key={m.id}>
-                <td data-label="Código">{m.codigo}</td>
-                <td data-label="Método de pago">{m.nombre}</td>
-                <td data-label="Descripción">{m.descripcion}</td>
+            {metodos.length === 0 && loading ? (
+              <tr>
+                <td data-label="Código">—</td>
+                <td data-label="Método de pago">—</td>
+                <td data-label="Descripción">—</td>
                 <td data-label="Estado">
-                  <button
-                    type="button"
-                    className={`badge badge-estado-toggle ${m.estado === 'Activo' ? 'badge-success' : 'badge-inactive'}`}
-                    onClick={() => cambiarEstado(m.id)}
-                    title="Clic para cambiar estado"
-                  >
-                    {m.estado}
-                  </button>
-                </td>
-                <td data-label="Acciones">
-                  <button type="button" className="btn-icon-action btn-icon-edit" onClick={() => handleEditar(m)} title="Editar" aria-label="Editar">
-                    <Pencil size={18} />
-                  </button>
-                  <button type="button" className="btn-icon-action btn-icon-delete" onClick={() => handleEliminar(m)} title="Eliminar" aria-label="Eliminar">
-                    <Trash2 size={18} />
-                  </button>
+                  <span className="badge badge-estado-toggle" aria-busy="true">Cargando</span>
                 </td>
               </tr>
-            ))}
+            ) : (
+              metodos.map((m) => (
+                <tr key={m.id}>
+                  <td data-label="Código">{normalizarCodigo(m.codigo)}</td>
+                  <td data-label="Método de pago">{m.nombre}</td>
+                  <td data-label="Descripción">{m.descripcion}</td>
+                  <td data-label="Estado">
+                    {updatingEstadoId === m.id ? (
+                      <span className="badge badge-estado-toggle" aria-busy="true">Cargando</span>
+                    ) : (
+                      <button
+                        type="button"
+                        className={`badge badge-estado-toggle ${m.estado === 'Activo' ? 'badge-success' : 'badge-inactive'}`}
+                        onClick={() => cambiarEstado(m)}
+                        title="Clic para cambiar estado"
+                      >
+                        {m.estado}
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </TableResponsive>
@@ -140,73 +209,16 @@ export default function MetodosPago() {
       {showCreateModal && (
         <ModalFormMetodoPago
           onClose={() => setShowCreateModal(false)}
-          onGuardar={(data) => {
-            setMetodos((prev) => [...prev, { ...data, id: Date.now() }])
-            setShowCreateModal(false)
-          }}
-        />
-      )}
-
-      {showEditModal && metodoEditando && (
-        <ModalFormMetodoPago
-          metodo={metodoEditando}
-          onClose={() => {
-            setShowEditModal(false)
-            setMetodoEditando(null)
-          }}
-          onGuardar={(data) => {
-            setMetodos((prev) =>
-              prev.map((mp) => (mp.id === metodoEditando.id ? { ...mp, ...data } : mp))
-            )
-            setShowEditModal(false)
-            setMetodoEditando(null)
-          }}
-          esEdicion
-        />
-      )}
-
-      {showDeleteModal && metodoEliminar && (
-        <ModalConfirmarEliminar
-          titulo="Eliminar método de pago"
-          nombre={metodoEliminar.nombre}
-          onClose={() => {
-            setShowDeleteModal(false)
-            setMetodoEliminar(null)
-          }}
-          onConfirmar={() => {
-            setMetodos((prev) => prev.filter((mp) => mp.id !== metodoEliminar.id))
-            setShowDeleteModal(false)
-            setMetodoEliminar(null)
+          onGuardar={async (data) => {
+            try {
+              await createPaymentMethodUseCase(mapFormToApi(data))
+              await cargarMetodos()
+              setShowCreateModal(false)
+            } catch (_) {}
           }}
         />
       )}
     </PageModule>
-  )
-}
-
-function ModalConfirmarEliminar({ titulo, nombre, onClose, onConfirmar }) {
-  return (
-    <div className="form-overlay" onClick={onClose}>
-      <div className="form-modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '400px' }}>
-        <div className="form-header">
-          <h3>{titulo}</h3>
-          <button className="form-close" onClick={onClose} aria-label="Cerrar">✕</button>
-        </div>
-        <div className="form-body">
-          <p style={{ marginBottom: '20px', color: '#6b7280' }}>
-            ¿Estás seguro de que deseas eliminar el método de pago <strong>{nombre}</strong>?
-          </p>
-          <div className="form-footer">
-            <button type="button" className="form-btn-secondary" onClick={onClose}>
-              Cancelar
-            </button>
-            <button type="button" className="form-btn-primary" onClick={onConfirmar} style={{ background: '#dc2626' }}>
-              Eliminar
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
   )
 }
 
@@ -215,10 +227,16 @@ function ModalFormMetodoPago({ metodo, onClose, onGuardar, esEdicion = false }) 
   const [nombre, setNombre] = useState(metodo?.nombre ?? '')
   const [descripcion, setDescripcion] = useState(metodo?.descripcion ?? '')
   const [estado, setEstado] = useState(metodo?.estado ?? 'Activo')
+  const [saving, setSaving] = useState(false)
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    onGuardar({ codigo, nombre, descripcion, estado })
+    setSaving(true)
+    try {
+      await onGuardar({ codigo: normalizarCodigo(codigo), nombre, descripcion, estado })
+    } finally {
+      setSaving(false)
+    }
   }
 
   return (
@@ -271,8 +289,8 @@ function ModalFormMetodoPago({ metodo, onClose, onGuardar, esEdicion = false }) 
             <button type="button" className="form-btn-secondary" onClick={onClose}>
               Cancelar
             </button>
-            <button type="submit" className="form-btn-primary">
-              {esEdicion ? 'Guardar cambios' : 'Crear método de pago'}
+            <button type="submit" className="form-btn-primary" disabled={saving}>
+              {saving ? 'Guardando…' : esEdicion ? 'Guardar cambios' : 'Crear método de pago'}
             </button>
           </div>
         </form>

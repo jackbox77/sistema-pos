@@ -86,9 +86,8 @@ const menuItems = [
     label: 'Configuración',
     icon: Settings,
     children: [
-      { path: '/app/configuracion/perfil', label: 'Perfil' },
+      { path: '/app/configuracion/compani', label: 'Compañía' },
       { path: '/app/configuracion/usuarios-permisos', label: 'Usuarios y permisos' },
-      { path: '/app/configuracion/historial-subscripciones', label: 'Historial de subscripciones' },
       { path: '/app/configuracion/subscripciones', label: 'Subscripciones' },
     ],
   },

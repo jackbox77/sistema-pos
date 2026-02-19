@@ -1,21 +1,59 @@
-import { useRef, useState, useEffect, useMemo } from 'react'
+import { useRef, useState, useEffect, useCallback } from 'react'
 import { Pencil, Trash2, Upload, Download, ChevronDown, Image as ImageIcon, X } from 'lucide-react'
 import PageModule from '../../components/PageModule/PageModule'
-import { useMaestros } from '../../context/MaestrosContext'
 import { descargarPlantilla, parsearCSV } from '../../utils/csvMaestros'
 import TableResponsive from '../../components/TableResponsive/TableResponsive'
 import '../../components/TableResponsive/TableResponsive.css'
 import '../../components/FormularioProductos/FormularioProductos.css'
+import {
+  getCategoriesUseCase,
+  createCategoryUseCase,
+  updateCategoryUseCase,
+  deleteCategoryUseCase,
+} from '../../feature/masters/category/use-case'
+
+function normalizarCodigo(s) {
+  return (s ?? '').toString().trim().replace(/\s+/g, '-').toUpperCase()
+}
+
+function mapApiToUI(c) {
+  return {
+    id: c.id,
+    codigo: '',
+    nombre: c.name ?? '',
+    descripcion: c.description ?? '',
+    imagen: '',
+    status: c.status ?? 'active',
+    productosAsociados: 0,
+  }
+}
 
 export default function Categorias() {
-  const { categorias: categoriasRaw, setCategorias, productos, agregarCategoria, actualizarCategoria, eliminarCategoria } = useMaestros()
-  const categorias = useMemo(
-    () => categoriasRaw.map((c) => ({
-      ...c,
-      productosAsociados: productos.filter((p) => p.categoriaId === c.id).length,
-    })),
-    [categoriasRaw, productos]
-  )
+  const [categorias, setCategoriasState] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  const cargarCategorias = useCallback(async () => {
+    setError(null)
+    setLoading(true)
+    try {
+      const res = await getCategoriesUseCase(1, 100)
+      if (res?.success && res?.data?.data) {
+        setCategoriasState(res.data.data.map(mapApiToUI))
+      } else setCategoriasState([])
+    } catch (err) {
+      setCategoriasState([])
+      const msg = err?.message ?? ''
+      const esErrorRed = /failed to fetch|network error|load failed|networkrequestfailed/i.test(msg)
+      setError(esErrorRed ? 'No fue posible cargar las categorías. Compruebe su conexión e intente de nuevo.' : (msg || 'No fue posible cargar las categorías'))
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    cargarCategorias()
+  }, [cargarCategorias])
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
@@ -54,27 +92,24 @@ export default function Categorias() {
       'plantilla_categorias.csv'
     )
   }
-  const handleCargaMasiva = (e) => {
+  const handleCargaMasiva = async (e) => {
     const file = e.target.files?.[0]
     if (!file) return
     const reader = new FileReader()
-    reader.onload = () => {
+    reader.onload = async () => {
       const filas = parsearCSV(reader.result)
       if (filas.length < 2) return
       const [, ...datos] = filas
-      setCategorias((prev) => {
-        const maxId = Math.max(0, ...prev.map((c) => c.id))
-        const nuevas = datos
-          .filter((f) => f[0]?.trim())
-          .map((f, i) => ({
-            id: maxId + i + 1,
-            codigo: (f[0] ?? '').trim(),
-            nombre: (f[1] ?? '').trim(),
-            descripcion: (f[2] ?? '').trim(),
-            imagen: '',
-          }))
-        return [...prev, ...nuevas]
-      })
+      const filasValidas = datos.filter((f) => (f[1] ?? '').trim())
+      for (const f of filasValidas) {
+        const nombre = (f[1] ?? '').trim()
+        const descripcion = (f[2] ?? '').trim()
+        if (!nombre) continue
+        try {
+          await createCategoryUseCase(nombre, descripcion, 'active')
+        } catch (_) {}
+      }
+      await cargarCategorias()
     }
     reader.readAsText(file, 'UTF-8')
     e.target.value = ''
@@ -163,6 +198,15 @@ export default function Categorias() {
       <div className="page-module-toolbar" style={{ marginTop: '16px' }}>
         <input type="search" className="input-search" placeholder="Buscar categorías..." />
       </div>
+      {error && !loading && (
+        <div className="page-module-empty" style={{ padding: '24px', textAlign: 'center' }}>
+          <p style={{ margin: '0 0 16px', color: '#6b7280' }}>{error}</p>
+          <button type="button" className="form-btn-primary" onClick={() => cargarCategorias()}>
+            Reintentar
+          </button>
+        </div>
+      )}
+      {!error && (
       <TableResponsive>
         <table className="page-module-table">
           <thead>
@@ -176,7 +220,14 @@ export default function Categorias() {
             </tr>
           </thead>
           <tbody>
-            {categorias.map((cat) => (
+            {loading ? (
+              <tr>
+                <td colSpan="6">
+                  <div className="page-module-empty">Cargando...</div>
+                </td>
+              </tr>
+            ) : (
+              categorias.map((cat) => (
               <tr key={cat.id}>
                 <td data-label="Imagen">
                   {cat.imagen ? (
@@ -187,7 +238,7 @@ export default function Categorias() {
                     </span>
                   )}
                 </td>
-                <td data-label="Código">{cat.codigo}</td>
+                <td data-label="Código">{normalizarCodigo(cat.codigo)}</td>
                 <td data-label="Nombre">{cat.nombre}</td>
                 <td data-label="Descripción">{cat.descripcion}</td>
                 <td data-label="Productos asociados">{cat.productosAsociados}</td>
@@ -200,17 +251,22 @@ export default function Categorias() {
                   </button>
                 </td>
               </tr>
-            ))}
+            ))
+            )}
           </tbody>
         </table>
       </TableResponsive>
+      )}
 
       {showCreateModal && (
         <ModalFormCategoria
           onClose={() => setShowCreateModal(false)}
-          onGuardar={(data) => {
-            agregarCategoria(data)
-            setShowCreateModal(false)
+          onGuardar={async (data) => {
+            try {
+              await createCategoryUseCase(data.nombre, data.descripcion ?? '', 'active')
+              await cargarCategorias()
+              setShowCreateModal(false)
+            } catch (_) {}
           }}
         />
       )}
@@ -222,10 +278,13 @@ export default function Categorias() {
             setShowEditModal(false)
             setCategoriaEditando(null)
           }}
-          onGuardar={(data) => {
-            actualizarCategoria(categoriaEditando.id, data)
-            setShowEditModal(false)
-            setCategoriaEditando(null)
+          onGuardar={async (data) => {
+            try {
+              await updateCategoryUseCase(categoriaEditando.id, data.nombre, data.descripcion ?? '', 'active')
+              await cargarCategorias()
+              setShowEditModal(false)
+              setCategoriaEditando(null)
+            } catch (_) {}
           }}
           esEdicion
         />
@@ -238,10 +297,13 @@ export default function Categorias() {
             setShowDeleteModal(false)
             setCategoriaEliminar(null)
           }}
-          onConfirmar={() => {
-            eliminarCategoria(categoriaEliminar.id)
-            setShowDeleteModal(false)
-            setCategoriaEliminar(null)
+          onConfirmar={async () => {
+            try {
+              await deleteCategoryUseCase(categoriaEliminar.id)
+              await cargarCategorias()
+              setShowDeleteModal(false)
+              setCategoriaEliminar(null)
+            } catch (_) {}
           }}
         />
       )}
@@ -255,10 +317,16 @@ function ModalFormCategoria({ categoria, onClose, onGuardar, esEdicion = false }
   const [descripcion, setDescripcion] = useState(categoria?.descripcion ?? '')
   const [imagen, setImagen] = useState(categoria?.imagen ?? '')
   const [imagenInputUrl, setImagenInputUrl] = useState(categoria?.imagen?.startsWith('http') ? categoria.imagen : '')
+  const [saving, setSaving] = useState(false)
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    onGuardar({ codigo, nombre, descripcion, imagen: imagen || undefined })
+    setSaving(true)
+    try {
+      await Promise.resolve(onGuardar({ codigo: normalizarCodigo(codigo), nombre, descripcion, imagen: imagen || undefined }))
+    } finally {
+      setSaving(false)
+    }
   }
 
   const handleImagenUrlChange = (e) => {
@@ -352,8 +420,8 @@ function ModalFormCategoria({ categoria, onClose, onGuardar, esEdicion = false }
             <button type="button" className="form-btn-secondary" onClick={onClose}>
               Cancelar
             </button>
-            <button type="submit" className="form-btn-primary">
-              {esEdicion ? 'Guardar cambios' : 'Crear categoría'}
+            <button type="submit" className="form-btn-primary" disabled={saving}>
+              {saving ? 'Guardando...' : esEdicion ? 'Guardar cambios' : 'Crear categoría'}
             </button>
           </div>
         </form>
@@ -363,23 +431,32 @@ function ModalFormCategoria({ categoria, onClose, onGuardar, esEdicion = false }
 }
 
 function ModalConfirmarEliminar({ nombre, onClose, onConfirmar }) {
+  const [deleting, setDeleting] = useState(false)
+  const handleConfirmar = async () => {
+    setDeleting(true)
+    try {
+      await Promise.resolve(onConfirmar())
+    } finally {
+      setDeleting(false)
+    }
+  }
   return (
     <div className="form-overlay" onClick={onClose}>
       <div className="form-modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '400px' }}>
         <div className="form-header">
           <h3>Eliminar categoría</h3>
-          <button className="form-close" onClick={onClose} aria-label="Cerrar">✕</button>
+          <button className="form-close" onClick={onClose} aria-label="Cerrar" disabled={deleting}>✕</button>
         </div>
         <div className="form-body">
           <p style={{ marginBottom: '20px', color: '#6b7280' }}>
             ¿Estás seguro de que deseas eliminar la categoría <strong>{nombre}</strong>?
           </p>
           <div className="form-footer">
-            <button type="button" className="form-btn-secondary" onClick={onClose}>
+            <button type="button" className="form-btn-secondary" onClick={onClose} disabled={deleting}>
               Cancelar
             </button>
-            <button type="button" className="form-btn-primary" onClick={onConfirmar} style={{ background: '#dc2626' }}>
-              Eliminar
+            <button type="button" className="form-btn-primary" onClick={handleConfirmar} disabled={deleting} style={{ background: '#dc2626' }}>
+              {deleting ? 'Eliminando...' : 'Eliminar'}
             </button>
           </div>
         </div>

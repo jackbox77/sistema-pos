@@ -1,19 +1,37 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Eye, EyeOff } from 'lucide-react'
+import { loginUseCase } from '../../feature/auth/use-case'
 import './Auth.css'
 
 const AUTH_IMAGE = 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1200&q=80'
+const TOKEN_STORAGE_KEY = 'token'
 
 export default function Login() {
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    navigate('/app')
+    setError(null)
+    setLoading(true)
+    try {
+      const response = await loginUseCase(email, password)
+      if (response?.success && response?.data?.token) {
+        localStorage.setItem(TOKEN_STORAGE_KEY, response.data.token)
+        navigate('/app')
+      } else {
+        setError(response?.message ?? 'Error al iniciar sesión')
+      }
+    } catch (err) {
+      setError(err?.message ?? err?.data?.message ?? 'Error de conexión. Intenta de nuevo.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -65,10 +83,15 @@ export default function Login() {
                 </button>
               </div>
             </div>
+            {error && (
+              <p className="auth-error" role="alert">{error}</p>
+            )}
             <div style={{ textAlign: 'right', marginTop: '-4px' }}>
               <Link to="/forgot-password" style={{ fontSize: '13px' }}>¿Olvidaste tu contraseña?</Link>
             </div>
-            <button type="submit" className="auth-btn">Iniciar sesión</button>
+            <button type="submit" className="auth-btn" disabled={loading}>
+              {loading ? 'Iniciando sesión...' : 'Iniciar sesión'}
+            </button>
           </form>
           <p className="auth-links">
             ¿No tienes cuenta? <Link to="/registro">Regístrate</Link>

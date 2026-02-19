@@ -420,6 +420,12 @@
   border-color: #e5e7eb;
 }
 
+/* Acciones en una sola línea horizontal */
+.page-module-table td[data-label="Acciones"] {
+  white-space: nowrap;
+  min-width: 130px;
+}
+
 .btn-secondary {
   padding: 10px 20px;
   min-height: 44px;
@@ -710,8 +716,28 @@
   cursor: pointer;
   font-size: inherit;
   font-family: inherit;
+  min-width: 7rem;
+  display: inline-block;
+  text-align: center;
+  box-sizing: border-box;
 }
 
 .badge-estado-toggle:hover {
   opacity: 0.9;
+}
+
+.badge-estado-toggle:focus,
+.badge-estado-toggle:active {
+  outline: none;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Evitar que la fila o la tabla cambien de tamaño al cambiar el estado */
+.page-module-table td[data-label="Estado"] {
+  min-width: 7.5rem;
+  width: 7.5rem;
+}
+.page-module-table td[data-label="Estado"] .badge-estado-toggle {
+  min-width: 7rem;
 }

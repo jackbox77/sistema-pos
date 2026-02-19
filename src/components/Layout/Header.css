@@ -86,6 +86,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  position: relative;
 }
 
 .header-btn {
@@ -114,4 +115,43 @@
   background: #0d9488;
   color: #fff;
   font-weight: 600;
+}
+
+/* Menú usuario (responsive) */
+.header-user-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 8px;
+  min-width: 180px;
+  padding: 6px 0;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 100;
+}
+
+.header-user-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 16px;
+  border: none;
+  background: none;
+  font-size: 14px;
+  color: #374151;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s;
+}
+
+.header-user-menu-item:hover {
+  background: #f3f4f6;
+}
+
+.header-user-menu-item:focus {
+  outline: none;
+  background: #f3f4f6;
 }

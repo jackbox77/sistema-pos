@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import Layout from './components/Layout/Layout'
+import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute'
 import Login from './pages/auth/Login'
 import Registro from './pages/auth/Registro'
 import ForgotPassword from './pages/auth/ForgotPassword'
@@ -22,17 +23,12 @@ import LibroDiario from './pages/contabilidad/LibroDiario'
 import Activos from './pages/contabilidad/Activos'
 import CatalogoCuentas from './pages/contabilidad/CatalogoCuentas'
 import Subscripciones from './pages/configuracion/Subscripciones'
-import Perfil from './pages/configuracion/Perfil'
+import Compania from './pages/configuracion/Compania'
 import UsuariosPermisos from './pages/configuracion/UsuariosPermisos'
-import HistorialSubscripciones from './pages/configuracion/HistorialSubscripciones'
 import RolesUsuarios from './pages/nomina/RolesUsuarios'
 import Categorias from './pages/maestros/Categorias'
-import ProductosLayout from './pages/maestros/ProductosLayout'
-import ProductosList from './pages/maestros/ProductosList'
-import ProductoForm from './pages/maestros/ProductoForm'
-import ProveedoresLayout from './pages/maestros/ProveedoresLayout'
-import ProveedoresList from './pages/maestros/ProveedoresList'
-import ProveedorForm from './pages/maestros/ProveedorForm'
+import Productos from './pages/maestros/Productos'
+import Proveedores from './pages/maestros/Proveedores'
 import ClientesFidelizados from './pages/maestros/ClientesFidelizados'
 import Impuestos from './pages/maestros/Impuestos'
 import MetodosPago from './pages/maestros/MetodosPago'
@@ -49,7 +45,8 @@ export default function App() {
       <Route path="/login" element={<Navigate to="/" replace />} />
       <Route path="/registro" element={<Registro />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
-      <Route path="/app" element={<Layout />}>
+      <Route path="/configuracion" element={<Navigate to="/app/configuracion/compani" replace />} />
+      <Route path="/app" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
         <Route index element={<Inicio />} />
         <Route path="pos" element={<PosLayout />}>
           <Route index element={<Navigate to="/app/pos/ingresos/historial-ventas" replace />} />
@@ -67,16 +64,8 @@ export default function App() {
         </Route>
         <Route path="maestros" element={<Navigate to="/app/maestros/categorias" replace />} />
         <Route path="maestros/categorias" element={<Categorias />} />
-        <Route path="maestros/productos" element={<ProductosLayout />}>
-          <Route index element={<ProductosList />} />
-          <Route path="nuevo" element={<ProductoForm />} />
-          <Route path="editar/:id" element={<ProductoForm />} />
-        </Route>
-        <Route path="maestros/proveedores" element={<ProveedoresLayout />}>
-          <Route index element={<ProveedoresList />} />
-          <Route path="nuevo" element={<ProveedorForm />} />
-          <Route path="editar/:id" element={<ProveedorForm />} />
-        </Route>
+        <Route path="maestros/productos" element={<Productos />} />
+        <Route path="maestros/proveedores" element={<Proveedores />} />
         <Route path="maestros/clientes-fidelizados" element={<ClientesFidelizados />} />
         <Route path="maestros/impuestos" element={<Impuestos />} />
         <Route path="maestros/metodos-pago" element={<MetodosPago />} />
@@ -96,9 +85,9 @@ export default function App() {
           <Route path="activos" element={<Activos />} />
           <Route path="catalogo-cuentas" element={<CatalogoCuentas />} />
         </Route>
-        <Route path="configuracion/perfil" element={<Perfil />} />
+        <Route path="configuracion/compani" element={<Compania />} />
         <Route path="configuracion/usuarios-permisos" element={<UsuariosPermisos />} />
-        <Route path="configuracion/historial-subscripciones" element={<HistorialSubscripciones />} />
+        <Route path="configuracion/historial-subscripciones" element={<Navigate to="/app/configuracion/subscripciones" state={{ tab: 'historial' }} replace />} />
         <Route path="configuracion/subscripciones" element={<Subscripciones />} />
         <Route path="nomina" element={<Navigate to="/app/nomina/roles-usuarios" replace />} />
         <Route path="nomina/roles-usuarios" element={<RolesUsuarios />} />
