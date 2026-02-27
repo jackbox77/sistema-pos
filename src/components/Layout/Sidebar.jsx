@@ -12,6 +12,7 @@ import {
   Settings,
   ClipboardList,
   Clock,
+  FileBarChart,
 } from 'lucide-react'
 import './Sidebar.css'
 
@@ -30,13 +31,13 @@ const menuItems = [
     ],
   },
   {
-    path: '/app/ingresos',
+    path: '/app/finanzas',
     label: 'Finanzas',
     icon: ArrowDownToLine,
     children: [
-      { path: '/app/ingresos/ingresos', label: 'Ingresos' },
-      { path: '/app/ingresos/egresos', label: 'Egresos' },
-      { path: '/app/ingresos/ventas', label: 'Ventas' },
+      { path: '/app/finanzas/ingresos', label: 'Ingresos' },
+      { path: '/app/finanzas/egresos', label: 'Egresos' },
+      { path: '/app/finanzas/ventas', label: 'Ventas' },
     ],
   },
   {
@@ -48,6 +49,7 @@ const menuItems = [
       { path: '/app/turnos/historial', label: 'Historial de turnos' },
     ],
   },
+  { path: '/app/reportes', label: 'Reportes', icon: FileBarChart },
   // Módulo Gastos comentado
   // {
   //   path: '/app/gastos',
@@ -89,6 +91,7 @@ const menuItems = [
       { path: '/app/configuracion/compani', label: 'Compañía' },
       { path: '/app/configuracion/usuarios-permisos', label: 'Usuarios y permisos' },
       { path: '/app/configuracion/subscripciones', label: 'Subscripciones' },
+      { path: '/app/configuracion/imagenes', label: 'Imágenes almacenadas' },
     ],
   },
   {
@@ -107,7 +110,7 @@ const menuItems = [
 ]
 
 export default function Sidebar({ isExpanded = false, onToggle }) {
-  const [expanded, setExpanded] = useState({ 'app/menu': true, 'app/maestros': true, 'app/ingresos': true, 'app/turnos': true, 'app/gastos': true, 'app/contabilidad': true, 'app/nomina': true, 'app/configuracion': true })
+  const [expanded, setExpanded] = useState({ 'app/menu': true, 'app/maestros': true, 'app/finanzas': true, 'app/turnos': true, 'app/gastos': true, 'app/contabilidad': true, 'app/nomina': true, 'app/configuracion': true })
 
   const toggle = (key) => {
     setExpanded((prev) => ({ ...prev, [key]: !prev[key] }))
@@ -168,9 +171,9 @@ export default function Sidebar({ isExpanded = false, onToggle }) {
           )
         )}
       </nav>
-        <div className="sidebar-footer">
-          <p className="sidebar-footer-text">Sistema POS</p>
-        </div>
+      <div className="sidebar-footer">
+        <p className="sidebar-footer-text">Sistema POS</p>
+      </div>
     </aside>
   )
 }

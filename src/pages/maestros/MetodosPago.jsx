@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { X, Info } from 'lucide-react'
 import PageModule from '../../components/PageModule/PageModule'
+import ApiErrorRecargar from '../../components/ApiErrorRecargar/ApiErrorRecargar'
 import TableResponsive from '../../components/TableResponsive/TableResponsive'
 import '../../components/TableResponsive/TableResponsive.css'
 import '../../components/FormularioProductos/FormularioProductos.css'
@@ -36,20 +37,26 @@ function mapFormToApi(data) {
 export default function MetodosPago() {
   const [metodos, setMetodos] = useState([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
   const [updatingEstadoId, setUpdatingEstadoId] = useState(null)
   const [showCreateModal, setShowCreateModal] = useState(false)
+  const [formError, setFormError] = useState(null)
   const [listaPrecios, setListaPrecios] = useState('general')
   const [filtrosActivos, setFiltrosActivos] = useState([{ id: 'estado', label: 'Estado: activos' }])
   const [showInfoSoporte, setShowInfoSoporte] = useState(false)
 
   const cargarMetodos = useCallback(async () => {
+    setError(null)
     setLoading(true)
     try {
       const res = await getPaymentMethodsUseCase(1, 100)
       const list = res?.data?.data ?? res?.data ?? (Array.isArray(res) ? res : [])
       setMetodos(Array.isArray(list) ? list.map(mapApiToUI) : [])
-    } catch {
+    } catch (err) {
       setMetodos([])
+      const msg = err?.message ?? ''
+      const esErrorRed = /failed to fetch|network error|load failed|networkrequestfailed/i.test(msg)
+      setError(esErrorRed ? 'No fue posible cargar los métodos de pago. Compruebe su conexión e intente de nuevo.' : (msg || 'No fue posible cargar los métodos de pago'))
     } finally {
       setLoading(false)
     }
@@ -159,6 +166,10 @@ export default function MetodosPago() {
           </div>
         </div>
       )}
+      {error && (
+        <ApiErrorRecargar message={error} onRecargar={cargarMetodos} loading={loading} />
+      )}
+      {!error && (
       <TableResponsive>
         <table className="page-module-table">
           <thead>
@@ -205,16 +216,21 @@ export default function MetodosPago() {
           </tbody>
         </table>
       </TableResponsive>
+      )}
 
       {showCreateModal && (
         <ModalFormMetodoPago
-          onClose={() => setShowCreateModal(false)}
+          onClose={() => { setShowCreateModal(false); setFormError(null) }}
+          error={formError}
           onGuardar={async (data) => {
+            setFormError(null)
             try {
               await createPaymentMethodUseCase(mapFormToApi(data))
               await cargarMetodos()
               setShowCreateModal(false)
-            } catch (_) {}
+            } catch (err) {
+              setFormError(err?.message ?? 'Error al crear método de pago')
+            }
           }}
         />
       )}
@@ -222,7 +238,7 @@ export default function MetodosPago() {
   )
 }
 
-function ModalFormMetodoPago({ metodo, onClose, onGuardar, esEdicion = false }) {
+function ModalFormMetodoPago({ metodo, onClose, onGuardar, esEdicion = false, error: apiError }) {
   const [codigo, setCodigo] = useState(metodo?.codigo ?? '')
   const [nombre, setNombre] = useState(metodo?.nombre ?? '')
   const [descripcion, setDescripcion] = useState(metodo?.descripcion ?? '')
@@ -247,6 +263,11 @@ function ModalFormMetodoPago({ metodo, onClose, onGuardar, esEdicion = false }) 
           <button className="form-close" onClick={onClose} aria-label="Cerrar">✕</button>
         </div>
         <form onSubmit={handleSubmit} className="form-body">
+          {apiError && (
+            <p className="form-api-error" role="alert" style={{ color: '#dc2626', fontSize: '14px', marginBottom: '12px' }}>
+              {apiError}
+            </p>
+          )}
           <div className="config-form-grid" style={{ gridTemplateColumns: '1fr' }}>
             <div className="config-field">
               <label>Código *</label>

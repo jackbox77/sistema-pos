@@ -1,0 +1,252 @@
+/* Página Reportes */
+.reportes-wrap {
+  max-width: 520px;
+}
+
+.reportes-card {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.reportes-card-titulo {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+  margin: 0 0 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.reportes-tipo-desc {
+  font-size: 13px;
+  color: #6b7280;
+  margin: -8px 0 16px;
+  line-height: 1.4;
+}
+
+.reportes-filtros-row {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 16px;
+  align-items: end;
+  margin-bottom: 8px;
+}
+
+@media (max-width: 480px) {
+  .reportes-filtros-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.reportes-filtro-fecha {
+  margin-bottom: 0;
+}
+
+.reportes-filtro-texto {
+  margin-bottom: 0;
+  min-width: 0;
+}
+
+.reportes-input-date {
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  font-size: 14px;
+  min-width: 150px;
+  background: #fff;
+}
+
+.reportes-input-date:focus {
+  outline: none;
+  border-color: #0d9488;
+  box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.15);
+}
+
+.reportes-busqueda-wrap {
+  margin-bottom: 12px;
+}
+
+.reportes-busqueda-wrap .input-search {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  font-size: 14px;
+}
+
+.reportes-busqueda-wrap .input-search:focus {
+  outline: none;
+  border-color: #0d9488;
+  box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.15);
+}
+
+.reportes-turnos-count {
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 6px;
+}
+
+.reportes-intervalo-resumen {
+  font-size: 13px;
+  color: #059669;
+  background: #ecfdf5;
+  padding: 10px 12px;
+  border-radius: 8px;
+  margin-top: 12px;
+  font-weight: 500;
+}
+
+.reportes-error {
+  color: #dc2626;
+  font-size: 14px;
+  margin-top: 12px;
+  padding: 10px 12px;
+  background: #fef2f2;
+  border-radius: 8px;
+}
+
+.reportes-footer {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.reportes-footer .form-btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.reportes-select {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  font-size: 14px;
+  background: #fff;
+}
+
+.reportes-select:focus {
+  outline: none;
+  border-color: #0d9488;
+}
+
+.reportes-field {
+  margin-bottom: 16px;
+}
+
+.reportes-field:last-child {
+  margin-bottom: 0;
+}
+
+.reportes-field label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 6px;
+}
+
+.reportes-field input[type="number"] {
+  width: 100%;
+  max-width: 120px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  font-size: 14px;
+}
+
+.reportes-field input[type="number"]:focus {
+  outline: none;
+  border-color: #0d9488;
+}
+
+.reportes-error-global {
+  margin-top: 20px;
+}
+
+.reportes-resultado {
+  margin-top: 28px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 10px;
+  padding: 24px;
+  max-width: 520px;
+}
+
+.reportes-resultado-titulo {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #166534;
+  margin: 0 0 8px;
+}
+
+.reportes-resultado-periodo {
+  font-size: 13px;
+  color: #15803d;
+  margin: 0 0 20px;
+}
+
+.reportes-resultado-totales {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.reportes-resultado-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.reportes-resultado-label {
+  font-size: 12px;
+  color: #166534;
+  font-weight: 500;
+}
+
+.reportes-resultado-valor {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #14532d;
+}
+
+.reportes-resultado-turnos {
+  padding-top: 16px;
+  border-top: 1px solid #bbf7d0;
+}
+
+.reportes-resultado-subtitulo {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #166534;
+  margin: 0 0 10px;
+}
+
+.reportes-resultado-lista {
+  margin: 0;
+  padding-left: 20px;
+  font-size: 14px;
+  color: #15803d;
+  line-height: 1.6;
+}
+
+.reportes-resultado-lista-detalle {
+  list-style: none;
+  padding-left: 0;
+}
+
+.reportes-resultado-lista-detalle li {
+  padding: 6px 0;
+  border-bottom: 1px solid #dcfce7;
+}
+
+.reportes-resultado-lista-detalle li:last-child {
+  border-bottom: none;
+}

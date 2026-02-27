@@ -223,3 +223,446 @@
 .form-btn-primary:hover {
   background: #0f766e;
 }
+
+/* Bucket browser modal — estilo limpio tipo Apple */
+.bucket-browser-overlay {
+  z-index: 1001;
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.bucket-browser-modal-apple {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.12);
+  max-width: 860px;
+  width: calc(100% - 32px);
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+
+.bucket-browser-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px 16px;
+  flex-shrink: 0;
+}
+
+.bucket-browser-header h3 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+  color: #1d1d1f;
+  letter-spacing: -0.02em;
+}
+
+.bucket-browser-close {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  font-size: 18px;
+  color: #86868b;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, color 0.15s;
+}
+
+.bucket-browser-close:hover {
+  background: #f5f5f7;
+  color: #1d1d1f;
+}
+
+.bucket-browser-content {
+  padding: 0 24px 24px;
+  overflow-y: auto;
+  min-height: 120px;
+}
+
+.bucket-browser-loading,
+.bucket-browser-error {
+  font-size: 14px;
+  margin: 0 0 16px;
+  color: #86868b;
+}
+
+.bucket-browser-error {
+  color: #d70015;
+  background: #fff5f5;
+  padding: 10px 14px;
+  border-radius: 10px;
+}
+
+.bucket-browser-no-bucket {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.bucket-browser-no-bucket p {
+  margin: 0;
+  font-size: 15px;
+  color: #1d1d1f;
+  line-height: 1.45;
+}
+
+/* Breadcrumb */
+.bucket-browser-breadcrumb {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px 0;
+  margin-bottom: 16px;
+  font-size: 13px;
+  color: #86868b;
+}
+
+.bucket-breadcrumb-item {
+  padding: 4px 6px;
+  margin: 0 -2px;
+  border: none;
+  background: transparent;
+  color: #1d1d1f;
+  cursor: pointer;
+  border-radius: 6px;
+  font-size: 13px;
+  transition: background 0.15s;
+}
+
+.bucket-breadcrumb-item:hover {
+  background: #ecfdf5;
+  color: #0d9488;
+}
+
+.bucket-breadcrumb-sep {
+  margin: 0 2px;
+  color: #c7c7cc;
+  user-select: none;
+}
+
+/* Layout dos columnas */
+.bucket-browser-layout {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  min-height: 300px;
+}
+
+.bucket-browser-sidebar {
+  width: 220px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  border-right: 1px solid #e5e7eb;
+  padding-right: 16px;
+  height: 100%;
+}
+
+.bucket-browser-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+  max-height: 450px;
+  overflow-y: auto;
+  padding-right: 8px;
+  /* para scrollbar */
+}
+
+/* Lista de carpetas tipo iOS */
+.bucket-browser-list-wrap {
+  background: transparent;
+  padding: 0;
+  margin-bottom: 0;
+}
+
+.bucket-browser-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.bucket-browser-list li+li .bucket-browser-list-row {
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.bucket-browser-list-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 12px 16px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 15px;
+  color: #1d1d1f;
+  text-align: left;
+  gap: 12px;
+  transition: background 0.12s;
+  border-radius: 0;
+}
+
+.bucket-browser-list-row:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.bucket-browser-list-row:active {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.bucket-browser-row-icon {
+  flex-shrink: 0;
+  color: #86868b;
+}
+
+.bucket-browser-row-label {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bucket-browser-row-chevron {
+  flex-shrink: 0;
+  color: #c7c7cc;
+}
+
+/* Sección imágenes */
+.bucket-browser-images-section {
+  margin-bottom: 16px;
+}
+
+.bucket-browser-section-title {
+  margin: 0 0 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #86868b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.bucket-browser-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 12px;
+}
+
+.bucket-browser-image-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: #f5f5f7;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.bucket-browser-image-card:hover {
+  background: #ebebed;
+  border-color: #d2d2d7;
+  transform: scale(1.02);
+}
+
+.bucket-browser-image-card img {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.bucket-browser-image-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+  font-size: 11px;
+  color: #86868b;
+}
+
+/* Nueva carpeta */
+.bucket-browser-actions {
+  margin-bottom: 8px;
+}
+
+.bucket-browser-btn-icon-folder {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  width: 100%;
+  height: 36px;
+  padding: 0 8px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #0d9488;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.15s, color 0.15s;
+}
+
+.bucket-browser-btn-icon-folder:hover {
+  background: #ecfdf5;
+  color: #0f766e;
+}
+
+.bucket-browser-new-folder-inline {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.bucket-browser-new-folder-input {
+  padding: 12px 14px;
+  border: 1px solid #d2d2d7;
+  border-radius: 10px;
+  font-size: 15px;
+  color: #1d1d1f;
+  background: #fff;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.bucket-browser-new-folder-input:focus {
+  outline: none;
+  border-color: #0d9488;
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15);
+}
+
+.bucket-browser-new-folder-btns {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.bucket-browser-btn-ghost {
+  padding: 8px 16px;
+  border: none;
+  background: transparent;
+  font-size: 15px;
+  color: #0d9488;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background 0.15s;
+}
+
+.bucket-browser-btn-ghost:hover {
+  background: #ecfdf5;
+}
+
+.bucket-browser-btn-ghost:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.bucket-browser-btn-primary {
+  padding: 10px 20px;
+  border: none;
+  background: #0d9488;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 500;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.15s, opacity 0.15s;
+}
+
+.bucket-browser-btn-primary:hover {
+  background: #0f766e;
+}
+
+.bucket-browser-btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Zona de subida */
+.bucket-browser-upload-zone {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+  justify-content: center;
+  min-height: 120px;
+  padding: 24px;
+  border: 1px dashed #d2d2d7;
+  border-radius: 12px;
+  background: #fafafa;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+  color: #86868b;
+}
+
+.bucket-browser-upload-zone:hover {
+  border-color: #0d9488;
+  background: #ecfdf5;
+  color: #0d9488;
+}
+
+.bucket-browser-upload-zone .input-file {
+  position: absolute;
+  width: 0;
+  height: 0;
+  opacity: 0;
+}
+
+.bucket-browser-upload-text {
+  font-size: 14px;
+  text-align: center;
+  pointer-events: none;
+}
+
+.categoria-imagen-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  margin-top: 8px;
+}
+
+.categoria-imagen-actions .btn-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: 1px solid #0d9488;
+  background: #ecfdf5;
+  color: #0d9488;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.categoria-imagen-actions .btn-action:hover {
+  background: #0d9488;
+  color: #fff;
+}
+
+.categoria-imagen-actions .categoria-imagen-o {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.categoria-imagen-actions input[type="url"] {
+  flex: 1;
+  min-width: 180px;
+  padding: 8px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  font-size: 14px;
+}

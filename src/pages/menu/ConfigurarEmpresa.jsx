@@ -1,15 +1,46 @@
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import PageModule from '../../components/PageModule/PageModule'
 import { Image, FolderOpen, Trash2, Settings, Type } from 'lucide-react'
+import { getProfileUseCase, updateProfileUseCase } from '../../feature/menu-config'
+import { useMenu } from './MenuContext'
 import './ConfigurarEmpresa.css'
 
 export default function ConfigurarEmpresa() {
+  const { loadProfile } = useMenu()
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState(null)
   const [colorTexto, setColorTexto] = useState('#2D4048')
   const [logoUrl, setLogoUrl] = useState('')
   const [fotos, setFotos] = useState([null, null, null])
   const [nombreEmpresa, setNombreEmpresa] = useState('')
   const [tipoNegocio, setTipoNegocio] = useState('')
   const [descripcion, setDescripcion] = useState('')
+
+  const cargarPerfil = useCallback(async () => {
+    setError(null)
+    setLoading(true)
+    try {
+      const res = await getProfileUseCase()
+      if (res?.success && res?.data) {
+        const { company, menu_config } = res.data
+        if (company) {
+          setLogoUrl(company.logo ?? '')
+          setNombreEmpresa(company.name ?? '')
+          setTipoNegocio(company.business_type ?? '')
+        }
+        if (menu_config?.text_color) setColorTexto(menu_config.text_color)
+      }
+    } catch (err) {
+      setError(err?.message ?? 'Error al cargar la configuración')
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    cargarPerfil()
+  }, [cargarPerfil])
 
   const handleLogoChange = (e) => {
     const file = e.target.files?.[0]
@@ -29,9 +60,27 @@ export default function ConfigurarEmpresa() {
     }
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    // Sin backend: solo prevención de envío
+    setError(null)
+    setSaving(true)
+    try {
+      const logo = typeof logoUrl === 'string' && (logoUrl.startsWith('http://') || logoUrl.startsWith('https://')) ? logoUrl : undefined
+      await updateProfileUseCase({
+        company: {
+          ...(logo != null && { logo }),
+          business_type: tipoNegocio.trim() || undefined,
+        },
+        menu_config: {
+          text_color: colorTexto || undefined,
+        },
+      })
+      await loadProfile()
+    } catch (err) {
+      setError(err?.message ?? 'Error al guardar')
+    } finally {
+      setSaving(false)
+    }
   }
 
   return (
@@ -39,6 +88,14 @@ export default function ConfigurarEmpresa() {
       title="Configuración de la empresa"
       description="Logo, imágenes, color de marca y datos visibles de tu negocio."
     >
+      {error && (
+        <p role="alert" style={{ color: '#dc2626', fontSize: '14px', marginBottom: '12px' }}>
+          {error}
+        </p>
+      )}
+      {loading ? (
+        <p style={{ color: '#6b7280' }}>Cargando configuración...</p>
+      ) : (
       <form className="config-empresa-form" onSubmit={handleSubmit}>
         <div className="config-empresa-grid">
           {/* Columna izquierda */}
@@ -183,12 +240,13 @@ export default function ConfigurarEmpresa() {
         </div>
 
         <div className="config-empresa-actions">
-          <button type="submit" className="config-empresa-btn-guardar">
+          <button type="submit" className="config-empresa-btn-guardar" disabled={saving}>
             <Settings size={20} aria-hidden />
-            Guardar
+            {saving ? 'Guardando...' : 'Guardar'}
           </button>
         </div>
       </form>
+      )}
     </PageModule>
   )
 }

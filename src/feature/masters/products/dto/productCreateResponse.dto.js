@@ -3,13 +3,15 @@
  */
 
 /**
- * Producto creado en la respuesta
+ * Producto creado en la respuesta (POST /products)
  * @typedef {Object} ProductCreateDataDto
  * @property {string} id
  * @property {string} company_id
  * @property {string} category_id
+ * @property {string} code
  * @property {string} name
  * @property {string} [description]
+ * @property {string} [image_url]
  * @property {string} [sku]
  * @property {string} [barcode]
  * @property {number} price

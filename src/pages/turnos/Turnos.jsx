@@ -26,14 +26,16 @@ export default function Turnos() {
 
   const iniciarTurno = () => {
     const ahora = new Date()
+    const start_at = ahora.toISOString()
     const inicio = `${ahora.getFullYear()}-${String(ahora.getMonth() + 1).padStart(2, '0')}-${String(ahora.getDate()).padStart(2, '0')} ${String(ahora.getHours()).padStart(2, '0')}:${String(ahora.getMinutes()).padStart(2, '0')}`
-    agregarTurno({ usuario: 'Admin', inicio, fin: '', ventas: 0, estado: 'Abierto' })
+    agregarTurno({ usuario: 'Admin', inicio, fin: '', ventas: 0, estado: 'Abierto', start_at })
   }
 
   const cerrarTurno = (t) => {
     const ahora = new Date()
+    const end_at = ahora.toISOString()
     const fin = `${ahora.getFullYear()}-${String(ahora.getMonth() + 1).padStart(2, '0')}-${String(ahora.getDate()).padStart(2, '0')} ${String(ahora.getHours()).padStart(2, '0')}:${String(ahora.getMinutes()).padStart(2, '0')}`
-    actualizarTurno(t.id, { ...t, fin, estado: 'Cerrado' })
+    actualizarTurno(t.id, { ...t, fin, estado: 'Cerrado', end_at })
   }
 
   return (

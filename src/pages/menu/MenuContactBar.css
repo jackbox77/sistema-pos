@@ -1,0 +1,63 @@
+/* ── MenuContactBar: barra de ancho completo en la parte inferior del menú ── */
+
+.mcb-bar {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    padding: 10px 0;
+    box-sizing: border-box;
+    font-size: 13px;
+    font-family: inherit;
+}
+
+.mcb-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 18px;
+    white-space: nowrap;
+    opacity: 0.95;
+    position: relative;
+}
+
+/* Separador vertical entre items */
+.mcb-item+.mcb-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 20%;
+    height: 60%;
+    width: 1px;
+    background: currentColor;
+    opacity: 0.25;
+}
+
+.mcb-icon {
+    flex-shrink: 0;
+    opacity: 0.85;
+}
+
+.mcb-link {
+    text-decoration: none;
+    transition: opacity 0.18s;
+    cursor: pointer;
+}
+
+.mcb-link:hover {
+    opacity: 0.8;
+}
+
+.mcb-closed {
+    font-weight: 700;
+    opacity: 0.7;
+}
+
+@media (max-width: 600px) {
+    .mcb-item {
+        padding: 5px 12px;
+        font-size: 12px;
+    }
+}

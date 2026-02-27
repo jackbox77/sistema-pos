@@ -19,12 +19,23 @@ const TIPOS_IDENTIFICACION = [
   { value: 'OTHER', label: 'Otro' },
 ]
 
+const TIPOS_NEGOCIO = [
+  { value: 'restaurante', label: 'Restaurante' },
+  { value: 'tienda', label: 'Tienda' },
+  { value: 'cafe', label: 'Café' },
+  { value: 'bar', label: 'Bar' },
+  { value: 'supermercado', label: 'Supermercado' },
+  { value: 'otros', label: 'Otros' },
+]
+
 export default function Compania() {
   const [tabActiva, setTabActiva] = useState('compania')
   const [companyLoading, setCompanyLoading] = useState(true)
   const [companyError, setCompanyError] = useState(null)
   const [companySaving, setCompanySaving] = useState(false)
   const [form, setForm] = useState({
+    logo: '',
+    business_type: '',
     name: '',
     identification_type: 'NIT',
     identification_number: '',
@@ -47,6 +58,8 @@ export default function Compania() {
       if (res?.success && res?.data) {
         const d = res.data
         setForm({
+          logo: d.logo ?? '',
+          business_type: d.business_type ?? '',
           name: d.name ?? '',
           identification_type: d.identification_type ?? 'NIT',
           identification_number: d.identification_number ?? '',
@@ -78,6 +91,8 @@ export default function Compania() {
     setCompanySaving(true)
     try {
       const res = await updateCompanyUseCase({
+        logo: form.logo.trim() || undefined,
+        business_type: form.business_type || undefined,
         name: form.name.trim(),
         email: form.email.trim(),
         phone: form.phone.trim(),
@@ -161,6 +176,32 @@ export default function Compania() {
               <form className="config-form" onSubmit={handleCompanySubmit}>
                 <h3 className="perfil-section-title">Datos de la empresa</h3>
                 <div className="config-form-grid">
+                  <div className="config-field">
+                    <label>Logo (URL)</label>
+                    <input
+                      type="url"
+                      placeholder="https://ejemplo.com/logo.png"
+                      value={form.logo}
+                      onChange={(e) => handleCompanyChange('logo', e.target.value)}
+                    />
+                    {form.logo && (
+                      <div className="config-field-preview" style={{ marginTop: 8 }}>
+                        <img src={form.logo} alt="Logo" style={{ maxHeight: 48, maxWidth: 120, objectFit: 'contain' }} onError={(e) => { e.target.style.display = 'none' }} />
+                      </div>
+                    )}
+                  </div>
+                  <div className="config-field">
+                    <label>Tipo de negocio</label>
+                    <select
+                      value={form.business_type}
+                      onChange={(e) => handleCompanyChange('business_type', e.target.value)}
+                    >
+                      <option value="">Seleccione</option>
+                      {TIPOS_NEGOCIO.map((t) => (
+                        <option key={t.value} value={t.value}>{t.label}</option>
+                      ))}
+                    </select>
+                  </div>
                   <div className="config-field">
                     <label>Nombre de la empresa</label>
                     <input

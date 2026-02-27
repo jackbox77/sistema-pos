@@ -1,29 +1,36 @@
 /**
- * DTO de respuesta al obtener empresa (GET /companies/me)
+ * DTO de respuesta al obtener/actualizar empresa (GET/PUT /companies/me)
  *
- * Respuesta ejemplo:
+ * Respuesta ejemplo (actualización):
  * {
  *   "success": true,
- *   "message": "Company retrieved successfully",
+ *   "message": "Company updated successfully",
  *   "data": {
  *     "id": "9d48445b-3132-4a09-9a54-5c8758ecf139",
- *     "name": "Mi Tienda S.A.S",
- *     "email": "cdna2001@gmail.com",
- *     "phone": "+573017883059",
- *     "identification_type": "CC",
- *     "identification_number": "9001234567",
- *     "address": "Calle 100 # 50-20",
- *     "legal_representative_name": "christian noel",
- *     "status": "active",
+ *     "name": "terraza",
+ *     "slug": null,
+ *     "logo": "logo.png",
+ *     "business_type": "string",
+ *     "email": "string",
+ *     "phone": "string",
+ *     "identification_type": "string",
+ *     "identification_number": "string",
+ *     "address": "string",
+ *     "legal_representative_name": "string",
+ *     "status": "string",
  *     "created_at": "2026-02-17T16:19:10.694177Z",
- *     "updated_at": "2026-02-17T16:19:10.694521Z"
+ *     "updated_at": "2026-02-23T16:18:29.576938132Z"
  *   }
  * }
  */
 
-/** @typedef {Object} CompanyDataDto
+/**
+ * @typedef {Object} CompanyDataDto
  * @property {string} id
  * @property {string} name
+ * @property {string|null} slug
+ * @property {string|null} logo
+ * @property {string|null} business_type
  * @property {string} email
  * @property {string} phone
  * @property {string} identification_type
@@ -36,7 +43,7 @@
  */
 
 /**
- * Respuesta GET /companies/me
+ * Respuesta GET/PUT /companies/me
  * @typedef {Object} CompanyResponseDto
  * @property {boolean} success
  * @property {string} message

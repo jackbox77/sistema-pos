@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { X, Info } from 'lucide-react'
 import PageModule from '../../components/PageModule/PageModule'
+import ApiErrorRecargar from '../../components/ApiErrorRecargar/ApiErrorRecargar'
 import TableResponsive from '../../components/TableResponsive/TableResponsive'
 import '../../components/TableResponsive/TableResponsive.css'
 import '../../components/FormularioProductos/FormularioProductos.css'
@@ -39,6 +40,7 @@ export default function Impuestos() {
   const [updatingEstadoId, setUpdatingEstadoId] = useState(null)
   const [error, setError] = useState(null)
   const [showFormModal, setShowFormModal] = useState(false)
+  const [formError, setFormError] = useState(null)
   const [listaPrecios, setListaPrecios] = useState('general')
   const [filtrosActivos, setFiltrosActivos] = useState([{ id: 'estado', label: 'Estado: activos' }])
   const [showInfoSoporte, setShowInfoSoporte] = useState(false)
@@ -88,7 +90,10 @@ export default function Impuestos() {
   }
 
   const handleCrear = () => setShowFormModal(true)
-  const cerrarFormModal = () => setShowFormModal(false)
+  const cerrarFormModal = () => {
+    setShowFormModal(false)
+    setFormError(null)
+  }
 
   const quitarFiltro = (id) => {
     setFiltrosActivos((prev) => prev.filter((f) => f.id !== id))
@@ -172,9 +177,7 @@ export default function Impuestos() {
         </div>
       )}
       {error && (
-        <p className="page-module-empty" style={{ color: '#dc2626', marginBottom: '12px' }}>
-          {error}
-        </p>
+        <ApiErrorRecargar message={error} onRecargar={cargarImpuestos} loading={loading} />
       )}
       <TableResponsive>
         <table className="page-module-table">
@@ -230,18 +233,19 @@ export default function Impuestos() {
         <ModalFormImpuesto
           impuesto={null}
           onClose={cerrarFormModal}
+          error={formError}
           onGuardar={async (code, name, percentage, description, status) => {
-            setError(null)
+            setFormError(null)
             try {
               const res = await createTaxUseCase(code, name, percentage, description, status)
               if (res?.success) {
                 await cargarImpuestos()
                 cerrarFormModal()
               } else {
-                setError(res?.message ?? 'Error al crear')
+                setFormError(res?.message ?? 'Error al crear')
               }
             } catch (err) {
-              setError(err?.message ?? 'Error al guardar')
+              setFormError(err?.message ?? 'Error al guardar')
             }
           }}
           esEdicion={false}
@@ -251,7 +255,7 @@ export default function Impuestos() {
   )
 }
 
-function ModalFormImpuesto({ impuesto, onClose, onGuardar, esEdicion = false }) {
+function ModalFormImpuesto({ impuesto, onClose, onGuardar, esEdicion = false, error: apiError }) {
   const [codigo, setCodigo] = useState(impuesto?.codigo ?? '')
   const [nombre, setNombre] = useState(impuesto?.nombre ?? '')
   const [porcentaje, setPorcentaje] = useState(impuesto?.porcentaje ?? '0%')
@@ -283,6 +287,11 @@ function ModalFormImpuesto({ impuesto, onClose, onGuardar, esEdicion = false }) 
           <button className="form-close" onClick={onClose} aria-label="Cerrar">✕</button>
         </div>
         <form onSubmit={handleSubmit} className="form-body">
+          {apiError && (
+            <p className="form-api-error" role="alert" style={{ color: '#dc2626', fontSize: '14px', marginBottom: '12px' }}>
+              {apiError}
+            </p>
+          )}
           <div className="config-form-grid" style={{ gridTemplateColumns: '1fr' }}>
             <div className="config-field">
               <label>Código *</label>

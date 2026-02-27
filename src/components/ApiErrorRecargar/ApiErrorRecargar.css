@@ -1,0 +1,38 @@
+.api-error-recargar {
+  padding: 16px 20px;
+  margin-bottom: 16px;
+  background: #fef2f2;
+  color: #b91c1c;
+  border-radius: 8px;
+  font-size: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.api-error-recargar-message {
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+}
+
+.api-error-recargar-btn {
+  padding: 8px 16px;
+  background: #fff;
+  color: #b91c1c;
+  border: 1px solid #b91c1c;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.api-error-recargar-btn:hover:not(:disabled) {
+  background: #fee2e2;
+}
+
+.api-error-recargar-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}

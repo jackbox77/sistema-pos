@@ -3,3 +3,4 @@
  */
 
 export { createProductRequest } from './productRequest.dto'
+export { createUpdateVisibilityRequest } from './updateVisibilityRequest.dto'

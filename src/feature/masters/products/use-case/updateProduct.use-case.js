@@ -5,6 +5,8 @@ import { updateProduct } from '../service'
  * @param {string} id
  * @param {Object} params
  * @param {string} params.category_id
+ * @param {string} [params.image_url]
+ * @param {string} params.code
  * @param {string} params.name
  * @param {string} [params.description]
  * @param {string} [params.sku]

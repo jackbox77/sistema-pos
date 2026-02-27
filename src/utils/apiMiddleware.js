@@ -60,16 +60,99 @@ function normalizeBody(init) {
 }
 
 /**
- * Ejecuta fetch y devuelve JSON o lanza error con mensaje del servidor.
+ * Devuelve un mensaje de error específico en español según el error de red o del navegador.
+ * Así el usuario ve la causa real (sin conexión, timeout, CORS, etc.) en lugar de un mensaje genérico.
+ * @param {Error} err
+ * @returns {string}
+ */
+function getSpecificNetworkErrorMessage(err) {
+  const msg = (err?.message ?? '').toLowerCase()
+  const name = (err?.name ?? '').toLowerCase()
+
+  if (name === 'aborterror' || msg.includes('aborted') || msg.includes('timeout')) {
+    return 'La solicitud tardó demasiado. Compruebe su conexión e intente de nuevo.'
+  }
+  if (
+    msg.includes('failed to fetch') ||
+    msg.includes('load failed') ||
+    msg.includes('networkerror') ||
+    msg.includes('network request failed') ||
+    msg.includes('err_internet_disconnected') ||
+    msg.includes('err_connection_refused') ||
+    msg.includes('err_connection_reset') ||
+    msg.includes('err_connection_timed_out') ||
+    msg.includes('err_name_not_resolved') ||
+    msg.includes('err_network_changed')
+  ) {
+    return 'Sin conexión a internet o el servidor no responde. Compruebe su red e intente de nuevo.'
+  }
+  if (msg.includes('cors') || msg.includes('cross-origin')) {
+    return 'El servidor no permite la conexión desde esta aplicación. Contacte al administrador.'
+  }
+  if (msg.includes('json') && msg.includes('parse')) {
+    return 'La respuesta del servidor no es válida. Intente de nuevo más tarde.'
+  }
+
+  return err?.message ? `Error de red: ${err.message}` : 'Error de conexión. Intente de nuevo.'
+}
+
+/**
+ * Mensaje específico para respuestas HTTP con error (4xx/5xx).
+ * Prioriza el mensaje que devuelve la API; si no hay, uno según el código.
+ */
+function getSpecificHttpErrorMessage(status, data) {
+  const serverMsg = data?.message ?? data?.error ?? data?.msg
+  if (serverMsg && typeof serverMsg === 'string') return serverMsg
+
+  switch (status) {
+    case 400:
+      return 'Datos incorrectos. Revise el formulario e intente de nuevo.'
+    case 401:
+      return 'Sesión expirada o no autorizado. Inicie sesión de nuevo.'
+    case 403:
+      return 'No tiene permiso para realizar esta acción.'
+    case 404:
+      return 'Recurso no encontrado.'
+    case 409:
+      return 'Conflicto: el recurso ya existe o fue modificado.'
+    case 422:
+      return data?.errors ? `Error de validación: ${JSON.stringify(data.errors)}` : 'Los datos enviados no son válidos.'
+    case 405:
+      return 'Método no permitido (405). El servidor no acepta esta acción. Intente de nuevo.'
+    case 429:
+      return 'Demasiadas solicitudes. Espere un momento e intente de nuevo.'
+    case 500:
+      return 'Error interno del servidor. Intente más tarde.'
+    case 502:
+    case 503:
+      return 'Servicio no disponible. Intente de nuevo en unos minutos.'
+    default:
+      return `Error del servidor (${status}). Intente de nuevo.`
+  }
+}
+
+/**
+ * Ejecuta fetch y devuelve JSON o lanza error con mensaje específico (red o servidor).
  * @param {string} url
  * @param {RequestInit} init
  * @returns {Promise<any>}
  */
 async function doFetch(url, init) {
-  const res = await fetch(url, init)
+  let res
+  try {
+    res = await fetch(url, init)
+  } catch (err) {
+    const specificMessage = getSpecificNetworkErrorMessage(err)
+    const e = new Error(specificMessage)
+    e.cause = err
+    e.isNetworkError = true
+    throw e
+  }
+
   const data = await res.json().catch(() => ({}))
   if (!res.ok) {
-    const err = new Error(data?.message || data?.error || `Error ${res.status}`)
+    const specificMessage = getSpecificHttpErrorMessage(res.status, data)
+    const err = new Error(specificMessage)
     err.status = res.status
     err.data = data
     throw err

@@ -1,5 +1,7 @@
-import { createContext, useContext, useState, useMemo } from 'react'
-import { useMaestros } from '../../context/MaestrosContext'
+import { createContext, useContext, useState, useMemo, useCallback, useEffect } from 'react'
+import { getProfileUseCase, getContactUseCase } from '../../feature/menu-config'
+import { getCategoriesAllUseCase } from '../../feature/masters/category/use-case'
+import { getProductsAllUseCase } from '../../feature/masters/products/use-case'
 
 const aparienciaInicial = {
   colorFondo: '#f8f9fa',
@@ -24,6 +26,19 @@ const empresaInfoInicial = {
   subtitulo: 'Cocina casera y tradicional',
   tipoNegocio: 'Restaurante',
   descripcion: 'Sabores auténticos en cada plato. Un lugar acogedor para compartir en familia.',
+
+  // Datos de contacto y horario
+  abierto: true, // Si se usa aún para "Estado de negocio" manual
+  whatsapp_contact: '',
+  visibility_whatsapp_contact: true,
+  mail_contact: '',
+  visibility_mail_contact: true,
+  phone_contact: '',
+  visibility_phone_contact: false,
+  location: '',
+  visibility_location: true,
+  schedule_visibility: true,
+  schedule: Array.from({ length: 7 }).map((_, day) => ({ day, slots: [{ from: '08:00', to: '20:00' }] })),
 }
 
 /** Tipos de menú disponibles */
@@ -34,6 +49,28 @@ export const TIPOS_MENU = [
   { id: 'platos-horizontal', label: 'Platos en horizontal' },
 ]
 
+/** Mapea header_type del API al id del contexto */
+const API_HEADER_TO_CONTEXT = {
+  classic: 'clasico',
+  background_photo: 'imagen-fondo',
+  minimalist: 'minimalista',
+  editorial: 'editorial',
+}
+const CONTEXT_HEADER_TO_API = Object.fromEntries(
+  Object.entries(API_HEADER_TO_CONTEXT).map(([k, v]) => [v, k])
+)
+
+/** Mapea menu_type del API al id del contexto */
+const API_MENU_TO_CONTEXT = {
+  classic: 'clasico',
+  targets_with_category: 'tarjetas-categorias',
+  primary_category: 'categorias-primero',
+  horizontal_bowls: 'platos-horizontal',
+}
+const CONTEXT_MENU_TO_API = Object.fromEntries(
+  Object.entries(API_MENU_TO_CONTEXT).map(([k, v]) => [v, k])
+)
+
 const MenuContext = createContext(null)
 
 export function useMenu() {
@@ -42,49 +79,147 @@ export function useMenu() {
   return ctx
 }
 
-export default function MenuProvider({ children }) {
-  const { categorias: categoriasMaestro, productos: productosMaestro } = useMaestros()
+export { CONTEXT_HEADER_TO_API, CONTEXT_MENU_TO_API }
 
-  /** Categorías disponibles desde el maestro Categorías */
+export default function MenuProvider({ children }) {
+  const [categoriasAll, setCategoriasAll] = useState([])
+  const [productosAll, setProductosAll] = useState([])
+
+  const refreshCategorias = useCallback(() => {
+    getCategoriesAllUseCase()
+      .then((list) => setCategoriasAll(Array.isArray(list) ? list : []))
+      .catch(() => setCategoriasAll([]))
+  }, [])
+
+  const refreshProductos = useCallback(() => {
+    getProductsAllUseCase()
+      .then((list) => setProductosAll(Array.isArray(list) ? list : []))
+      .catch(() => setProductosAll([]))
+  }, [])
+
+  useEffect(() => {
+    refreshCategorias()
+  }, [refreshCategorias])
+
+  useEffect(() => {
+    refreshProductos()
+  }, [refreshProductos])
+
+  /** Categorías disponibles (solo visibles): desde GET categories all, filtradas por visibility del maestro */
   const categoriasDisponibles = useMemo(
-    () => categoriasMaestro.map((c, i) => ({ id: c.id, nombre: c.nombre, orden: i })),
-    [categoriasMaestro]
+    () =>
+      categoriasAll
+        .filter((c) => c.visibility !== false)
+        .map((c, i) => ({
+          id: c.id,
+          nombre: c.name ?? c.nombre ?? '',
+          orden: i,
+        })),
+    [categoriasAll]
   )
 
-  /** Productos disponibles desde el maestro Productos (relacionados por categoriaId) */
+  /** Productos disponibles (solo visibles): desde GET products all, filtrados por visibility del maestro */
   const productosDisponibles = useMemo(
     () =>
-      productosMaestro.map((p) => ({
-        id: p.id,
-        categoriaId: p.categoriaId,
-        nombre: p.nombre,
-        descripcion: p.descripcion ?? '',
-        precio: typeof p.precio === 'number' ? p.precio : Number(p.precio) || 0,
-        imagen: p.imagen ?? '',
-      })),
-    [productosMaestro]
+      productosAll
+        .filter((p) => p.visibility !== false)
+        .map((p) => ({
+          id: p.id,
+          categoriaId: p.category_id ?? p.categoriaId,
+          nombre: p.name ?? p.nombre ?? '',
+          descripcion: p.description ?? p.descripcion ?? '',
+          precio: typeof p.price === 'number' ? p.price : Number(p.price) || 0,
+          imagen: p.image_url ?? p.imagen ?? '',
+        })),
+    [productosAll]
   )
 
-  const [categoriasEnMenu, setCategoriasEnMenu] = useState([1, 2, 3, 4])
-  const [productosEnMenu, setProductosEnMenu] = useState([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11])
+  /** IDs de categorías visibles = "en el menú" (misma lógica que en MenuCategoria) */
+  const categoriasEnMenu = useMemo(
+    () => categoriasAll.filter((c) => c.visibility !== false).map((c) => c.id),
+    [categoriasAll]
+  )
+
+  /** IDs de productos visibles = "en el menú" (misma lógica que en MenuProductos) */
+  const productosEnMenu = useMemo(
+    () => productosAll.filter((p) => p.visibility !== false).map((p) => p.id),
+    [productosAll]
+  )
   const [apariencia, setApariencia] = useState(aparienciaInicial)
   const [empresaInfo, setEmpresaInfo] = useState(empresaInfoInicial)
   const [tipoMenu, setTipoMenu] = useState('tarjetas-categorias')
   const [mostrarImagenes, setMostrarImagenes] = useState(true)
   const [mostrarVerMas, setMostrarVerMas] = useState(true)
   const [tipoHeader, setTipoHeader] = useState('clasico')
+  const [profileLoading, setProfileLoading] = useState(true)
+  const [profileError, setProfileError] = useState(null)
 
-  const toggleCategoriaEnMenu = (id) => {
-    setCategoriasEnMenu((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id].sort((a, b) => a - b)
-    )
-  }
+  const loadProfile = useCallback(async () => {
+    setProfileError(null)
+    setProfileLoading(true)
+    try {
+      // Cargar perfil (company + menu_config) y contacto en paralelo
+      const [res, contactRes] = await Promise.all([
+        getProfileUseCase(),
+        getContactUseCase().catch(() => null),
+      ])
 
-  const toggleProductoEnMenu = (id) => {
-    setProductosEnMenu((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
-    )
-  }
+      if (res?.success && res?.data) {
+        const { company, menu_config } = res.data
+        if (company) {
+          setEmpresaInfo((prev) => ({
+            ...prev,
+            logoUrl: company.logo ?? prev.logoUrl,
+            nombreEmpresa: company.name ?? prev.nombreEmpresa,
+            tipoNegocio: company.business_type ?? prev.tipoNegocio,
+          }))
+        }
+        if (menu_config) {
+          setApariencia((prev) => ({
+            ...prev,
+            colorFondo: menu_config.menu_background_color ?? prev.colorFondo,
+            colorContenido: menu_config.content_background_color ?? prev.colorContenido,
+            colorTexto: menu_config.text_color ?? prev.colorTexto,
+            colorTitulo: menu_config.title_color ?? prev.colorTitulo,
+          }))
+          setTipoHeader(API_HEADER_TO_CONTEXT[menu_config.header_type] ?? 'clasico')
+          setTipoMenu(API_MENU_TO_CONTEXT[menu_config.menu_type] ?? 'tarjetas-categorias')
+          setMostrarImagenes(menu_config.visualization === 'image')
+          setMostrarVerMas(menu_config.view_more === 'yes')
+        }
+      }
+
+      // Mapear datos de contacto al estado de empresaInfo
+      if (contactRes?.success && contactRes?.data) {
+        const c = contactRes.data
+        setEmpresaInfo((prev) => ({
+          ...prev,
+          whatsapp_contact: c.whatsapp_contact ?? prev.whatsapp_contact,
+          visibility_whatsapp_contact: c.visibility_whatsapp_contact ?? prev.visibility_whatsapp_contact,
+          mail_contact: c.mail_contact ?? prev.mail_contact,
+          visibility_mail_contact: c.visibility_mail_contact ?? prev.visibility_mail_contact,
+          phone_contact: c.phone_contact ?? prev.phone_contact,
+          visibility_phone_contact: c.visibility_phone_contact ?? prev.visibility_phone_contact,
+          location: c.location ?? prev.location,
+          visibility_location: c.visibility_location ?? prev.visibility_location,
+          schedule_visibility: c.schedule_visibility ?? prev.schedule_visibility,
+          schedule: Array.isArray(c.schedule) ? c.schedule : prev.schedule,
+        }))
+      }
+    } catch (err) {
+      setProfileError(err?.message ?? 'Error al cargar perfil del menú')
+    } finally {
+      setProfileLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    loadProfile()
+  }, [loadProfile])
+
+  /** La visibilidad se gestiona en MenuCategoria/MenuProductos con el API; el contexto refleja los datos cargados. */
+  const toggleCategoriaEnMenu = useCallback(() => { }, [])
+  const toggleProductoEnMenu = useCallback(() => { }, [])
 
   /** Categorías seleccionadas para el menú, con sus productos */
   const categoriasConProductos = useMemo(
@@ -120,6 +255,11 @@ export default function MenuProvider({ children }) {
     toggleCategoriaEnMenu,
     toggleProductoEnMenu,
     categoriasConProductos,
+    loadProfile,
+    profileLoading,
+    profileError,
+    refreshCategorias,
+    refreshProductos,
   }
 
   return <MenuContext.Provider value={value}>{children}</MenuContext.Provider>

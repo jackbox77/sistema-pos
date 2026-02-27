@@ -1,0 +1,121 @@
+﻿On branch main
+Your branch is up to date with 'origin/main'.
+
+Changes not staged for commit:
+  (use "git add/rm <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+	modified:   package-lock.json
+	modified:   package.json
+	modified:   src/App.jsx
+	modified:   src/components/FormularioProductos/FormularioProductos.css
+	modified:   src/components/Layout/Layout.jsx
+	modified:   src/components/Layout/Sidebar.jsx
+	modified:   src/components/PageModule/PageModule.css
+	modified:   src/feature/configuration/company/dto/companyRequest.dto.js
+	modified:   src/feature/configuration/company/dto/companyResponse.dto.js
+	modified:   src/feature/masters/category/api-const.js
+	modified:   src/feature/masters/category/dto/categoriesResponse.dto.js
+	modified:   src/feature/masters/category/dto/categoryCreateResponse.dto.js
+	modified:   src/feature/masters/category/dto/categoryRequest.dto.js
+	modified:   src/feature/masters/category/dto/categoryUpdateResponse.dto.js
+	modified:   src/feature/masters/category/dto/index.js
+	modified:   src/feature/masters/category/service/category.service.js
+	modified:   src/feature/masters/category/service/index.js
+	modified:   src/feature/masters/category/use-case/createCategory.use-case.js
+	modified:   src/feature/masters/category/use-case/index.js
+	modified:   src/feature/masters/category/use-case/updateCategory.use-case.js
+	modified:   src/feature/masters/loyal-customers/api-const.js
+	modified:   src/feature/masters/loyal-customers/dto/loyalCustomersResponse.dto.js
+	modified:   src/feature/masters/loyal-customers/service/index.js
+	modified:   src/feature/masters/loyal-customers/service/loyalCustomers.service.js
+	modified:   src/feature/masters/loyal-customers/use-case/index.js
+	modified:   src/feature/masters/products/api-const.js
+	modified:   src/feature/masters/products/dto/index.js
+	modified:   src/feature/masters/products/dto/productCreateResponse.dto.js
+	modified:   src/feature/masters/products/dto/productRequest.dto.js
+	modified:   src/feature/masters/products/dto/productUpdateResponse.dto.js
+	modified:   src/feature/masters/products/dto/productsResponse.dto.js
+	modified:   src/feature/masters/products/service/index.js
+	modified:   src/feature/masters/products/service/products.service.js
+	modified:   src/feature/masters/products/use-case/createProduct.use-case.js
+	modified:   src/feature/masters/products/use-case/index.js
+	modified:   src/feature/masters/products/use-case/updateProduct.use-case.js
+	modified:   src/feature/masters/suppliers/api-const.js
+	modified:   src/feature/masters/suppliers/dto/suppliersResponse.dto.js
+	modified:   src/feature/masters/suppliers/service/index.js
+	modified:   src/feature/masters/suppliers/service/suppliers.service.js
+	modified:   src/feature/masters/suppliers/use-case/index.js
+	modified:   src/pages/Inicio.jsx
+	modified:   src/pages/configuracion/Compania.jsx
+	deleted:    src/pages/gastos/DocumentoSoporte.jsx
+	deleted:    src/pages/gastos/FacturasCompras.jsx
+	deleted:    src/pages/gastos/GastosLayout.jsx
+	deleted:    src/pages/gastos/OrdenesCompra.jsx
+	deleted:    src/pages/gastos/Pagos.jsx
+	deleted:    src/pages/ingresos/Devoluciones.jsx
+	deleted:    src/pages/ingresos/Egresos.jsx
+	deleted:    src/pages/ingresos/FacturaVentas.jsx
+	deleted:    src/pages/ingresos/IngresosLayout.jsx
+	deleted:    src/pages/ingresos/PagosRecibidos.jsx
+	deleted:    src/pages/ingresos/Remisiones.jsx
+	deleted:    src/pages/ingresos/Ventas.jsx
+	modified:   src/pages/maestros/Categorias.jsx
+	modified:   src/pages/maestros/ClientesFidelizados.jsx
+	modified:   src/pages/maestros/Impuestos.jsx
+	modified:   src/pages/maestros/MetodosPago.jsx
+	modified:   src/pages/maestros/Productos.jsx
+	modified:   src/pages/maestros/Proveedores.jsx
+	modified:   src/pages/menu/ConfigurarEmpresa.jsx
+	modified:   src/pages/menu/Menu.css
+	modified:   src/pages/menu/Menu.jsx
+	modified:   src/pages/menu/MenuCategoria.css
+	modified:   src/pages/menu/MenuCategoria.jsx
+	modified:   src/pages/menu/MenuContext.jsx
+	modified:   src/pages/menu/MenuProductos.css
+	modified:   src/pages/menu/MenuProductos.jsx
+	modified:   src/pages/pos/Facturar.css
+	modified:   src/pages/pos/Facturar.jsx
+	modified:   src/pages/pos/HistorialVentas.jsx
+	modified:   src/pages/pos/PosLayout.css
+	modified:   src/pages/pos/PosLayout.jsx
+	modified:   src/pages/turnos/Turnos.jsx
+	modified:   src/pages/turnos/TurnosLayout.jsx
+	modified:   src/utils/apiMiddleware.js
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	git_status.txt
+	git_status_utf8.txt
+	src/components/ApiErrorRecargar/
+	src/feature/finance/
+	src/feature/masters/category/dto/categoriesFiltersRequest.dto.js
+	src/feature/masters/category/dto/updateVisibilityRequest.dto.js
+	src/feature/masters/category/dto/updateVisibilityResponse.dto.js
+	src/feature/masters/category/use-case/getCategoriesAll.use-case.js
+	src/feature/masters/category/use-case/getCategoriesWithFilters.use-case.js
+	src/feature/masters/category/use-case/updateCategoryVisibility.use-case.js
+	src/feature/masters/loyal-customers/dto/loyalCustomersFiltersRequest.dto.js
+	src/feature/masters/loyal-customers/use-case/getLoyalCustomersAll.use-case.js
+	src/feature/masters/loyal-customers/use-case/getLoyalCustomersWithFilters.use-case.js
+	src/feature/masters/products/dto/productsFiltersRequest.dto.js
+	src/feature/masters/products/dto/updateVisibilityRequest.dto.js
+	src/feature/masters/products/dto/updateVisibilityResponse.dto.js
+	src/feature/masters/products/use-case/getProductsAll.use-case.js
+	src/feature/masters/products/use-case/getProductsWithFilters.use-case.js
+	src/feature/masters/products/use-case/updateProductVisibility.use-case.js
+	src/feature/masters/suppliers/dto/suppliersFiltersRequest.dto.js
+	src/feature/masters/suppliers/use-case/getSuppliersAll.use-case.js
+	src/feature/masters/suppliers/use-case/getSuppliersWithFilters.use-case.js
+	src/feature/menu-config/
+	src/feature/pos/
+	src/feature/report/
+	src/feature/shifts/
+	src/feature/storage/
+	src/pages/configuracion/Imagenes.css
+	src/pages/configuracion/Imagenes.jsx
+	src/pages/finanzas/
+	src/pages/reportes/
+	src/utils/excelMaestros.js
+	src/utils/exportTableToExcel.js
+
+no changes added to commit (use "git add" and/or "git commit -a")

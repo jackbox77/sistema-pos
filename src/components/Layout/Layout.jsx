@@ -9,10 +9,15 @@ export default function Layout() {
   const [sidebarExpanded, setSidebarExpanded] = useState(false)
   const { pathname } = useLocation()
   const isVistaCompletaMenu = pathname.includes('/menu/vista-completa')
+  const isPos = pathname.includes('/pos')
+  const posBarLeft = sidebarExpanded ? '260px' : '64px'
 
   return (
     <MaestrosProvider>
-      <div className="layout">
+      <div
+        className={`layout ${isPos ? 'layout--pos' : ''}`}
+        style={isPos ? { '--pos-bar-left': posBarLeft } : undefined}
+      >
         <Header />
         <div className="layout-body">
           <Sidebar

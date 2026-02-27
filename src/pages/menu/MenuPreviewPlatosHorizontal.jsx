@@ -1,5 +1,6 @@
 import { Image as ImageIcon } from 'lucide-react'
 import MenuHeader from './MenuHeader'
+import MenuContactBar from './MenuContactBar'
 import './MenuPreviewPlatosHorizontal.css'
 
 const aparienciaDefault = {
@@ -115,6 +116,7 @@ export default function MenuPreviewPlatosHorizontal({ categorias, apariencia = a
             ))
           )}
         </div>
+        <MenuContactBar empresaInfo={empresaInfo} apariencia={apariencia} />
       </div>
     </div>
   )

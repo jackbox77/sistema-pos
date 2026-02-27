@@ -2,4 +2,4 @@
  * Servicios del maestro Proveedores
  */
 
-export { getSuppliers, createSupplier, updateSupplier, deleteSupplier } from './suppliers.service'
+export { getSuppliers, getSuppliersWithFilters, getSuppliersAll, createSupplier, updateSupplier, deleteSupplier } from './suppliers.service'

@@ -200,6 +200,141 @@
   border-radius: 8px;
 }
 
+/* Paginación (maestros) */
+.page-module-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 16px;
+  padding: 12px 0;
+  border-top: 1px solid #e5e7eb;
+}
+
+.page-module-pagination-info {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.page-module-pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.page-module-pagination-limit {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #374151;
+}
+
+.page-module-pagination-limit select {
+  padding: 6px 10px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  font-size: 14px;
+  background: #fff;
+}
+
+/* Píldora de números de página (diseño tipo cápsula) */
+.page-module-pagination-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  background: #fff;
+  border-radius: 9999px;
+  box-shadow: 0 2px 8px rgba(13, 148, 136, 0.12);
+}
+
+.page-module-pagination-pill .page-module-pagination-prev,
+.page-module-pagination-pill .page-module-pagination-next {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: #9ca3af;
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+.page-module-pagination-pill .page-module-pagination-prev:hover:not(:disabled),
+.page-module-pagination-pill .page-module-pagination-next:hover:not(:disabled) {
+  color: #374151;
+  background: #f3f4f6;
+}
+
+.page-module-pagination-pill .page-module-pagination-prev:disabled,
+.page-module-pagination-pill .page-module-pagination-next:disabled {
+  color: #d1d5db;
+  cursor: not-allowed;
+}
+
+.page-module-pagination-pill .page-module-pagination-nums {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.page-module-pagination-pill .page-module-pagination-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 32px;
+  padding: 0 8px;
+  border: none;
+  background: none;
+  font-size: 14px;
+  color: #6b7280;
+  cursor: pointer;
+  border-radius: 50%;
+  text-decoration: none;
+}
+
+.page-module-pagination-pill .page-module-pagination-num:hover {
+  color: #374151;
+  background: #f3f4f6;
+}
+
+.page-module-pagination-pill .page-module-pagination-num.is-active {
+  background: #0d9488;
+  color: #fff;
+  cursor: default;
+  font-weight: 500;
+}
+
+.page-module-pagination-pill .page-module-pagination-num.is-active:hover {
+  background: #0d9488;
+  color: #fff;
+}
+
+.page-module-pagination-pill .page-module-pagination-ellipsis {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 32px;
+  padding: 0 4px;
+  font-size: 14px;
+  color: #6b7280;
+  user-select: none;
+}
+
+.page-module-pagination-page {
+  font-size: 14px;
+  color: #374151;
+  min-width: 100px;
+  text-align: center;
+}
+
 .btn-primary {
   padding: 10px 20px;
   min-height: 44px;

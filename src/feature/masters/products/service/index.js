@@ -2,4 +2,4 @@
  * Servicios del maestro Productos
  */
 
-export { getProducts, createProduct, updateProduct, deleteProduct } from './products.service'
+export { getProducts, getProductsWithFilters, getProductsAll, createProduct, updateProduct, updateProductVisibility, deleteProduct } from './products.service'

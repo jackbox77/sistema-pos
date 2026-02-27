@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Image as ImageIcon, ChevronLeft, UtensilsCrossed } from 'lucide-react'
 import MenuHeader from './MenuHeader'
+import MenuContactBar from './MenuContactBar'
 import './MenuPreviewCategoriasPrimero.css'
 
 const aparienciaDefault = {
@@ -156,6 +157,7 @@ export default function MenuPreviewCategoriasPrimero({ categorias, apariencia = 
             </div>
           </>
         )}
+        <MenuContactBar empresaInfo={empresaInfo} apariencia={apariencia} />
       </div>
     </div>
   )

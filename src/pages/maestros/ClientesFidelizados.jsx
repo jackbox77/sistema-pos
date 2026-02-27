@@ -1,12 +1,15 @@
-import { useRef, useState, useMemo, useEffect, useCallback } from 'react'
-import { Pencil, Trash2, Upload, Download, ChevronDown, BookOpen, X } from 'lucide-react'
+import { useRef, useState, useEffect, useCallback } from 'react'
+import { Pencil, Trash2, Upload, Download, ChevronDown, ChevronLeft, ChevronRight, BookOpen, X } from 'lucide-react'
 import PageModule from '../../components/PageModule/PageModule'
-import { descargarPlantilla, parsearCSV } from '../../utils/csvMaestros'
+import { parsearCSV } from '../../utils/csvMaestros'
+import { descargarDatosExcel, parsearExcel } from '../../utils/excelMaestros'
+import ApiErrorRecargar from '../../components/ApiErrorRecargar/ApiErrorRecargar'
 import TableResponsive from '../../components/TableResponsive/TableResponsive'
 import '../../components/TableResponsive/TableResponsive.css'
 import '../../components/FormularioProductos/FormularioProductos.css'
 import {
-  getLoyalCustomersUseCase,
+  getLoyalCustomersWithFiltersUseCase,
+  getLoyalCustomersAllUseCase,
   createLoyalCustomerUseCase,
   updateLoyalCustomerUseCase,
   deleteLoyalCustomerUseCase,
@@ -37,8 +40,23 @@ function mapApiToUI(c) {
     email: c.email ?? '',
     fechaCumpleanos: c.birth_date ?? '',
     estado: c.status === 'active' ? 'Activo' : 'Inactivo',
-    ventasAsociadas: 0,
+    ventasAsociadas: c.ventas_asociadas ?? 0,
   }
+}
+
+const LIMIT_OPCIONES = [10, 25, 50]
+
+function getPaginationItems(totalPages, current) {
+  if (totalPages <= 0) return []
+  if (totalPages <= 7) return Array.from({ length: totalPages }, (_, i) => i + 1)
+  const set = new Set([1, totalPages, current, current - 1, current - 2, current + 1, current + 2].filter(p => p >= 1 && p <= totalPages))
+  const sorted = [...set].sort((a, b) => a - b)
+  const out = []
+  for (let i = 0; i < sorted.length; i++) {
+    if (i > 0 && sorted[i] - sorted[i - 1] > 1) out.push('ellipsis')
+    out.push(sorted[i])
+  }
+  return out
 }
 
 function mapFormToApi(data) {
@@ -55,42 +73,67 @@ function mapFormToApi(data) {
 export default function ClientesFidelizados() {
   const [clientes, setClientes] = useState([])
   const [loading, setLoading] = useState(true)
+  const [page, setPage] = useState(1)
+  const [limit, setLimit] = useState(10)
+  const [pagination, setPagination] = useState(null)
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [formError, setFormError] = useState(null)
   const [clienteEditando, setClienteEditando] = useState(null)
   const [clienteEliminar, setClienteEliminar] = useState(null)
-  const [busqueda, setBusqueda] = useState('')
   const [updatingEstadoId, setUpdatingEstadoId] = useState(null)
+  const [error, setError] = useState(null)
+  const [filtrosActivos, setFiltrosActivos] = useState([{ id: 'estado', label: 'Estado: activos', value: 'active' }])
+  const [search, setSearch] = useState('')
+  const [searchDebounced, setSearchDebounced] = useState('')
+  const searchTimeoutRef = useRef(null)
 
   const cargarClientes = useCallback(async (silent = false) => {
     if (!silent) setLoading(true)
+    if (!silent) setError(null)
     try {
-      const res = await getLoyalCustomersUseCase(1, 100)
-      if (res?.success && res?.data?.data) {
-        setClientes(res.data.data.map(mapApiToUI))
-      } else setClientes([])
-    } catch {
+      const statusFilter = filtrosActivos.find((f) => f.id === 'estado')?.value
+      const documentTypeFilter = filtrosActivos.find((f) => f.id === 'document_type')?.value
+      const res = await getLoyalCustomersWithFiltersUseCase({
+        page,
+        limit,
+        ...(statusFilter && { status: statusFilter }),
+        ...(documentTypeFilter && { document_type: documentTypeFilter }),
+        ...(searchDebounced.trim() && { search: searchDebounced.trim() }),
+      })
+      if (res?.success && res?.data) {
+        setClientes(Array.isArray(res.data.data) ? res.data.data.map(mapApiToUI) : [])
+        setPagination(res.data.pagination ?? null)
+      } else {
+        setClientes([])
+        setPagination(null)
+      }
+    } catch (err) {
       setClientes([])
+      setPagination(null)
+      const msg = err?.message ?? ''
+      const esErrorRed = /failed to fetch|network error|load failed|networkrequestfailed/i.test(msg)
+      setError(esErrorRed ? 'No fue posible cargar los clientes. Compruebe su conexión e intente de nuevo.' : (msg || 'No fue posible cargar los clientes'))
     } finally {
       if (!silent) setLoading(false)
     }
-  }, [])
+  }, [page, limit, searchDebounced, filtrosActivos])
 
   useEffect(() => {
     cargarClientes()
   }, [cargarClientes])
 
-  const clientesFiltrados = useMemo(() => {
-    if (!busqueda.trim()) return clientes
-    const q = busqueda.toLowerCase().trim()
-    return clientes.filter(
-      (c) =>
-        c.nombre.toLowerCase().includes(q) ||
-        (c.email?.toLowerCase().includes(q)) ||
-        (c.numeroDocumento?.toLowerCase().includes(q))
-    )
-  }, [clientes, busqueda])
+  useEffect(() => {
+    if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current)
+    searchTimeoutRef.current = setTimeout(() => {
+      setSearchDebounced(search)
+      setPage(1)
+    }, 400)
+    return () => {
+      if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current)
+    }
+  }, [search])
 
   const handleCrear = () => setShowCreateModal(true)
   const handleEditar = (c) => {
@@ -101,6 +144,11 @@ export default function ClientesFidelizados() {
     setClienteEliminar(c)
     setShowDeleteModal(true)
   }
+
+  const total = pagination?.total ?? 0
+  const totalPages = pagination?.total_pages ?? 1
+  const desde = total === 0 ? 0 : (page - 1) * limit + 1
+  const hasta = Math.min(page * limit, total)
 
   const cambiarEstado = async (c) => {
     const newEstado = c.estado === 'Activo' ? 'Inactivo' : 'Activo'
@@ -117,8 +165,6 @@ export default function ClientesFidelizados() {
   const [showMasAcciones, setShowMasAcciones] = useState(false)
   const masAccionesRef = useRef(null)
   const inputCargaRef = useRef(null)
-  const [listaPrecios, setListaPrecios] = useState('general')
-  const [filtrosActivos, setFiltrosActivos] = useState([{ id: 'estado', label: 'Estado: activos' }])
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -127,19 +173,28 @@ export default function ClientesFidelizados() {
     if (showMasAcciones) document.addEventListener('click', handleClickOutside)
     return () => document.removeEventListener('click', handleClickOutside)
   }, [showMasAcciones])
-  const descargarPlantillaClientes = () => {
-    descargarPlantilla(
-      ['tipoDocumento', 'numeroDocumento', 'nombre', 'email', 'fechaCumpleanos', 'estado'],
-      ['Cédula de ciudadanía', '1.234.567-8', 'Cliente Ejemplo', 'cliente@email.com', '1990-01-15', 'Activo'],
-      'plantilla_clientes_fidelizados.csv'
-    )
+  const descargarTodoClientes = async () => {
+    try {
+      const list = await getLoyalCustomersAllUseCase()
+      const columnas = ['tipoDocumento', 'numeroDocumento', 'nombre', 'email', 'fechaCumpleanos', 'estado']
+      const filas = (Array.isArray(list) ? list : []).map((c) => [
+        TIPO_DOC_API_TO_UI[c.document_type] ?? c.document_type ?? '',
+        c.document_number ?? '',
+        c.full_name ?? '',
+        c.email ?? '',
+        c.birth_date ?? '',
+        c.status === 'active' ? 'Activo' : 'Inactivo',
+      ])
+      descargarDatosExcel(columnas, filas, 'clientes_fidelizados.xlsx')
+    } catch (_) {}
   }
   const handleCargaMasiva = async (e) => {
     const file = e.target.files?.[0]
     if (!file) return
+    const isExcel = /\.xlsx?$/i.test(file.name)
     const reader = new FileReader()
     reader.onload = async () => {
-      const filas = parsearCSV(reader.result)
+      const filas = isExcel ? parsearExcel(reader.result) : parsearCSV(reader.result)
       if (filas.length < 2) return
       const [, ...datos] = filas
       const filasValidas = datos.filter((f) => (f[2] ?? '').trim())
@@ -158,7 +213,8 @@ export default function ClientesFidelizados() {
       }
       await cargarClientes()
     }
-    reader.readAsText(file, 'UTF-8')
+    if (isExcel) reader.readAsArrayBuffer(file)
+    else reader.readAsText(file, 'UTF-8')
     e.target.value = ''
   }
 
@@ -190,8 +246,8 @@ export default function ClientesFidelizados() {
               </button>
               {showMasAcciones && (
                 <div className="toolbar-dropdown">
-                  <button type="button" onClick={() => { descargarPlantillaClientes(); setShowMasAcciones(false); }}>
-                    <Download size={18} /> Descargar plantilla
+                  <button type="button" onClick={() => { descargarTodoClientes(); setShowMasAcciones(false); }}>
+                    <Download size={18} /> Descargar todo
                   </button>
                   <button type="button" onClick={() => { inputCargaRef.current?.click(); setShowMasAcciones(false); }}>
                     <Upload size={18} /> Carga masiva
@@ -206,15 +262,53 @@ export default function ClientesFidelizados() {
         </div>
         <div className="maestro-encabezado-filtros">
           <div className="maestro-encabezado-filtros-left">
-            <label className="maestro-encabezado-label">Lista de precios</label>
+            <input
+              type="search"
+              className="input-search"
+              placeholder="Buscar clientes..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              aria-label="Buscar clientes"
+            />
+            <label className="maestro-encabezado-label">Estado</label>
             <select
               className="maestro-encabezado-select"
-              value={listaPrecios}
-              onChange={(e) => setListaPrecios(e.target.value)}
+              value={filtrosActivos.find((f) => f.id === 'estado')?.value ?? ''}
+              onChange={(e) => {
+                const v = e.target.value
+                setFiltrosActivos((prev) => {
+                  const rest = prev.filter((f) => f.id !== 'estado')
+                  if (!v) return rest
+                  return [...rest, { id: 'estado', label: v === 'active' ? 'Estado: activos' : 'Estado: inactivos', value: v }]
+                })
+                setPage(1)
+              }}
+              aria-label="Filtrar por estado"
             >
-              <option value="general">General</option>
-              <option value="mayorista">Mayorista</option>
-              <option value="especial">Especial</option>
+              <option value="">Todos</option>
+              <option value="active">Activos</option>
+              <option value="inactive">Inactivos</option>
+            </select>
+            <label className="maestro-encabezado-label">Tipo doc.</label>
+            <select
+              className="maestro-encabezado-select"
+              value={filtrosActivos.find((f) => f.id === 'document_type')?.value ?? ''}
+              onChange={(e) => {
+                const v = e.target.value
+                setFiltrosActivos((prev) => {
+                  const rest = prev.filter((f) => f.id !== 'document_type')
+                  if (!v) return rest
+                  const tipoLabel = TIPOS_DOCUMENTO.find((t) => TIPO_DOC_UI_TO_API[t] === v) ?? v
+                  return [...rest, { id: 'document_type', label: `Tipo doc.: ${tipoLabel}`, value: v }]
+                })
+                setPage(1)
+              }}
+              aria-label="Filtrar por tipo de documento"
+            >
+              <option value="">Todos</option>
+              {TIPOS_DOCUMENTO.map((t) => (
+                <option key={t} value={TIPO_DOC_UI_TO_API[t]}>{t}</option>
+              ))}
             </select>
           </div>
           <div className="maestro-encabezado-filtros-right">
@@ -237,20 +331,15 @@ export default function ClientesFidelizados() {
       <input
         ref={inputCargaRef}
         type="file"
-        accept=".csv"
+        accept=".csv,.xlsx"
         className="input-file"
         style={{ position: 'absolute', width: 0, height: 0, opacity: 0 }}
         onChange={handleCargaMasiva}
       />
-      <div className="page-module-toolbar" style={{ marginTop: '16px' }}>
-        <input
-          type="search"
-          className="input-search"
-          placeholder="Buscar clientes..."
-          value={busqueda}
-          onChange={(e) => setBusqueda(e.target.value)}
-        />
-      </div>
+      {error && (
+        <ApiErrorRecargar message={error} onRecargar={() => cargarClientes(false)} loading={loading} />
+      )}
+      {!error && (
       <TableResponsive>
         <table className="page-module-table">
           <thead>
@@ -273,13 +362,20 @@ export default function ClientesFidelizados() {
                 </td>
               </tr>
             ) : (
-              clientesFiltrados.map((c) => (
+              clientes.map((c) => (
               <tr key={c.id}>
                 <td data-label="Tipo doc.">{c.tipoDocumento}</td>
                 <td data-label="Nº documento">{c.numeroDocumento}</td>
                 <td data-label="Nombre">{c.nombre}</td>
                 <td data-label="Email">{c.email}</td>
-                <td data-label="Fecha cumpleaños">{c.fechaCumpleanos ? new Date(c.fechaCumpleanos + 'T00:00:00').toLocaleDateString('es-CO') : '—'}</td>
+                <td data-label="Fecha cumpleaños">
+                  {(() => {
+                    if (!c.fechaCumpleanos) return '—'
+                    const d = new Date(c.fechaCumpleanos)
+                    if (Number.isNaN(d.getTime())) return '—'
+                    return d.toLocaleDateString('es-CO')
+                  })()}
+                </td>
                 <td data-label="Estado">
                   {updatingEstadoId === c.id ? (
                     <span className="badge badge-estado-toggle" aria-busy="true">Cargando</span>
@@ -312,22 +408,63 @@ export default function ClientesFidelizados() {
           </tbody>
         </table>
       </TableResponsive>
-      {!loading && clientesFiltrados.length === 0 && (
+      )}
+      {!error && !loading && clientes.length === 0 && (
         <p className="page-module-empty">
-          {busqueda ? 'No hay clientes que coincidan con la búsqueda.' : 'No hay clientes fidelizados. Crea uno con el botón "+ Nuevo cliente fidelizado".'}
+          {search.trim() || filtrosActivos.find((f) => f.id === 'estado')?.value === 'inactive' || filtrosActivos.some((f) => f.id === 'document_type')
+            ? 'No hay clientes que coincidan con los filtros.'
+            : 'No hay clientes fidelizados. Crea uno con el botón "+ Nuevo cliente fidelizado".'}
         </p>
+      )}
+      {!error && pagination && total > 0 && (
+        <div className="page-module-pagination">
+          <div className="page-module-pagination-info">Mostrando {desde}-{hasta} de {total}</div>
+          <div className="page-module-pagination-controls">
+            <label className="page-module-pagination-limit">
+              <span>Por página</span>
+              <select value={limit} onChange={(e) => { setLimit(Number(e.target.value)); setPage(1) }} aria-label="Registros por página">
+                {LIMIT_OPCIONES.map((n) => (
+                  <option key={n} value={n}>{n}</option>
+                ))}
+              </select>
+            </label>
+            <div className="page-module-pagination-pill">
+              <button type="button" className="page-module-pagination-prev" disabled={page <= 1 || loading} onClick={() => setPage((p) => Math.max(1, p - 1))} aria-label="Página anterior">
+                <ChevronLeft size={20} />
+              </button>
+              <div className="page-module-pagination-nums">
+                {getPaginationItems(totalPages, page).map((item, idx) =>
+                  item === 'ellipsis' ? (
+                    <span key={`e-${idx}`} className="page-module-pagination-ellipsis">…</span>
+                  ) : (
+                    <button key={item} type="button" className={`page-module-pagination-num ${item === page ? 'is-active' : ''}`} disabled={loading} onClick={() => setPage(item)} aria-label={`Página ${item}`} aria-current={item === page ? 'page' : undefined}>
+                      {item}
+                    </button>
+                  )
+                )}
+              </div>
+              <button type="button" className="page-module-pagination-next" disabled={page >= totalPages || loading} onClick={() => setPage((p) => Math.min(totalPages, p + 1))} aria-label="Página siguiente">
+                <ChevronRight size={20} />
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {showCreateModal && (
         <ModalFormCliente
           tiposDocumento={TIPOS_DOCUMENTO}
-          onClose={() => setShowCreateModal(false)}
+          onClose={() => { setShowCreateModal(false); setFormError(null) }}
+          error={formError}
           onGuardar={async (data) => {
+            setFormError(null)
             try {
               await createLoyalCustomerUseCase(mapFormToApi(data))
               await cargarClientes()
               setShowCreateModal(false)
-            } catch (_) {}
+            } catch (err) {
+              setFormError(err?.message ?? 'Error al crear cliente')
+            }
           }}
         />
       )}
@@ -339,14 +476,19 @@ export default function ClientesFidelizados() {
           onClose={() => {
             setShowEditModal(false)
             setClienteEditando(null)
+            setFormError(null)
           }}
+          error={formError}
           onGuardar={async (data) => {
+            setFormError(null)
             try {
               await updateLoyalCustomerUseCase(clienteEditando.id, mapFormToApi(data))
               await cargarClientes()
               setShowEditModal(false)
               setClienteEditando(null)
-            } catch (_) {}
+            } catch (err) {
+              setFormError(err?.message ?? 'Error al actualizar cliente')
+            }
           }}
           esEdicion
         />
@@ -366,7 +508,11 @@ export default function ClientesFidelizados() {
               await cargarClientes()
               setShowDeleteModal(false)
               setClienteEliminar(null)
-            } catch (_) {}
+            } catch (err) {
+              setError(err?.message ?? 'Error al eliminar')
+              setShowDeleteModal(false)
+              setClienteEliminar(null)
+            }
           }}
         />
       )}
@@ -374,7 +520,7 @@ export default function ClientesFidelizados() {
   )
 }
 
-function ModalFormCliente({ cliente, tiposDocumento, onClose, onGuardar, esEdicion = false }) {
+function ModalFormCliente({ cliente, tiposDocumento, onClose, onGuardar, esEdicion = false, error: apiError }) {
   const [tipoDocumento, setTipoDocumento] = useState(cliente?.tipoDocumento ?? 'Cédula de ciudadanía')
   const [numeroDocumento, setNumeroDocumento] = useState(cliente?.numeroDocumento ?? '')
   const [nombre, setNombre] = useState(cliente?.nombre ?? '')
@@ -401,6 +547,11 @@ function ModalFormCliente({ cliente, tiposDocumento, onClose, onGuardar, esEdici
           <button className="form-close" onClick={onClose} aria-label="Cerrar">✕</button>
         </div>
         <form onSubmit={handleSubmit} className="form-body">
+          {apiError && (
+            <p className="form-api-error" role="alert" style={{ color: '#dc2626', fontSize: '14px', marginBottom: '12px' }}>
+              {apiError}
+            </p>
+          )}
           <div className="config-form-grid" style={{ gridTemplateColumns: '1fr' }}>
             <div className="config-field">
               <label>Tipo de documento *</label>

@@ -1,8 +1,10 @@
 /**
  * DTO de envío para actualizar empresa (PUT /companies/me)
- * Body: name, email, phone, identification_type, identification_number, address, legal_representative_name, status
+ * Body: logo, business_type, name, email, phone, identification_type, identification_number, address, legal_representative_name, status
  *
  * @typedef {Object} CompanyRequestDto
+ * @property {string} [logo]
+ * @property {string} [business_type]
  * @property {string} name
  * @property {string} email
  * @property {string} phone
@@ -20,6 +22,8 @@
  */
 export function createCompanyRequest(params) {
   return {
+    ...(params.logo != null && { logo: params.logo }),
+    ...(params.business_type != null && { business_type: params.business_type }),
     name: params.name ?? '',
     email: params.email ?? '',
     phone: params.phone ?? '',

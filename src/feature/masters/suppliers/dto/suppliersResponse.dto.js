@@ -1,9 +1,20 @@
 /**
- * DTOs de respuesta del listado de proveedores (GET /suppliers)
+ * DTOs de respuesta del listado de proveedores
+ * (GET /suppliers o GET /suppliers con filtros: status, document_type, search, page, limit)
+ *
+ * Respuesta ejemplo:
+ * {
+ *   "success": true,
+ *   "message": "Suppliers retrieved successfully",
+ *   "data": {
+ *     "data": [ { "id", "company_id", "document_type", "document_number", "supplier_name", "contact_name", "contact_phone", "status", "created_at", "updated_at", "compras_asociadas" } ],
+ *     "pagination": { "page": 1, "limit": 10, "total": 1, "total_pages": 1 }
+ *   }
+ * }
  */
 
 /**
- * Item de proveedor en la respuesta
+ * Item de proveedor en la respuesta (GET /suppliers)
  * @typedef {Object} SupplierItemDto
  * @property {string} id
  * @property {string} company_id
@@ -15,6 +26,7 @@
  * @property {string} status
  * @property {string} created_at
  * @property {string} updated_at
+ * @property {number} compras_asociadas
  */
 
 /**

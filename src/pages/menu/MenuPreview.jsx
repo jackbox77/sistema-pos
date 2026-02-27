@@ -3,6 +3,7 @@ import MenuPreviewTarjetas from './MenuPreviewTarjetas'
 import MenuPreviewCategoriasPrimero from './MenuPreviewCategoriasPrimero'
 import MenuPreviewPlatosHorizontal from './MenuPreviewPlatosHorizontal'
 import MenuHeader from './MenuHeader'
+import MenuContactBar from './MenuContactBar'
 import './Menu.css'
 
 const aparienciaDefault = {
@@ -19,17 +20,17 @@ export default function MenuPreview({ categorias, apariencia = aparienciaDefault
   const empresa = { ...empresaDefault, ...empresaInfo }
   if (tipoMenu === 'tarjetas-categorias') {
     return (
-      <MenuPreviewTarjetas categorias={categorias} apariencia={apariencia} empresaInfo={empresa} mostrarImagenes={mostrarImagenes} mostrarVerMas={mostrarVerMas} tipoHeader={tipoHeader} />
+      <MenuPreviewTarjetas categorias={categorias} apariencia={apariencia} empresaInfo={empresaInfo} mostrarImagenes={mostrarImagenes} mostrarVerMas={mostrarVerMas} tipoHeader={tipoHeader} />
     )
   }
   if (tipoMenu === 'categorias-primero') {
     return (
-      <MenuPreviewCategoriasPrimero categorias={categorias} apariencia={apariencia} empresaInfo={empresa} mostrarImagenes={mostrarImagenes} mostrarVerMas={mostrarVerMas} tipoHeader={tipoHeader} />
+      <MenuPreviewCategoriasPrimero categorias={categorias} apariencia={apariencia} empresaInfo={empresaInfo} mostrarImagenes={mostrarImagenes} mostrarVerMas={mostrarVerMas} tipoHeader={tipoHeader} />
     )
   }
   if (tipoMenu === 'platos-horizontal') {
     return (
-      <MenuPreviewPlatosHorizontal categorias={categorias} apariencia={apariencia} empresaInfo={empresa} mostrarImagenes={mostrarImagenes} mostrarVerMas={mostrarVerMas} tipoHeader={tipoHeader} />
+      <MenuPreviewPlatosHorizontal categorias={categorias} apariencia={apariencia} empresaInfo={empresaInfo} mostrarImagenes={mostrarImagenes} mostrarVerMas={mostrarVerMas} tipoHeader={tipoHeader} />
     )
   }
   const {
@@ -121,6 +122,7 @@ export default function MenuPreview({ categorias, apariencia = aparienciaDefault
             ))}
           </div>
         )}
+        <MenuContactBar empresaInfo={empresaInfo} apariencia={apariencia} />
       </div>
     </div>
   )

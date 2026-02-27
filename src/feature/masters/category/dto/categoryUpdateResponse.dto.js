@@ -7,11 +7,13 @@
  * @typedef {Object} CategoryUpdateDataDto
  * @property {string} id
  * @property {string} company_id
+ * @property {string} code
  * @property {string} name
  * @property {string} [description]
  * @property {string} status
  * @property {string} created_at
  * @property {string} updated_at
+ * @property {number} product_count
  */
 
 /**

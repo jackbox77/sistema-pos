@@ -6,18 +6,15 @@ import Registro from './pages/auth/Registro'
 import ForgotPassword from './pages/auth/ForgotPassword'
 import Inicio from './pages/Inicio'
 import PosLayout from './pages/pos/PosLayout'
-import HistorialVentas from './pages/pos/HistorialVentas'
-import ComprobanteVentaDiarias from './pages/pos/ComprobanteVentaDiarias'
-import PosTurnos from './pages/pos/Turnos'
 import Facturar from './pages/pos/Facturar'
 import FacturaElectronica from './pages/FacturaElectronica'
-import IngresosLayout from './pages/ingresos/IngresosLayout'
+import IngresosLayout from './pages/finanzas/IngresosLayout'
 import TurnosLayout from './pages/turnos/TurnosLayout'
 import Turnos from './pages/turnos/Turnos'
 import HistorialTurnos from './pages/turnos/HistorialTurnos'
-import FacturaVentas from './pages/ingresos/FacturaVentas'
-import Egresos from './pages/ingresos/Egresos'
-import Ventas from './pages/ingresos/Ventas'
+import { FacturaVentas } from './pages/finanzas/Ventas'
+import Egresos from './pages/finanzas/Egresos'
+import Ventas from './pages/finanzas/Ventas'
 import ContabilidadLayout from './pages/contabilidad/ContabilidadLayout'
 import LibroDiario from './pages/contabilidad/LibroDiario'
 import Activos from './pages/contabilidad/Activos'
@@ -25,6 +22,7 @@ import CatalogoCuentas from './pages/contabilidad/CatalogoCuentas'
 import Subscripciones from './pages/configuracion/Subscripciones'
 import Compania from './pages/configuracion/Compania'
 import UsuariosPermisos from './pages/configuracion/UsuariosPermisos'
+import Imagenes from './pages/configuracion/Imagenes'
 import RolesUsuarios from './pages/nomina/RolesUsuarios'
 import Categorias from './pages/maestros/Categorias'
 import Productos from './pages/maestros/Productos'
@@ -37,6 +35,7 @@ import Menu from './pages/menu/Menu'
 import MenuCategoria from './pages/menu/MenuCategoria'
 import MenuProductos from './pages/menu/MenuProductos'
 import VistaCompletaMenu from './pages/menu/VistaCompletaMenu'
+import Reportes from './pages/reportes/Reportes'
 
 export default function App() {
   return (
@@ -49,16 +48,12 @@ export default function App() {
       <Route path="/app" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
         <Route index element={<Inicio />} />
         <Route path="pos" element={<PosLayout />}>
-          <Route index element={<Navigate to="/app/pos/ingresos/historial-ventas" replace />} />
-          <Route path="ingresos/historial-ventas" element={<HistorialVentas />} />
-          <Route path="ingresos/comprobante-venta-diarias" element={<ComprobanteVentaDiarias />} />
-          <Route path="turnos" element={<PosTurnos />} />
-          <Route path="facturar" element={<Facturar />} />
+          <Route index element={<Facturar />} />
         </Route>
         <Route path="factura-electronica" element={<FacturaElectronica />} />
         <Route path="menu" element={<MenuLayout />}>
           <Route index element={<Menu />} />
-<Route path="categoria" element={<MenuCategoria />} />
+          <Route path="categoria" element={<MenuCategoria />} />
           <Route path="productos" element={<MenuProductos />} />
           <Route path="vista-completa" element={<VistaCompletaMenu />} />
         </Route>
@@ -69,8 +64,8 @@ export default function App() {
         <Route path="maestros/clientes-fidelizados" element={<ClientesFidelizados />} />
         <Route path="maestros/impuestos" element={<Impuestos />} />
         <Route path="maestros/metodos-pago" element={<MetodosPago />} />
-        <Route path="ingresos" element={<IngresosLayout />}>
-          <Route index element={<Navigate to="/app/ingresos/ingresos" replace />} />
+        <Route path="finanzas" element={<IngresosLayout />}>
+          <Route index element={<Navigate to="/app/finanzas/ingresos" replace />} />
           <Route path="ingresos" element={<FacturaVentas />} />
           <Route path="egresos" element={<Egresos />} />
           <Route path="ventas" element={<Ventas />} />
@@ -79,6 +74,7 @@ export default function App() {
           <Route index element={<Turnos />} />
           <Route path="historial" element={<HistorialTurnos />} />
         </Route>
+        <Route path="reportes" element={<Reportes />} />
         <Route path="contabilidad" element={<ContabilidadLayout />}>
           <Route index element={<Navigate to="/app/contabilidad/libro-diario" replace />} />
           <Route path="libro-diario" element={<LibroDiario />} />
@@ -89,6 +85,7 @@ export default function App() {
         <Route path="configuracion/usuarios-permisos" element={<UsuariosPermisos />} />
         <Route path="configuracion/historial-subscripciones" element={<Navigate to="/app/configuracion/subscripciones" state={{ tab: 'historial' }} replace />} />
         <Route path="configuracion/subscripciones" element={<Subscripciones />} />
+        <Route path="configuracion/imagenes" element={<Imagenes />} />
         <Route path="nomina" element={<Navigate to="/app/nomina/roles-usuarios" replace />} />
         <Route path="nomina/roles-usuarios" element={<RolesUsuarios />} />
       </Route>

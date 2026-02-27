@@ -15,6 +15,38 @@ export async function getLoyalCustomers(page = 1, limit = 10) {
 }
 
 /**
+ * Lista clientes fidelizados con filtros (GET /loyal-customers?status=active&document_type=CC&search=maria&page=1&limit=10)
+ * @param {Object} [params]
+ * @param {number} [params.page=1]
+ * @param {number} [params.limit=10]
+ * @param {string} [params.status] - 'active' | 'inactive'
+ * @param {string} [params.document_type] - Ej: 'CC', 'CE', 'PASSPORT', 'OTHER'
+ * @param {string} [params.search] - Búsqueda (nombre, email, documento, etc.)
+ * @returns {Promise<import('../dto/loyalCustomersResponse.dto').LoyalCustomersResponseDto>}
+ */
+export async function getLoyalCustomersWithFilters(params = {}) {
+  const { page = 1, limit = 10, status, document_type, search } = params
+  const url = CLIENTES_FIDELIZADOS_API.LIST_FILTERS({ page, limit, status, document_type, search })
+  const response = await requestWithToken.get(url)
+  return response
+}
+
+/**
+ * Obtiene todos los clientes fidelizados. Intenta GET /loyal-customers; si falla (404/405), usa listado paginado con límite alto.
+ */
+export async function getLoyalCustomersAll() {
+  try {
+    const response = await requestWithToken.get(CLIENTES_FIDELIZADOS_API.LIST_ALL)
+    return response
+  } catch (err) {
+    if (err?.status === 404 || err?.status === 405) {
+      return requestWithToken.get(CLIENTES_FIDELIZADOS_API.LIST(1, 10000))
+    }
+    throw err
+  }
+}
+
+/**
  * Crea un cliente fidelizado (POST /loyal-customers con token)
  * @param {Object} params
  * @param {'CC'|'CE'|'PASSPORT'|'OTHER'} params.document_type

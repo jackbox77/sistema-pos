@@ -2,4 +2,4 @@
  * Servicios del maestro Categorías
  */
 
-export { getCategories, createCategory, updateCategory, deleteCategory } from './category.service'
+export { getCategories, getCategoriesWithFilters, getCategoriesAll, createCategory, updateCategory, updateCategoryVisibility, deleteCategory } from './category.service'
