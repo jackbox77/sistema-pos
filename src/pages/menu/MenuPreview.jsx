@@ -38,6 +38,9 @@ export default function MenuPreview({ categorias, apariencia = aparienciaDefault
     colorContenido,
     colorTexto,
     colorTitulo,
+    colorSubtitulo = colorTexto,
+    colorPrecio = colorTexto,
+    colorAcento = colorTitulo,
     imagenFondo,
   } = { ...aparienciaDefault, ...apariencia }
 
@@ -53,7 +56,7 @@ export default function MenuPreview({ categorias, apariencia = aparienciaDefault
           empresaInfo={empresa}
           apariencia={apariencia}
           className="menu-preview-header"
-          style={{ borderBottomColor: colorTitulo }}
+          style={{ borderBottomColor: colorAcento }}
         />
         {categorias.length === 0 ? (
           <p className="menu-preview-empty" style={{ color: colorTexto }}>
@@ -65,7 +68,7 @@ export default function MenuPreview({ categorias, apariencia = aparienciaDefault
               <section key={seccion.id} className="menu-preview-seccion">
                 <h3
                   className="menu-preview-seccion-titulo"
-                  style={{ color: colorTitulo, borderBottomColor: colorTexto }}
+                  style={{ color: colorTitulo, borderBottomColor: colorAcento }}
                 >
                   {seccion.nombre}
                 </h3>
@@ -79,7 +82,7 @@ export default function MenuPreview({ categorias, apariencia = aparienciaDefault
                       <li
                         key={item.id}
                         className="menu-preview-item"
-                        style={{ borderBottomColor: `${colorTexto}20` }}
+                        style={{ borderBottomColor: `${colorAcento}40` }}
                       >
                         <div className="menu-preview-item-content">
                           {mostrarImagenes && (
@@ -101,7 +104,7 @@ export default function MenuPreview({ categorias, apariencia = aparienciaDefault
                             {item.descripcion && (
                               <span
                                 className="menu-preview-item-desc"
-                                style={{ color: colorTexto }}
+                                style={{ color: colorSubtitulo }}
                               >
                                 {item.descripcion}
                               </span>
@@ -110,7 +113,7 @@ export default function MenuPreview({ categorias, apariencia = aparienciaDefault
                         </div>
                         <span
                           className="menu-preview-item-precio"
-                          style={{ color: colorTitulo }}
+                          style={{ color: colorPrecio }}
                         >
                           ${item.precio.toLocaleString('es-CO')}
                         </span>

@@ -36,6 +36,12 @@
  * @property {string} [content_background_color]
  * @property {string} [text_color]
  * @property {string} [title_color]
+ * @property {string} [subtitle_color]
+ * @property {string} [price_color]
+ * @property {string} [accent_color]
+ * @property {string} [contact_icon_color]
+ * @property {string} [contact_text_color]
+ * @property {string} [contact_background_color]
  */
 
 /**
@@ -71,6 +77,12 @@ export function createUpdateProfileRequest(params = {}) {
       ...(mc.content_background_color != null && { content_background_color: mc.content_background_color }),
       ...(mc.text_color != null && { text_color: mc.text_color }),
       ...(mc.title_color != null && { title_color: mc.title_color }),
+      ...(mc.subtitle_color != null && { subtitle_color: mc.subtitle_color }),
+      ...(mc.price_color != null && { price_color: mc.price_color }),
+      ...(mc.accent_color != null && { accent_color: mc.accent_color }),
+      ...(mc.contact_icon_color != null && { contact_icon_color: mc.contact_icon_color }),
+      ...(mc.contact_text_color != null && { contact_text_color: mc.contact_text_color }),
+      ...(mc.contact_background_color != null && { contact_background_color: mc.contact_background_color }),
     }
     if (Object.keys(body.menu_config).length === 0) delete body.menu_config
   }

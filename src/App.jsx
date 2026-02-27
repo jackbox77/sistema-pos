@@ -12,6 +12,7 @@ import IngresosLayout from './pages/finanzas/IngresosLayout'
 import TurnosLayout from './pages/turnos/TurnosLayout'
 import Turnos from './pages/turnos/Turnos'
 import HistorialTurnos from './pages/turnos/HistorialTurnos'
+import DetalleTurno from './pages/turnos/DetalleTurno'
 import { FacturaVentas } from './pages/finanzas/Ventas'
 import Egresos from './pages/finanzas/Egresos'
 import Ventas from './pages/finanzas/Ventas'
@@ -73,6 +74,7 @@ export default function App() {
         <Route path="turnos" element={<TurnosLayout />}>
           <Route index element={<Turnos />} />
           <Route path="historial" element={<HistorialTurnos />} />
+          <Route path="historial/detalle/:id" element={<DetalleTurno />} />
         </Route>
         <Route path="reportes" element={<Reportes />} />
         <Route path="contabilidad" element={<ContabilidadLayout />}>
@@ -92,3 +94,4 @@ export default function App() {
     </Routes>
   )
 }
+

@@ -26,7 +26,14 @@ export default function MenuContactBar({ empresaInfo, apariencia }) {
         schedule, schedule_visibility,
     } = empresaInfo || {}
 
-    const { colorTitulo = '#134e4a', colorContenido = '#ffffff', colorTexto = '#1f2937' } = apariencia || {}
+    const {
+        colorTitulo = '#134e4a',
+        colorContenido = '#ffffff',
+        colorTexto = '#1f2937',
+        colorIconoContacto = '#C7D02C',
+        colorTextoContacto = '#ffffff',
+        colorFondoContacto = colorTitulo,
+    } = apariencia || {}
 
     const showWhatsapp = visibility_whatsapp_contact && whatsapp_contact?.trim()
     const showMail = visibility_mail_contact && mail_contact?.trim()
@@ -37,18 +44,19 @@ export default function MenuContactBar({ empresaInfo, apariencia }) {
     const hasAny = showWhatsapp || showMail || showPhone || showLocation || showSchedule
     if (!hasAny) return null
 
+    // Colores finales para la barra
+    const barBg = colorFondoContacto
+    const barColor = colorTextoContacto
+    const iconColor = colorIconoContacto
+
     const scheduleInfo = showSchedule ? getTodayScheduleLabel(schedule) : null
     const numeroWA = whatsapp_contact?.replace(/\D/g, '')
-
-    // Usamos el colorTitulo como fondo de la barra (verde oscuro por defecto)
-    const barBg = colorTitulo
-    const barColor = colorContenido
 
     return (
         <div className="mcb-bar" style={{ background: barBg, color: barColor }}>
             {showLocation && (
                 <div className="mcb-item">
-                    <MapPin size={16} className="mcb-icon" />
+                    <MapPin size={16} className="mcb-icon" style={{ color: iconColor }} />
                     <span>{location}</span>
                 </div>
             )}
@@ -59,7 +67,7 @@ export default function MenuContactBar({ empresaInfo, apariencia }) {
                     className="mcb-item mcb-link"
                     style={{ color: barColor }}
                 >
-                    <Phone size={16} className="mcb-icon" />
+                    <Phone size={16} className="mcb-icon" style={{ color: iconColor }} />
                     <span>{phone_contact}</span>
                 </a>
             )}
@@ -70,7 +78,7 @@ export default function MenuContactBar({ empresaInfo, apariencia }) {
                     className="mcb-item mcb-link"
                     style={{ color: barColor }}
                 >
-                    <Mail size={16} className="mcb-icon" />
+                    <Mail size={16} className="mcb-icon" style={{ color: iconColor }} />
                     <span>{mail_contact}</span>
                 </a>
             )}
@@ -83,14 +91,14 @@ export default function MenuContactBar({ empresaInfo, apariencia }) {
                     className="mcb-item mcb-link"
                     style={{ color: barColor }}
                 >
-                    <MessageCircle size={16} className="mcb-icon" />
+                    <MessageCircle size={16} className="mcb-icon" style={{ color: iconColor }} />
                     <span>{whatsapp_contact}</span>
                 </a>
             )}
 
             {showSchedule && scheduleInfo && (
                 <div className="mcb-item">
-                    <Clock size={16} className="mcb-icon" />
+                    <Clock size={16} className="mcb-icon" style={{ color: iconColor }} />
                     {scheduleInfo.closed ? (
                         <span>
                             <strong>{scheduleInfo.day}:</strong>{' '}

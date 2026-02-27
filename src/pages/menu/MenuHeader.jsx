@@ -17,7 +17,7 @@ export default function MenuHeader({
   style = {},
 }) {
   const empresa = { ...empresaDefault, ...empresaInfo }
-  const { colorTexto, colorTitulo, imagenHeaderFondo } = apariencia
+  const { colorTexto, colorTitulo, colorAcento, imagenHeaderFondo } = apariencia
 
   // Header con imagen de fondo
   if (tipoHeader === 'imagen-fondo') {
@@ -45,7 +45,7 @@ export default function MenuHeader({
     return (
       <header
         className={`menu-header menu-header-minimalista ${className}`}
-        style={{ borderBottomColor: `${colorTexto || '#1f2937'}25`, ...style }}
+        style={{ borderBottomColor: colorAcento || `${colorTexto || '#1f2937'}25`, ...style }}
       >
         <h2 className="menu-header-minimalista-titulo" style={{ color: colorTitulo || '#1f2937' }}>
           {empresa.nombreEmpresa || 'Menú'}
@@ -64,7 +64,7 @@ export default function MenuHeader({
     return (
       <header
         className={`menu-header menu-header-editorial ${className}`}
-        style={{ borderLeftColor: colorTitulo || '#1f2937', ...style }}
+        style={{ borderLeftColor: colorAcento || colorTitulo || '#1f2937', ...style }}
       >
         {empresa.logoUrl && (
           <div className="menu-header-editorial-logo">
@@ -89,7 +89,7 @@ export default function MenuHeader({
   return (
     <header
       className={`menu-header menu-header-clasico ${className}`}
-      style={{ borderBottomColor: colorTitulo || '#1f2937', ...style }}
+      style={{ borderBottomColor: colorAcento || colorTitulo || '#1f2937', ...style }}
     >
       {empresa.logoUrl ? (
         <div className="menu-header-clasico-logo-img">

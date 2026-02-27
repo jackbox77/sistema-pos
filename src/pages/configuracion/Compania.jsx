@@ -1,7 +1,10 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef, useMemo, Fragment } from 'react'
+import { FolderOpen, ChevronRight, Plus, Upload, ImageIcon, X } from 'lucide-react'
 import PageModule from '../../components/PageModule/PageModule'
 import { getCompanyUseCase, updateCompanyUseCase } from '../../feature/configuration/company/use-case'
 import { getApiKeysUseCase, regenerateApiKeyUseCase } from '../../feature/configuration/api-keys/use-case'
+import { validateBucketUseCase, getBucketUseCase, createBucketUseCase, createFolderUseCase, uploadFileUseCase } from '../../feature/storage/use-case'
+import '../../components/FormularioProductos/FormularioProductos.css'
 import './Perfil.css'
 
 const TABS = [
@@ -49,6 +52,7 @@ export default function Compania() {
   const [apiKeyLoading, setApiKeyLoading] = useState(false)
   const [apiKeyRegenerating, setApiKeyRegenerating] = useState(false)
   const [showApiKeyValue, setShowApiKeyValue] = useState(false)
+  const [showBucketBrowser, setShowBucketBrowser] = useState(false)
 
   const cargarCompany = useCallback(async () => {
     setCompanyError(null)
@@ -176,18 +180,27 @@ export default function Compania() {
               <form className="config-form" onSubmit={handleCompanySubmit}>
                 <h3 className="perfil-section-title">Datos de la empresa</h3>
                 <div className="config-form-grid">
-                  <div className="config-field">
-                    <label>Logo (URL)</label>
-                    <input
-                      type="url"
-                      placeholder="https://ejemplo.com/logo.png"
-                      value={form.logo}
-                      onChange={(e) => handleCompanyChange('logo', e.target.value)}
-                    />
+                  <div className="config-field" style={{ gridColumn: '1 / -1' }}>
+                    <label>Logo de la empresa</label>
                     {form.logo && (
-                      <div className="config-field-preview" style={{ marginTop: 8 }}>
-                        <img src={form.logo} alt="Logo" style={{ maxHeight: 48, maxWidth: 120, objectFit: 'contain' }} onError={(e) => { e.target.style.display = 'none' }} />
+                      <div className="config-field-preview" style={{ marginBottom: 12, display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '8px' }}>
+                        <img src={form.logo} alt="Logo" style={{ maxHeight: 60, maxWidth: 160, objectFit: 'contain', background: '#e5e7eb', padding: '4px', borderRadius: '4px' }} onError={(e) => { e.target.style.display = 'none' }} />
+                        <button type="button" className="btn-secondary" onClick={() => handleCompanyChange('logo', '')} style={{ padding: '4px 8px', fontSize: '13px' }}>
+                          Quitar logo
+                        </button>
                       </div>
+                    )}
+                    <button type="button" className="btn-secondary" onClick={() => setShowBucketBrowser(true)} style={{ display: 'flex', alignItems: 'center', gap: '8px', width: 'fit-content' }}>
+                      <ImageIcon size={18} /> {form.logo ? 'Cambiar logo' : 'Elegir logo'}
+                    </button>
+                    {showBucketBrowser && (
+                      <BucketBrowserModal
+                        onSelectUrl={(url) => {
+                          handleCompanyChange('logo', url)
+                          setShowBucketBrowser(false)
+                        }}
+                        onClose={() => setShowBucketBrowser(false)}
+                      />
                     )}
                   </div>
                   <div className="config-field">
@@ -319,5 +332,279 @@ export default function Compania() {
         )}
       </div>
     </PageModule>
+  )
+}
+
+/** Obtiene el nodo actual del árbol según la ruta de carpetas */
+function getBucketCurrentNode(treeData, path) {
+  const root = treeData?.data?.tree?.folders ?? {}
+  if (path.length === 0) return { folders: root, images: [] }
+  const node = path.reduce((n, name) => n?.folders?.[name], { folders: root })
+  return node ?? { folders: {}, images: [] }
+}
+
+function BucketBrowserModal({ onSelectUrl, onClose }) {
+  const [tree, setTree] = useState(null)
+  const [currentPath, setCurrentPath] = useState(['general'])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+  const [uploading, setUploading] = useState(false)
+  const [hasBucket, setHasBucket] = useState(null)
+  const [creatingBucket, setCreatingBucket] = useState(false)
+  const [showNewFolderInput, setShowNewFolderInput] = useState(false)
+  const [newFolderName, setNewFolderName] = useState('')
+  const [creatingFolder, setCreatingFolder] = useState(false)
+  const uploadInputRef = useRef(null)
+  const newFolderInputRef = useRef(null)
+
+  const loadBucketTree = useCallback(() => {
+    setError(null)
+    return getBucketUseCase()
+      .then((res) => {
+        if (res?.success) setTree(res)
+        else setError(res?.message ?? 'No se pudo cargar el bucket')
+      })
+      .catch((err) => setError(err?.message ?? 'Error al cargar el bucket'))
+  }, [])
+
+  useEffect(() => {
+    let cancelled = false
+    setError(null)
+    setLoading(true)
+    setHasBucket(null)
+    validateBucketUseCase()
+      .then((res) => {
+        if (cancelled) return
+        if (!res?.success) {
+          setError(res?.message ?? 'No se pudo validar el bucket')
+          setLoading(false)
+          return
+        }
+        const has = res?.data?.has_bucket === true
+        setHasBucket(has)
+        if (has) {
+          return getBucketUseCase().then((bucketRes) => {
+            if (!cancelled && bucketRes?.success) setTree(bucketRes)
+            else if (!cancelled) setError(bucketRes?.message ?? 'No se pudo cargar el bucket')
+          })
+        }
+      })
+      .catch((err) => {
+        if (!cancelled) setError(err?.message ?? 'Error al validar el bucket')
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false)
+      })
+    return () => { cancelled = true }
+  }, [])
+
+  const handleCreateBucket = async () => {
+    setError(null)
+    setCreatingBucket(true)
+    try {
+      const res = await createBucketUseCase()
+      if (res?.success) {
+        setHasBucket(true)
+        await loadBucketTree()
+      } else {
+        setError(res?.message ?? 'No se pudo crear el bucket')
+      }
+    } catch (err) {
+      setError(err?.message ?? 'Error al crear el bucket')
+    } finally {
+      setCreatingBucket(false)
+    }
+  }
+
+  const currentNode = useMemo(() => getBucketCurrentNode(tree, currentPath), [tree, currentPath])
+  const folderNames = useMemo(() => Object.keys(currentNode.folders || {}), [currentNode.folders])
+  const images = useMemo(() => currentNode.images || [], [currentNode.images])
+  const pathString = currentPath.length === 0 ? '' : currentPath.join('/')
+
+  const handleCreateFolder = async () => {
+    const name = newFolderName.trim().replace(/[/\\]/g, '')
+    if (!name) return
+    setError(null)
+    setCreatingFolder(true)
+    try {
+      const fullPath = pathString ? `${pathString}/${name}` : name
+      const res = await createFolderUseCase(fullPath)
+      if (res?.success) {
+        setShowNewFolderInput(false)
+        setNewFolderName('')
+        await loadBucketTree()
+        setCurrentPath((prev) => [...prev, name])
+      } else {
+        setError(res?.message ?? 'No se pudo crear la carpeta')
+      }
+    } catch (err) {
+      setError(err?.message ?? 'Error al crear la carpeta')
+    } finally {
+      setCreatingFolder(false)
+    }
+  }
+
+  useEffect(() => {
+    if (showNewFolderInput && newFolderInputRef.current) newFolderInputRef.current.focus()
+  }, [showNewFolderInput])
+
+  const handleUpload = async (e) => {
+    const file = e.target.files?.[0]
+    if (!file || !file.type.startsWith('image/')) return
+    e.target.value = ''
+    setUploading(true)
+    setError(null)
+    try {
+      const res = await uploadFileUseCase(file, pathString || 'general')
+      if (res?.success && res?.data?.url) {
+        onSelectUrl(res.data.url)
+        onClose()
+      } else {
+        setError(res?.message ?? 'Error al subir')
+      }
+    } catch (err) {
+      setError(err?.message ?? 'Error al subir el archivo')
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  return (
+    <div className="form-overlay bucket-browser-overlay" onClick={onClose} style={{ zIndex: 1001 }}>
+      <div className="bucket-browser-modal-apple" onClick={(e) => e.stopPropagation()}>
+        <div className="bucket-browser-header">
+          <h3>Elegir imagen</h3>
+          <button type="button" className="bucket-browser-close" onClick={onClose} aria-label="Cerrar">✕</button>
+        </div>
+        <div className="bucket-browser-content">
+          {loading && <p className="bucket-browser-loading">Validando bucket…</p>}
+          {error && <p className="bucket-browser-error" role="alert">{error}</p>}
+          {!loading && hasBucket === false && (
+            <div className="bucket-browser-no-bucket">
+              <p>No tienes un bucket de almacenamiento. Créalo para subir y elegir imágenes.</p>
+              <button type="button" className="bucket-browser-btn-primary" onClick={handleCreateBucket} disabled={creatingBucket}>
+                {creatingBucket ? 'Creando…' : 'Crear bucket'}
+              </button>
+            </div>
+          )}
+          {!loading && hasBucket && tree && (
+            <>
+              <nav className="bucket-browser-breadcrumb" aria-label="Ruta">
+                <button type="button" onClick={() => { setCurrentPath([]); setShowNewFolderInput(false); }} className="bucket-breadcrumb-item">
+                  Inicio
+                </button>
+                {currentPath.map((name, i) => (
+                  <Fragment key={i}>
+                    <span className="bucket-breadcrumb-sep">/</span>
+                    <button
+                      type="button"
+                      onClick={() => { setCurrentPath(currentPath.slice(0, i + 1)); setShowNewFolderInput(false); }}
+                      className="bucket-breadcrumb-item"
+                    >
+                      {name}
+                    </button>
+                  </Fragment>
+                ))}
+              </nav>
+
+              <div className="bucket-browser-layout">
+                <div className="bucket-browser-sidebar">
+                  <div className="bucket-browser-list-wrap">
+                    {folderNames.length > 0 && (
+                      <ul className="bucket-browser-list" role="list">
+                        {folderNames.map((name) => (
+                          <li key={name}>
+                            <button
+                              type="button"
+                              className="bucket-browser-list-row"
+                              onClick={() => { setCurrentPath([...currentPath, name]); setShowNewFolderInput(false); }}
+                            >
+                              <FolderOpen size={20} className="bucket-browser-row-icon" />
+                              <span className="bucket-browser-row-label">{name}</span>
+                              <ChevronRight size={18} className="bucket-browser-row-chevron" />
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+
+                  <div className="bucket-browser-actions">
+                    {showNewFolderInput ? (
+                      <div className="bucket-browser-new-folder-inline">
+                        <input
+                          ref={newFolderInputRef}
+                          type="text"
+                          value={newFolderName}
+                          onChange={(e) => setNewFolderName(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') handleCreateFolder()
+                            if (e.key === 'Escape') { setShowNewFolderInput(false); setNewFolderName('') }
+                          }}
+                          placeholder="Nombre de carpeta"
+                          className="bucket-browser-new-folder-input"
+                          disabled={creatingFolder}
+                        />
+                        <div className="bucket-browser-new-folder-btns">
+                          <button type="button" className="bucket-browser-btn-ghost" onClick={() => { setShowNewFolderInput(false); setNewFolderName('') }} disabled={creatingFolder}>
+                            Cancelar
+                          </button>
+                          <button type="button" className="bucket-browser-btn-primary" onClick={handleCreateFolder} disabled={creatingFolder || !newFolderName.trim()}>
+                            {creatingFolder ? 'Creando…' : 'Crear'}
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <button type="button" className="bucket-browser-btn-icon-folder" onClick={() => setShowNewFolderInput(true)} aria-label="Nueva carpeta" title="Nueva carpeta">
+                        <Plus size={20} /> Nueva carpeta
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                <div className="bucket-browser-main">
+                  <label className="bucket-browser-upload-zone">
+                    <input
+                      ref={uploadInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleUpload}
+                      disabled={uploading}
+                      className="input-file"
+                    />
+                    <Upload size={28} style={{ opacity: 0.6 }} />
+                    <span className="bucket-browser-upload-text">
+                      {uploading ? 'Subiendo…' : 'Arrastra una imagen aquí o haz clic para subir'}
+                    </span>
+                  </label>
+
+                  {images.length > 0 && (
+                    <div className="bucket-browser-images-section">
+                      <p className="bucket-browser-section-title">Imágenes</p>
+                      <div className="bucket-browser-grid">
+                        {images.map((img) => (
+                          <button
+                            key={img.key}
+                            type="button"
+                            className="bucket-browser-image-card"
+                            onClick={() => {
+                              onSelectUrl(img.url)
+                              onClose()
+                            }}
+                          >
+                            <img src={img.url} alt="" />
+                            <span className="bucket-browser-image-name" title={img.key}>{img.key}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
   )
 }

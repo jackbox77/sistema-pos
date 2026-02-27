@@ -2,6 +2,9 @@ import { createContext, useContext, useState, useCallback, useEffect, Component 
 import { Outlet } from 'react-router-dom'
 import { getCategoriesWithProductsUseCase, registerSaleUseCase } from '../../feature/pos/use-case'
 import { getCurrentShiftUseCase } from '../../feature/shifts/use-case'
+import { getPaymentMethodsUseCase } from '../../feature/masters/payment-methods/use-case'
+import { getLoyalCustomersAllUseCase } from '../../feature/masters/loyal-customers/use-case'
+import { getTaxesUseCase } from '../../feature/masters/taxes/use-case'
 import './PosLayout.css'
 
 const PosContext = createContext(null)
@@ -39,27 +42,48 @@ export function usePos() {
 
 export default function PosLayout() {
   const [categoriesWithProducts, setCategoriesWithProducts] = useState([])
+  const [paymentMethods, setPaymentMethods] = useState([])
+  const [customers, setCustomers] = useState([])
+  const [taxes, setTaxes] = useState([])
   const [currentShiftId, setCurrentShiftId] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [lastUpdate, setLastUpdate] = useState(null)
 
   const loadData = useCallback(async () => {
     setError(null)
     setLoading(true)
     try {
-      const [categoriesRes, shiftRes] = await Promise.all([
+      const [categoriesRes, shiftRes, methodsRes, loyalCustomers, taxesRes] = await Promise.all([
         getCategoriesWithProductsUseCase(),
         getCurrentShiftUseCase(),
+        getPaymentMethodsUseCase(1, 100),
+        getLoyalCustomersAllUseCase(),
+        getTaxesUseCase(1, 100)
       ])
       if (categoriesRes?.success && Array.isArray(categoriesRes?.data)) {
         setCategoriesWithProducts(categoriesRes.data)
       } else {
         setCategoriesWithProducts([])
       }
+
+      if (methodsRes?.success && methodsRes?.data?.data) {
+        setPaymentMethods(methodsRes.data.data)
+      }
+
+      if (taxesRes?.success && taxesRes?.data?.data) {
+        setTaxes(taxesRes.data.data)
+      }
+
+      setCustomers(loyalCustomers || [])
       setCurrentShiftId(shiftRes?.data?.id ?? null)
+      setLastUpdate(new Date())
     } catch (err) {
       setError(err?.message ?? 'No se pudo cargar el POS')
       setCategoriesWithProducts([])
+      setPaymentMethods([])
+      setCustomers([])
+      setTaxes([])
       setCurrentShiftId(null)
     } finally {
       setLoading(false)
@@ -80,11 +104,15 @@ export default function PosLayout() {
 
   const value = {
     categoriesWithProducts,
+    paymentMethods,
+    customers,
+    taxes,
     currentShiftId,
     loading,
     error,
     loadData,
     registerSale,
+    lastUpdate,
   }
 
   return (

@@ -36,8 +36,9 @@ export default function IngresosLayout() {
   const [currentShiftId, setCurrentShiftId] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0, total_pages: 1 })
 
-  const loadIncomes = useCallback(async () => {
+  const loadIncomes = useCallback(async (page = 1, search = '', min = '', max = '') => {
     setError(null)
     setLoading(true)
     try {
@@ -46,11 +47,20 @@ export default function IngresosLayout() {
       setCurrentShiftId(shiftId)
       if (!shiftId) {
         setFacturasVentas([])
+        setPagination({ page: 1, limit: 10, total: 0, total_pages: 1 })
         return
       }
-      const res = await getIncomesUseCase(shiftId, 1, 100)
+      const res = await getIncomesUseCase(
+        shiftId,
+        page,
+        10,
+        search.trim() || undefined,
+        min ? Number(min) : undefined,
+        max ? Number(max) : undefined
+      )
       if (res?.success && Array.isArray(res?.data?.data)) {
         setFacturasVentas(res.data.data.map(mapIncomeApiToUI))
+        if (res.data.pagination) setPagination(res.data.pagination)
       } else {
         setFacturasVentas([])
       }
@@ -110,6 +120,7 @@ export default function IngresosLayout() {
     error,
     loadIncomes,
     currentShiftId,
+    pagination,
   }
 
   return (

@@ -24,6 +24,9 @@ export default function MenuPreviewCategoriasPrimero({ categorias, apariencia = 
     colorContenido,
     colorTexto,
     colorTitulo,
+    colorSubtitulo = colorTexto,
+    colorPrecio = colorTexto,
+    colorAcento = colorTitulo,
     imagenFondo,
   } = { ...aparienciaDefault, ...apariencia }
 
@@ -55,7 +58,7 @@ export default function MenuPreviewCategoriasPrimero({ categorias, apariencia = 
               empresaInfo={{ ...empresa, subtitulo: empresa.subtitulo || 'Elige una categoría' }}
               apariencia={apariencia}
               className="menu-preview-cat-primero-header"
-              style={{ borderBottomColor: `${colorTexto}20` }}
+              style={{ borderBottomColor: `${colorAcento}30` }}
             />
             <div className="menu-preview-cat-primero-body">
               {categorias.length === 0 ? (
@@ -70,7 +73,7 @@ export default function MenuPreviewCategoriasPrimero({ categorias, apariencia = 
                       type="button"
                       className="menu-preview-cat-primero-card"
                       style={{
-                        borderColor: `${colorTexto}30`,
+                        borderColor: `${colorAcento}50`,
                         backgroundColor: `${colorContenido}`,
                         color: colorTitulo,
                       }}
@@ -94,7 +97,7 @@ export default function MenuPreviewCategoriasPrimero({ categorias, apariencia = 
         ) : (
           <>
             {/* Pantalla 2: Volver + nombre categoría + productos */}
-            <div className="menu-preview-cat-primero-header menu-preview-cat-primero-header-menu" style={{ borderBottomColor: `${colorTexto}20` }}>
+            <div className="menu-preview-cat-primero-header menu-preview-cat-primero-header-menu" style={{ borderBottomColor: `${colorAcento}30` }}>
               <button
                 type="button"
                 className="menu-preview-cat-primero-back"
@@ -116,7 +119,7 @@ export default function MenuPreviewCategoriasPrimero({ categorias, apariencia = 
               ) : (
                 <ul className="menu-preview-cat-primero-lista">
                   {items.map((item) => (
-                    <li key={item.id} className={`menu-preview-cat-primero-item ${!mostrarImagenes ? 'menu-preview-cat-primero-item-solo-texto' : ''}`} style={{ borderColor: `${colorTexto}15` }}>
+                    <li key={item.id} className={`menu-preview-cat-primero-item ${!mostrarImagenes ? 'menu-preview-cat-primero-item-solo-texto' : ''}`} style={{ borderColor: `${colorAcento}20` }}>
                       {mostrarImagenes && (
                         <div className="menu-preview-cat-primero-item-img">
                           {item.imagen ? (
@@ -133,11 +136,11 @@ export default function MenuPreviewCategoriasPrimero({ categorias, apariencia = 
                           {item.nombre}
                         </span>
                         {item.descripcion && (
-                          <p className="menu-preview-cat-primero-item-desc" style={{ color: colorTexto }}>
+                          <p className="menu-preview-cat-primero-item-desc" style={{ color: colorSubtitulo }}>
                             {item.descripcion}
                           </p>
                         )}
-                        <span className="menu-preview-cat-primero-item-precio" style={{ color: colorTexto }}>
+                        <span className="menu-preview-cat-primero-item-precio" style={{ color: colorPrecio }}>
                           $ {typeof item.precio === 'number' ? item.precio.toLocaleString('es-CO') : item.precio}
                         </span>
                       </div>
@@ -145,7 +148,7 @@ export default function MenuPreviewCategoriasPrimero({ categorias, apariencia = 
                         <button
                           type="button"
                           className="menu-preview-cat-primero-btn-agregar"
-                          style={{ backgroundColor: colorTitulo, color: colorContenido }}
+                          style={{ backgroundColor: colorAcento, color: colorContenido }}
                         >
                           Ver más
                         </button>

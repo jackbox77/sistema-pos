@@ -8,6 +8,12 @@ const aparienciaInicial = {
   colorContenido: '#ffffff',
   colorTexto: '#4a5568',
   colorTitulo: '#1a202c',
+  colorSubtitulo: '#718096',
+  colorPrecio: '#2d3748',
+  colorAcento: '#C7D02C',
+  colorIconoContacto: '#C7D02C',
+  colorTextoContacto: '#ffffff',
+  colorFondoContacto: '#134e4a',
   imagenFondo: '',
   imagenHeaderFondo: '',
 }
@@ -181,6 +187,12 @@ export default function MenuProvider({ children }) {
             colorContenido: menu_config.content_background_color ?? prev.colorContenido,
             colorTexto: menu_config.text_color ?? prev.colorTexto,
             colorTitulo: menu_config.title_color ?? prev.colorTitulo,
+            colorSubtitulo: menu_config.subtitle_color ?? prev.colorSubtitulo,
+            colorPrecio: menu_config.price_color ?? prev.colorPrecio,
+            colorAcento: menu_config.accent_color ?? prev.colorAcento,
+            colorIconoContacto: menu_config.contact_icon_color ?? prev.colorIconoContacto,
+            colorTextoContacto: menu_config.contact_text_color ?? prev.colorTextoContacto,
+            colorFondoContacto: menu_config.contact_background_color ?? prev.colorFondoContacto,
           }))
           setTipoHeader(API_HEADER_TO_CONTEXT[menu_config.header_type] ?? 'clasico')
           setTipoMenu(API_MENU_TO_CONTEXT[menu_config.menu_type] ?? 'tarjetas-categorias')

@@ -3,6 +3,7 @@ import { ChevronDown, X } from 'lucide-react'
 import { useTurnos } from './TurnosLayout'
 import PageModule from '../../components/PageModule/PageModule'
 import TableResponsive from '../../components/TableResponsive/TableResponsive'
+import TurnosTabs from './TurnosTabs'
 import '../../components/TableResponsive/TableResponsive.css'
 
 export default function Turnos() {
@@ -40,6 +41,7 @@ export default function Turnos() {
 
   return (
     <PageModule title="" description="">
+      <TurnosTabs />
       <header className="maestro-encabezado">
         <div className="maestro-encabezado-top">
           <div className="maestro-encabezado-info">
@@ -117,7 +119,7 @@ export default function Turnos() {
                   <td data-label="Fin">{t.fin || '-'}</td>
                   <td data-label="Ventas">${Number(t.ventas || 0).toLocaleString('es-CO')}</td>
                   <td data-label="Estado">
-                    <span className={`badge ${t.estado === 'Cerrado' ? 'badge-success' : 'badge-pending'}`}>{t.estado}</span>
+                    <span className={`badge ${t.estado === 'Cerrado' ? 'badge-closed' : 'badge-success'}`}>{t.estado}</span>
                   </td>
                   <td data-label="Acciones">
                     <button type="button" className="form-btn-secondary" onClick={() => cerrarTurno(t)} disabled={t.estado === 'Cerrado'}>

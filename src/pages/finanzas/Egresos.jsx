@@ -21,10 +21,24 @@ export default function Egresos() {
   const [form, setForm] = useState({ concept: '', reference: '', amount: '' })
   const [errorGuardar, setErrorGuardar] = useState('')
   const [saving, setSaving] = useState(false)
-  const [listaPrecios, setListaPrecios] = useState('general')
-  const [filtrosActivos, setFiltrosActivos] = useState([{ id: 'estado', label: 'Estado: todas' }])
 
-  const loadEgresos = useCallback(async () => {
+  // Filtros y Paginación
+  const [page, setPage] = useState(1)
+  const [limit] = useState(10)
+  const [totalPages, setTotalPages] = useState(1)
+  const [totalItems, setTotalItems] = useState(0)
+
+  const [searchTerm, setSearchTerm] = useState('')
+  const [minAmount, setMinAmount] = useState('')
+  const [maxAmount, setMaxAmount] = useState('')
+  const [filtrosActivos, setFiltrosActivos] = useState([])
+
+  const loadEgresos = useCallback(async (
+    currentPage = page,
+    search = searchTerm,
+    min = minAmount,
+    max = maxAmount
+  ) => {
     setError(null)
     setLoading(true)
     try {
@@ -34,11 +48,23 @@ export default function Egresos() {
         setEgresos([])
         return
       }
-      const res = await getExpensesUseCase(shiftId, 1, 100)
+      const res = await getExpensesUseCase(
+        shiftId,
+        currentPage,
+        limit,
+        search.trim() || undefined,
+        min ? Number(min) : undefined,
+        max ? Number(max) : undefined
+      )
+
       if (res?.success && Array.isArray(res?.data?.data)) {
         setEgresos(res.data.data)
+        setTotalPages(res.data.pagination?.total_pages || 1)
+        setTotalItems(res.data.pagination?.total || 0)
       } else {
         setEgresos([])
+        setTotalPages(1)
+        setTotalItems(0)
       }
     } catch (err) {
       setError(err?.message ?? 'No se pudieron cargar los egresos')
@@ -46,13 +72,43 @@ export default function Egresos() {
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [limit])
 
   useEffect(() => {
-    loadEgresos()
-  }, [loadEgresos])
+    loadEgresos(page, searchTerm, minAmount, maxAmount)
+  }, [page, loadEgresos])
 
-  const quitarFiltro = (id) => setFiltrosActivos((p) => p.filter((f) => f.id !== id))
+  const aplicarFiltros = () => {
+    setPage(1) // Volver a la página 1 al filtrar
+
+    const nuevosFiltros = []
+    if (searchTerm.trim()) nuevosFiltros.push({ id: 'search', label: `Búsqueda: ${searchTerm}` })
+    if (minAmount) nuevosFiltros.push({ id: 'min', label: `Mínimo: $${Number(minAmount).toLocaleString()}` })
+    if (maxAmount) nuevosFiltros.push({ id: 'max', label: `Máximo: $${Number(maxAmount).toLocaleString()}` })
+    setFiltrosActivos(nuevosFiltros)
+
+    loadEgresos(1, searchTerm, minAmount, maxAmount)
+  }
+
+  const quitarFiltro = (id) => {
+    if (id === 'search') setSearchTerm('')
+    if (id === 'min') setMinAmount('')
+    if (id === 'max') setMaxAmount('')
+
+    setFiltrosActivos((p) => p.filter((f) => f.id !== id))
+
+    // Al quitar un filtro, recargamos con los valores limpiados
+    const newSearch = id === 'search' ? '' : searchTerm
+    const newMin = id === 'min' ? '' : minAmount
+    const newMax = id === 'max' ? '' : maxAmount
+
+    setPage(1)
+    loadEgresos(1, newSearch, newMin, newMax)
+  }
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') aplicarFiltros()
+  }
 
   const abrirModal = () => {
     setErrorGuardar('')
@@ -111,38 +167,67 @@ export default function Egresos() {
             </button>
           </div>
         </div>
-        <div className="maestro-encabezado-filtros">
-          <div className="maestro-encabezado-filtros-left">
-            <label className="maestro-encabezado-label">Lista de precios</label>
-            <select className="maestro-encabezado-select" value={listaPrecios} onChange={(e) => setListaPrecios(e.target.value)}>
-              <option value="general">General</option>
-              <option value="mayorista">Mayorista</option>
-              <option value="especial">Especial</option>
-            </select>
+        <div className="maestro-encabezado-filtros" style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', alignItems: 'flex-end', paddingBottom: '16px' }}>
+          <div style={{ flex: '1', minWidth: '200px' }}>
+            <label className="maestro-encabezado-label">Buscar concepto o referencia</label>
+            <input
+              type="search"
+              className="input-search"
+              placeholder="Ej: transporte..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onKeyDown={handleKeyDown}
+              style={{ width: '100%', marginTop: '6px' }}
+            />
           </div>
-          <div className="maestro-encabezado-filtros-right">
-            <span className="maestro-encabezado-label">Filtros Activos:</span>
-            {filtrosActivos.length > 0 ? (
-              filtrosActivos.map((f) => (
-                <span key={f.id} className="maestro-filtro-tag">
-                  {f.label}
-                  <button type="button" onClick={() => quitarFiltro(f.id)} aria-label="Quitar filtro"><X size={14} /></button>
-                </span>
-              ))
-            ) : (
-              <span className="maestro-filtro-sin">Ninguno</span>
-            )}
+          <div>
+            <label className="maestro-encabezado-label">Monto mínimo</label>
+            <input
+              type="number"
+              className="input-search"
+              placeholder="0"
+              value={minAmount}
+              onChange={(e) => setMinAmount(e.target.value)}
+              onKeyDown={handleKeyDown}
+              style={{ width: '140px', marginTop: '6px' }}
+            />
+          </div>
+          <div>
+            <label className="maestro-encabezado-label">Monto máximo</label>
+            <input
+              type="number"
+              className="input-search"
+              placeholder="Sin límite"
+              value={maxAmount}
+              onChange={(e) => setMaxAmount(e.target.value)}
+              onKeyDown={handleKeyDown}
+              style={{ width: '140px', marginTop: '6px' }}
+            />
+          </div>
+          <div>
+            <button type="button" className="btn-primary" onClick={aplicarFiltros}>
+              Filtrar
+            </button>
           </div>
         </div>
+
+        {filtrosActivos.length > 0 && (
+          <div className="maestro-encabezado-filtros-right" style={{ paddingBottom: '16px', borderTop: 'none' }}>
+            <span className="maestro-encabezado-label">Filtros Activos:</span>
+            {filtrosActivos.map((f) => (
+              <span key={f.id} className="maestro-filtro-tag" style={{ marginLeft: '8px' }}>
+                {f.label}
+                <button type="button" onClick={() => quitarFiltro(f.id)} aria-label="Quitar filtro"><X size={14} /></button>
+              </span>
+            ))}
+          </div>
+        )}
       </header>
       {error && (
         <div role="alert" style={{ marginTop: '16px', padding: '12px 16px', background: '#fef2f2', color: '#b91c1c', borderRadius: '8px', fontSize: '14px' }}>
           {error}
         </div>
       )}
-      <div className="page-module-toolbar" style={{ marginTop: '16px' }}>
-        <input type="search" className="input-search" placeholder="Buscar egresos..." />
-      </div>
       <TableResponsive>
         <table className="page-module-table">
           <thead>
@@ -181,6 +266,42 @@ export default function Egresos() {
           </tbody>
         </table>
       </TableResponsive>
+
+      {/* Paginación */}
+      {!loading && totalPages > 1 && (
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px', fontSize: '14px', color: '#4b5563' }}>
+          <span>Mostrando {egresos.length} de {totalItems} egresos</span>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button
+              type="button"
+              disabled={page === 1}
+              onClick={() => setPage(p => p - 1)}
+              style={{
+                padding: '6px 12px', border: '1px solid #d1d5db', borderRadius: '6px',
+                background: page === 1 ? '#f3f4f6' : '#fff', cursor: page === 1 ? 'not-allowed' : 'pointer',
+                color: page === 1 ? '#9ca3af' : '#374151', fontWeight: 500
+              }}
+            >
+              Anterior
+            </button>
+            <span style={{ padding: '6px 12px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px', fontWeight: 600 }}>
+              {page} / {totalPages}
+            </span>
+            <button
+              type="button"
+              disabled={page === totalPages}
+              onClick={() => setPage(p => p + 1)}
+              style={{
+                padding: '6px 12px', border: '1px solid #d1d5db', borderRadius: '6px',
+                background: page === totalPages ? '#f3f4f6' : '#fff', cursor: page === totalPages ? 'not-allowed' : 'pointer',
+                color: page === totalPages ? '#9ca3af' : '#374151', fontWeight: 500
+              }}
+            >
+              Siguiente
+            </button>
+          </div>
+        </div>
+      )}
 
       {showModal && (
         <div className="form-overlay" onClick={() => !saving && setShowModal(false)}>

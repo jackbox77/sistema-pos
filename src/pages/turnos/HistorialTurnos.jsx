@@ -1,13 +1,16 @@
 import { useRef, useState, useEffect } from 'react'
-import { ChevronDown, X } from 'lucide-react'
+import { ChevronDown, X, ChevronRight } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import { useTurnos } from './TurnosLayout'
 import { formatoTurno } from '../../utils/fechaUtils'
 import PageModule from '../../components/PageModule/PageModule'
 import TableResponsive from '../../components/TableResponsive/TableResponsive'
+import TurnosTabs from './TurnosTabs'
 import '../../components/TableResponsive/TableResponsive.css'
 
 export default function HistorialTurnos() {
   const { turnos } = useTurnos()
+  const navigate = useNavigate()
   const [showMasAcciones, setShowMasAcciones] = useState(false)
   const masAccionesRef = useRef(null)
   const [listaPrecios, setListaPrecios] = useState('general')
@@ -33,6 +36,7 @@ export default function HistorialTurnos() {
 
   return (
     <PageModule title="" description="">
+      <TurnosTabs />
       <header className="maestro-encabezado">
         <div className="maestro-encabezado-top">
           <div className="maestro-encabezado-info">
@@ -90,12 +94,13 @@ export default function HistorialTurnos() {
               <th>Turno</th>
               <th>Ventas</th>
               <th>Estado</th>
+              <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
             {turnosCerrados.length === 0 ? (
               <tr>
-                <td colSpan="6">
+                <td colSpan="7">
                   <div className="page-module-empty">No hay turnos cerrados en el historial.</div>
                 </td>
               </tr>
@@ -108,7 +113,12 @@ export default function HistorialTurnos() {
                   <td data-label="Turno">{formatoTurno(extraerFecha(t.inicio), extraerFecha(t.fin))}</td>
                   <td data-label="Ventas">${Number(t.ventas || 0).toLocaleString('es-CO')}</td>
                   <td data-label="Estado">
-                    <span className={`badge ${t.estado === 'Cerrado' ? 'badge-success' : 'badge-pending'}`}>{t.estado}</span>
+                    <span className={`badge ${t.estado === 'Cerrado' ? 'badge-closed' : 'badge-success'}`}>{t.estado}</span>
+                  </td>
+                  <td data-label="Acciones">
+                    <button type="button" className="btn-icon-action btn-icon-neutral" onClick={() => navigate(`/app/turnos/historial/detalle/${t.id}`)} title="Ver detalle" aria-label="Ver detalle">
+                      <ChevronRight size={18} />
+                    </button>
                   </td>
                 </tr>
               ))

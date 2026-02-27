@@ -17,19 +17,10 @@ import {
 import './Sidebar.css'
 
 const menuItems = [
-  { path: '/app', label: 'Inicio', icon: Home },
+  { path: '/app', label: 'Dashboard', icon: Home },
   { path: '/app/pos', label: 'POS', icon: ShoppingCart },
   // { path: '/app/factura-electronica', label: 'Habilitar factura electrónica', icon: FileText },
-  {
-    path: '/app/menu',
-    label: 'Menú',
-    icon: UtensilsCrossed,
-    children: [
-      { path: '/app/menu', label: 'Editor de menú' },
-      { path: '/app/menu/categoria', label: 'Categoría' },
-      { path: '/app/menu/productos', label: 'Productos' },
-    ],
-  },
+  { path: '/app/turnos', label: 'Turnos', icon: Clock },
   {
     path: '/app/finanzas',
     label: 'Finanzas',
@@ -40,16 +31,30 @@ const menuItems = [
       { path: '/app/finanzas/ventas', label: 'Ventas' },
     ],
   },
+  { path: '/app/reportes', label: 'Reportes', icon: FileBarChart },
   {
-    path: '/app/turnos',
-    label: 'Turnos',
-    icon: Clock,
+    path: '/app/menu',
+    label: 'Menú',
+    icon: UtensilsCrossed,
     children: [
-      { path: '/app/turnos', label: 'Turnos' },
-      { path: '/app/turnos/historial', label: 'Historial de turnos' },
+      { path: '/app/menu', label: 'Editor de menú' },
+      { path: '/app/menu/categoria', label: 'Editor de categoria' },
+      { path: '/app/menu/productos', label: 'Editor de productos' },
     ],
   },
-  { path: '/app/reportes', label: 'Reportes', icon: FileBarChart },
+  {
+    path: '/app/maestros',
+    label: 'Almacén',
+    icon: ClipboardList,
+    children: [
+      { path: '/app/maestros/categorias', label: 'Categorías' },
+      { path: '/app/maestros/productos', label: 'Productos' },
+      { path: '/app/maestros/proveedores', label: 'Proveedores' },
+      { path: '/app/maestros/clientes-fidelizados', label: 'Clientes fidelizados' },
+      { path: '/app/maestros/impuestos', label: 'Impuestos' },
+      { path: '/app/maestros/metodos-pago', label: 'Métodos de pago' },
+    ],
+  },
   // Módulo Gastos comentado
   // {
   //   path: '/app/gastos',
@@ -92,19 +97,6 @@ const menuItems = [
       { path: '/app/configuracion/usuarios-permisos', label: 'Usuarios y permisos' },
       { path: '/app/configuracion/subscripciones', label: 'Subscripciones' },
       { path: '/app/configuracion/imagenes', label: 'Imágenes almacenadas' },
-    ],
-  },
-  {
-    path: '/app/maestros',
-    label: 'Maestros',
-    icon: ClipboardList,
-    children: [
-      { path: '/app/maestros/categorias', label: 'Categorías' },
-      { path: '/app/maestros/productos', label: 'Productos' },
-      { path: '/app/maestros/proveedores', label: 'Proveedores' },
-      { path: '/app/maestros/clientes-fidelizados', label: 'Clientes fidelizados' },
-      { path: '/app/maestros/impuestos', label: 'Impuestos' },
-      { path: '/app/maestros/metodos-pago', label: 'Métodos de pago' },
     ],
   },
 ]

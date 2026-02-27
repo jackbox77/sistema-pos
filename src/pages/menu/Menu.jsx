@@ -325,6 +325,12 @@ export default function Menu() {
             content_background_color: apariencia.colorContenido || undefined,
             text_color: apariencia.colorTexto || undefined,
             title_color: apariencia.colorTitulo || undefined,
+            subtitle_color: apariencia.colorSubtitulo || undefined,
+            price_color: apariencia.colorPrecio || undefined,
+            accent_color: apariencia.colorAcento,
+            contact_icon_color: apariencia.colorIconoContacto,
+            contact_text_color: apariencia.colorTextoContacto,
+            contact_background_color: apariencia.colorFondoContacto,
           },
         })
       } else if (activeTab === 'contacto') {
@@ -625,6 +631,48 @@ export default function Menu() {
                       <div className="menu-apariencia-color">
                         <input type="color" value={apariencia.colorTitulo} onChange={(e) => setApariencia((a) => ({ ...a, colorTitulo: e.target.value }))} aria-label="Color de títulos" />
                         <input type="text" value={apariencia.colorTitulo} onChange={(e) => setApariencia((a) => ({ ...a, colorTitulo: e.target.value }))} className="menu-apariencia-hex" />
+                      </div>
+                    </div>
+                    <div className="menu-apariencia-field">
+                      <label>Color de subtítulo (Descripción)</label>
+                      <div className="menu-apariencia-color">
+                        <input type="color" value={apariencia.colorSubtitulo} onChange={(e) => setApariencia((a) => ({ ...a, colorSubtitulo: e.target.value }))} aria-label="Color de subtítulo" />
+                        <input type="text" value={apariencia.colorSubtitulo} onChange={(e) => setApariencia((a) => ({ ...a, colorSubtitulo: e.target.value }))} className="menu-apariencia-hex" />
+                      </div>
+                    </div>
+                    <div className="menu-apariencia-field">
+                      <label>Color de precio</label>
+                      <div className="menu-apariencia-color">
+                        <input type="color" value={apariencia.colorPrecio} onChange={(e) => setApariencia((a) => ({ ...a, colorPrecio: e.target.value }))} aria-label="Color de precio" />
+                        <input type="text" value={apariencia.colorPrecio} onChange={(e) => setApariencia((a) => ({ ...a, colorPrecio: e.target.value }))} className="menu-apariencia-hex" />
+                      </div>
+                    </div>
+                    <div className="menu-apariencia-field">
+                      <label>Color de acento (Botones/Tabs)</label>
+                      <div className="menu-apariencia-color">
+                        <input type="color" value={apariencia.colorAcento} onChange={(e) => setApariencia((a) => ({ ...a, colorAcento: e.target.value }))} aria-label="Color de acento" />
+                        <input type="text" value={apariencia.colorAcento} onChange={(e) => setApariencia((a) => ({ ...a, colorAcento: e.target.value }))} className="menu-apariencia-hex" />
+                      </div>
+                    </div>
+                    <div className="menu-apariencia-field">
+                      <label>Iconos de contacto</label>
+                      <div className="menu-apariencia-color">
+                        <input type="color" value={apariencia.colorIconoContacto} onChange={(e) => setApariencia((a) => ({ ...a, colorIconoContacto: e.target.value }))} aria-label="Iconos de contacto" />
+                        <input type="text" value={apariencia.colorIconoContacto} onChange={(e) => setApariencia((a) => ({ ...a, colorIconoContacto: e.target.value }))} className="menu-apariencia-hex" />
+                      </div>
+                    </div>
+                    <div className="menu-apariencia-field">
+                      <label>Texto de contacto</label>
+                      <div className="menu-apariencia-color">
+                        <input type="color" value={apariencia.colorTextoContacto} onChange={(e) => setApariencia((a) => ({ ...a, colorTextoContacto: e.target.value }))} aria-label="Texto de contacto" />
+                        <input type="text" value={apariencia.colorTextoContacto} onChange={(e) => setApariencia((a) => ({ ...a, colorTextoContacto: e.target.value }))} className="menu-apariencia-hex" />
+                      </div>
+                    </div>
+                    <div className="menu-apariencia-field">
+                      <label>Fondo de contacto</label>
+                      <div className="menu-apariencia-color">
+                        <input type="color" value={apariencia.colorFondoContacto} onChange={(e) => setApariencia((a) => ({ ...a, colorFondoContacto: e.target.value }))} aria-label="Fondo de contacto" />
+                        <input type="text" value={apariencia.colorFondoContacto} onChange={(e) => setApariencia((a) => ({ ...a, colorFondoContacto: e.target.value }))} className="menu-apariencia-hex" />
                       </div>
                     </div>
                   </div>

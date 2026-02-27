@@ -14,7 +14,7 @@
 }
 
 /* Ocultar h1 vacío cuando el maestro usa encabezado custom */
-.page-module > h1:empty {
+.page-module>h1:empty {
   display: none;
 }
 
@@ -652,6 +652,7 @@
 
 /* Formularios optimizados para pantallas táctiles */
 @media (max-width: 768px) {
+
   .btn-primary,
   .btn-secondary {
     min-height: 48px;
@@ -665,7 +666,9 @@
     font-size: 16px;
   }
 
-  input, select, textarea {
+  input,
+  select,
+  textarea {
     font-size: 16px !important;
   }
 }
@@ -846,6 +849,11 @@
   color: #9ca3af;
 }
 
+.badge-closed {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
 .badge-estado-toggle {
   border: none;
   cursor: pointer;
@@ -873,6 +881,7 @@
   min-width: 7.5rem;
   width: 7.5rem;
 }
+
 .page-module-table td[data-label="Estado"] .badge-estado-toggle {
   min-width: 7rem;
 }

@@ -15,7 +15,16 @@ const empresaDefault = { logoUrl: '', nombreEmpresa: '', subtitulo: '' }
 
 export default function MenuPreviewPlatosHorizontal({ categorias, apariencia = aparienciaDefault, empresaInfo = empresaDefault, mostrarImagenes = true, mostrarVerMas = true, tipoHeader = 'clasico' }) {
   const empresa = { ...empresaDefault, ...empresaInfo }
-  const { colorFondo, colorContenido, colorTexto, colorTitulo, imagenFondo } = {
+  const {
+    colorFondo,
+    colorContenido,
+    colorTexto,
+    colorTitulo,
+    colorSubtitulo = colorTexto,
+    colorPrecio = colorTexto,
+    colorAcento = colorTitulo,
+    imagenFondo
+  } = {
     ...aparienciaDefault,
     ...apariencia,
   }
@@ -32,7 +41,7 @@ export default function MenuPreviewPlatosHorizontal({ categorias, apariencia = a
           empresaInfo={empresa}
           apariencia={apariencia}
           className="menu-preview-platos-h-header"
-          style={{ borderBottomColor: `${colorTexto}20` }}
+          style={{ borderBottomColor: `${colorAcento}40` }}
         />
 
         <div className="menu-preview-platos-h-body">
@@ -61,7 +70,7 @@ export default function MenuPreviewPlatosHorizontal({ categorias, apariencia = a
                       <article
                         key={item.id}
                         className={`menu-preview-platos-h-card ${!mostrarImagenes ? 'menu-preview-platos-h-card-solo-texto' : ''}`}
-                        style={{ borderColor: `${colorTexto}25` }}
+                        style={{ borderColor: `${colorAcento}30` }}
                       >
                         {mostrarImagenes && (
                           <div className="menu-preview-platos-h-card-img">
@@ -87,14 +96,14 @@ export default function MenuPreviewPlatosHorizontal({ categorias, apariencia = a
                           {item.descripcion && (
                             <p
                               className="menu-preview-platos-h-card-desc"
-                              style={{ color: colorTexto }}
+                              style={{ color: colorSubtitulo }}
                             >
                               {item.descripcion}
                             </p>
                           )}
                           <span
                             className="menu-preview-platos-h-card-precio"
-                            style={{ color: colorTexto }}
+                            style={{ color: colorPrecio }}
                           >
                             $ {typeof item.precio === 'number' ? item.precio.toLocaleString('es-CO') : item.precio}
                           </span>
@@ -103,7 +112,7 @@ export default function MenuPreviewPlatosHorizontal({ categorias, apariencia = a
                           <button
                             type="button"
                             className="menu-preview-platos-h-card-btn"
-                            style={{ backgroundColor: colorTitulo, color: colorContenido }}
+                            style={{ backgroundColor: colorAcento, color: colorContenido }}
                           >
                             Ver más
                           </button>

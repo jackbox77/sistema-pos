@@ -24,6 +24,9 @@ export default function MenuPreviewTarjetas({ categorias, apariencia = aparienci
     colorContenido,
     colorTexto,
     colorTitulo,
+    colorSubtitulo = colorTexto,
+    colorPrecio = colorTexto,
+    colorAcento = colorTitulo,
     imagenFondo,
   } = { ...aparienciaDefault, ...apariencia }
 
@@ -42,14 +45,14 @@ export default function MenuPreviewTarjetas({ categorias, apariencia = aparienci
           empresaInfo={empresa}
           apariencia={apariencia}
           className="menu-preview-tarjetas-header"
-          style={{ borderBottomColor: `${colorTexto}15` }}
+          style={{ borderBottomColor: `${colorAcento}30` }}
         />
 
         {/* Barra de categorías sticky (estilo Pirpos) */}
         {categorias.length > 0 && (
           <div
             className="menu-preview-tarjetas-bar-wrap"
-            style={{ backgroundColor: colorContenido, borderBottomColor: `${colorTexto}12` }}
+            style={{ backgroundColor: colorContenido, borderBottomColor: `${colorAcento}30` }}
           >
             <div className="menu-preview-tarjetas-bar" role="tablist">
               {categorias.map((cat) => (
@@ -61,7 +64,7 @@ export default function MenuPreviewTarjetas({ categorias, apariencia = aparienci
                   className={`menu-preview-tarjetas-pill ${categoriaActiva === cat.id ? 'menu-preview-tarjetas-pill-active' : ''}`}
                   style={
                     categoriaActiva === cat.id
-                      ? { backgroundColor: colorTitulo, color: colorContenido }
+                      ? { backgroundColor: colorAcento, color: colorContenido }
                       : { backgroundColor: `${colorTexto}10`, color: colorTexto }
                   }
                   onClick={() => setCategoriaActiva(cat.id)}
@@ -86,7 +89,7 @@ export default function MenuPreviewTarjetas({ categorias, apariencia = aparienci
           ) : (
             <ul className="menu-preview-tarjetas-lista">
               {items.map((item) => (
-                <li key={item.id} className={`menu-preview-tarjetas-card ${!mostrarImagenes ? 'menu-preview-tarjetas-card-solo-texto' : ''}`} style={{ backgroundColor: colorContenido, borderColor: `${colorTexto}12` }}>
+                <li key={item.id} className={`menu-preview-tarjetas-card ${!mostrarImagenes ? 'menu-preview-tarjetas-card-solo-texto' : ''}`} style={{ backgroundColor: colorContenido, borderColor: `${colorAcento}40` }}>
                   {mostrarImagenes && (
                     <div className="menu-preview-tarjetas-card-img">
                       {item.imagen ? (
@@ -103,11 +106,11 @@ export default function MenuPreviewTarjetas({ categorias, apariencia = aparienci
                       {item.nombre}
                     </span>
                     {item.descripcion && (
-                      <p className="menu-preview-tarjetas-card-desc" style={{ color: colorTexto }}>
+                      <p className="menu-preview-tarjetas-card-desc" style={{ color: colorSubtitulo }}>
                         {item.descripcion}
                       </p>
                     )}
-                    <span className="menu-preview-tarjetas-card-precio" style={{ color: colorTitulo }}>
+                    <span className="menu-preview-tarjetas-card-precio" style={{ color: colorPrecio }}>
                       $ {typeof item.precio === 'number' ? item.precio.toLocaleString('es-CO') : item.precio}
                     </span>
                   </div>
@@ -115,7 +118,7 @@ export default function MenuPreviewTarjetas({ categorias, apariencia = aparienci
                     <button
                       type="button"
                       className="menu-preview-tarjetas-btn-agregar"
-                      style={{ backgroundColor: colorTitulo, color: colorContenido }}
+                      style={{ backgroundColor: colorAcento, color: colorContenido }}
                     >
                       Ver más
                     </button>

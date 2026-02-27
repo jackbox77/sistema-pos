@@ -5,6 +5,7 @@ import { formatoTurno } from '../../utils/fechaUtils'
 import { useMaestros } from '../../context/MaestrosContext'
 import { getSalesUseCase } from '../../feature/finance/Sales/use-case'
 import { getCurrentShiftUseCase } from '../../feature/shifts/use-case'
+import { getLoyalCustomersAllUseCase } from '../../feature/masters/loyal-customers/use-case'
 import PageModule from '../../components/PageModule/PageModule'
 import TableResponsive from '../../components/TableResponsive/TableResponsive'
 import '../../components/TableResponsive/TableResponsive.css'
@@ -40,7 +41,10 @@ function generarNumeroFactura(existentes) {
 
 function IngresosOVentasView({ mode }) {
   const isIngresos = mode === 'ingresos'
-  const { facturasVentas, agregarFacturaVenta, actualizarFacturaVenta, eliminarFacturaVenta, loading: loadingIngresos, error: errorIngresos } = useIngresos()
+  const {
+    facturasVentas, agregarFacturaVenta, actualizarFacturaVenta, eliminarFacturaVenta,
+    loading: loadingIngresos, error: errorIngresos, loadIncomes, pagination: paginationIngresos
+  } = useIngresos()
   const { productos } = useMaestros()
   const [ventasList, setVentasList] = useState([])
   const [loadingVentas, setLoadingVentas] = useState(false)
@@ -59,10 +63,33 @@ function IngresosOVentasView({ mode }) {
   const [productoSeleccionado, setProductoSeleccionado] = useState('')
   const [cantidadAgregar, setCantidadAgregar] = useState(1)
   const [listaPrecios, setListaPrecios] = useState('general')
-  const [filtrosActivos, setFiltrosActivos] = useState([{ id: 'estado', label: 'Estado: todas' }])
+  const [filtrosActivos, setFiltrosActivos] = useState([])
 
-  const loadVentas = useCallback(async () => {
-    if (isIngresos) return
+  const [searchTerm, setSearchTerm] = useState('')
+  const [minAmount, setMinAmount] = useState('')
+  const [maxAmount, setMaxAmount] = useState('')
+  const [loyalCustomerId, setLoyalCustomerId] = useState('')
+  const [clientes, setClientes] = useState([])
+  const [page, setPage] = useState(1)
+  const [paginationVentas, setPaginationVentas] = useState({ page: 1, limit: 10, total: 0, total_pages: 1 })
+
+  useEffect(() => {
+    getLoyalCustomersAllUseCase().then((res) => {
+      if (res?.success && Array.isArray(res.data)) setClientes(res.data)
+    }).catch(console.error)
+  }, [])
+
+  const loadVentas = useCallback(async (
+    currentPage = page,
+    search = searchTerm,
+    min = minAmount,
+    max = maxAmount,
+    customer = loyalCustomerId
+  ) => {
+    if (isIngresos) {
+      loadIncomes(currentPage, search, min, max)
+      return
+    }
     setErrorVentas(null)
     setLoadingVentas(true)
     try {
@@ -73,25 +100,71 @@ function IngresosOVentasView({ mode }) {
         setVentasList([])
         return
       }
-      const res = await getSalesUseCase(shiftId, 1, 100)
+      const res = await getSalesUseCase(
+        shiftId,
+        currentPage,
+        10,
+        customer || undefined, // loyal_customer_id
+        search.trim() || undefined,
+        min ? Number(min) : undefined,
+        max ? Number(max) : undefined
+      )
       if (res?.success && Array.isArray(res?.data?.data)) {
         setVentasList(res.data.data.map((s) => mapSaleApiToUI(s, shiftName)))
+        if (res.data.pagination) setPaginationVentas(res.data.pagination)
       } else {
         setVentasList([])
+        setPaginationVentas({ page: 1, limit: 10, total: 0, total_pages: 1 })
       }
     } catch (err) {
       setErrorVentas(err?.message ?? 'No se pudieron cargar las ventas')
       setVentasList([])
+      setPaginationVentas({ page: 1, limit: 10, total: 0, total_pages: 1 })
     } finally {
       setLoadingVentas(false)
     }
   }, [isIngresos])
 
   useEffect(() => {
-    loadVentas()
-  }, [loadVentas])
+    loadVentas(page, searchTerm, minAmount, maxAmount, loyalCustomerId)
+  }, [page, isIngresos]) // Remove loadVentas from dependency to avoid loop if defined outside
 
-  const quitarFiltro = (id) => setFiltrosActivos((p) => p.filter((f) => f.id !== id))
+  const aplicarFiltros = () => {
+    setPage(1)
+    const nuevos = []
+    if (searchTerm.trim()) nuevos.push({ id: 'search', label: `Búsqueda: ${searchTerm}` })
+    if (minAmount) nuevos.push({ id: 'min', label: `Mínimo: $${Number(minAmount).toLocaleString()}` })
+    if (maxAmount) nuevos.push({ id: 'max', label: `Máximo: $${Number(maxAmount).toLocaleString()}` })
+    if (loyalCustomerId) {
+      const c = clientes.find(x => x.id === loyalCustomerId)
+      nuevos.push({ id: 'customer', label: `Cliente: ${c ? (c.first_name + ' ' + c.last_name) : loyalCustomerId}` })
+    }
+    setFiltrosActivos(nuevos)
+
+    if (isIngresos) loadIncomes(1, searchTerm, minAmount, maxAmount)
+    else loadVentas(1, searchTerm, minAmount, maxAmount, loyalCustomerId)
+  }
+
+  const quitarFiltro = (id) => {
+    if (id === 'search') setSearchTerm('')
+    if (id === 'min') setMinAmount('')
+    if (id === 'max') setMaxAmount('')
+    if (id === 'customer') setLoyalCustomerId('')
+    setFiltrosActivos((p) => p.filter((f) => f.id !== id))
+
+    const newSearch = id === 'search' ? '' : searchTerm
+    const newMin = id === 'min' ? '' : minAmount
+    const newMax = id === 'max' ? '' : maxAmount
+    const newCust = id === 'customer' ? '' : loyalCustomerId
+
+    setPage(1)
+    if (isIngresos) loadIncomes(1, newSearch, newMin, newMax)
+    else loadVentas(1, newSearch, newMin, newMax, newCust)
+  }
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') aplicarFiltros()
+  }
 
   const agregarLinea = () => {
     const prod = productos.find((p) => p.id === Number(productoSeleccionado))
@@ -203,42 +276,89 @@ function IngresosOVentasView({ mode }) {
             {isIngresos ? (
               <button type="button" className="btn-primary" onClick={abrirNuevo}>+ Registrar ingreso</button>
             ) : (
-              <button type="button" className="form-btn-secondary" onClick={() => {}}>Exportar ventas</button>
+              <button type="button" className="form-btn-secondary" onClick={() => { }}>Exportar ventas</button>
             )}
           </div>
         </div>
-        <div className="maestro-encabezado-filtros">
-          <div className="maestro-encabezado-filtros-left">
-            <label className="maestro-encabezado-label">Lista de precios</label>
-            <select className="maestro-encabezado-select" value={listaPrecios} onChange={(e) => setListaPrecios(e.target.value)}>
-              <option value="general">General</option>
-              <option value="mayorista">Mayorista</option>
-              <option value="especial">Especial</option>
-            </select>
+        <div className="maestro-encabezado-filtros" style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', alignItems: 'flex-end', paddingBottom: '16px' }}>
+          <div style={{ flex: '1', minWidth: '200px' }}>
+            <label className="maestro-encabezado-label">Buscar {isIngresos ? 'factura o cliente' : 'venta o referencia'}</label>
+            <input
+              type="search"
+              className="input-search"
+              placeholder="Ej: FACT-001 o REF-001..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onKeyDown={handleKeyDown}
+              style={{ width: '100%', marginTop: '6px' }}
+            />
           </div>
-          <div className="maestro-encabezado-filtros-right">
+          {!isIngresos && (
+            <div>
+              <label className="maestro-encabezado-label">Cliente Fidelizado</label>
+              <select
+                className="input-search"
+                value={loyalCustomerId}
+                onChange={(e) => setLoyalCustomerId(e.target.value)}
+                style={{ width: '180px', marginTop: '6px' }}
+              >
+                <option value="">Todos los clientes</option>
+                {clientes.map(c => (
+                  <option key={c.id} value={c.id}>
+                    {c.first_name} {c.last_name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+          <div>
+            <label className="maestro-encabezado-label">Monto mínimo</label>
+            <input
+              type="number"
+              className="input-search"
+              placeholder="0"
+              value={minAmount}
+              onChange={(e) => setMinAmount(e.target.value)}
+              onKeyDown={handleKeyDown}
+              style={{ width: '140px', marginTop: '6px' }}
+            />
+          </div>
+          <div>
+            <label className="maestro-encabezado-label">Monto máximo</label>
+            <input
+              type="number"
+              className="input-search"
+              placeholder="Sin límite"
+              value={maxAmount}
+              onChange={(e) => setMaxAmount(e.target.value)}
+              onKeyDown={handleKeyDown}
+              style={{ width: '140px', marginTop: '6px' }}
+            />
+          </div>
+          <div>
+            <button type="button" className="btn-primary" onClick={aplicarFiltros}>
+              Filtrar
+            </button>
+          </div>
+        </div>
+
+        {filtrosActivos.length > 0 && (
+          <div className="maestro-encabezado-filtros-right" style={{ paddingBottom: '16px', borderTop: 'none' }}>
             <span className="maestro-encabezado-label">Filtros Activos:</span>
-            {filtrosActivos.length > 0 ? (
-              filtrosActivos.map((f) => (
-                <span key={f.id} className="maestro-filtro-tag">
-                  {f.label}
-                  <button type="button" onClick={() => quitarFiltro(f.id)} aria-label="Quitar filtro"><X size={14} /></button>
-                </span>
-              ))
-            ) : (
-              <span className="maestro-filtro-sin">Ninguno</span>
-            )}
+            {filtrosActivos.map((f) => (
+              <span key={f.id} className="maestro-filtro-tag" style={{ marginLeft: '8px' }}>
+                {f.label}
+                <button type="button" onClick={() => quitarFiltro(f.id)} aria-label="Quitar filtro"><X size={14} /></button>
+              </span>
+            ))}
           </div>
-        </div>
+        )}
       </header>
       {isIngresos && errorIngresos && (
         <div role="alert" style={{ marginTop: '16px', padding: '12px 16px', background: '#fef2f2', color: '#b91c1c', borderRadius: '8px', fontSize: '14px' }}>
           {errorIngresos}
         </div>
       )}
-      <div className="page-module-toolbar" style={{ marginTop: '16px' }}>
-        <input type="search" className="input-search" placeholder={isIngresos ? 'Buscar ingresos...' : 'Buscar ventas...'} />
-      </div>
       <TableResponsive>
         <table className="page-module-table">
           <thead>
@@ -300,6 +420,43 @@ function IngresosOVentasView({ mode }) {
           </tbody>
         </table>
       </TableResponsive>
+
+      {/* Paginación */}
+      {!loadingIngresos && !loadingVentas && ((isIngresos ? paginationIngresos : paginationVentas)?.total_pages > 1) && (
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px', fontSize: '14px', color: '#4b5563' }}>
+          <span>Mostrando {isIngresos ? facturasVentas.length : ventasList.length} de {isIngresos ? paginationIngresos.total : paginationVentas.total} {isIngresos ? 'ingresos' : 'ventas'}</span>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button
+              type="button"
+              disabled={page === 1}
+              onClick={() => setPage(page - 1)}
+              style={{
+                padding: '6px 12px', border: '1px solid #d1d5db', borderRadius: '6px',
+                background: page === 1 ? '#f3f4f6' : '#fff', cursor: page === 1 ? 'not-allowed' : 'pointer',
+                color: page === 1 ? '#9ca3af' : '#374151', fontWeight: 500
+              }}
+            >
+              Anterior
+            </button>
+            <span style={{ padding: '6px 12px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px', fontWeight: 600 }}>
+              {page} / {isIngresos ? paginationIngresos.total_pages : paginationVentas.total_pages}
+            </span>
+            <button
+              type="button"
+              disabled={page === (isIngresos ? paginationIngresos.total_pages : paginationVentas.total_pages)}
+              onClick={() => setPage(page + 1)}
+              style={{
+                padding: '6px 12px', border: '1px solid #d1d5db', borderRadius: '6px',
+                background: page === (isIngresos ? paginationIngresos.total_pages : paginationVentas.total_pages) ? '#f3f4f6' : '#fff',
+                cursor: page === (isIngresos ? paginationIngresos.total_pages : paginationVentas.total_pages) ? 'not-allowed' : 'pointer',
+                color: page === (isIngresos ? paginationIngresos.total_pages : paginationVentas.total_pages) ? '#9ca3af' : '#374151', fontWeight: 500
+              }}
+            >
+              Siguiente
+            </button>
+          </div>
+        </div>
+      )}
 
       {isIngresos && showModal && (
         <div className="form-overlay" onClick={() => setShowModal(false)}>

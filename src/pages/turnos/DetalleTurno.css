@@ -1,0 +1,57 @@
+.detalle-turno-empty {
+    padding: 40px;
+    text-align: center;
+}
+
+.detalle-turno-empty p {
+    font-size: 16px;
+    color: #6b7280;
+    margin-bottom: 20px;
+}
+
+.detalle-turno-header-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 6px;
+}
+
+.detalle-turno-header-title .maestro-encabezado-titulo {
+    margin: 0;
+}
+
+.btn-back {
+    background: transparent;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    color: #6b7280;
+}
+
+.btn-back:hover {
+    background: rgba(0, 0, 0, 0.05);
+    color: #111827;
+}
+
+.detalle-turno-card {
+    padding: 24px;
+}
+
+.detalle-turno-total {
+    background: #f0fdf4;
+    border-color: #bbf7d0;
+}
+
+.detalle-turno-section {
+    margin-top: 32px;
+}
+
+.detalle-turno-section-title {
+    font-size: 18px;
+    color: #1f2937;
+    margin-bottom: 16px;
+    font-weight: 600;
+}
