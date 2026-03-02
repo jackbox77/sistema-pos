@@ -167,7 +167,8 @@
   color: #1a1d21;
 }
 
-.sidebar-link.active {
+.sidebar-link.active,
+.sidebar-group-toggle.active {
   background: #ecfdf5;
   color: #0d9488;
   font-weight: 600;
@@ -206,11 +207,11 @@
 }
 
 .sidebar-children {
-  padding-left: 46px;
+  padding-left: 0;
 }
 
 .sidebar-link-child {
-  padding: 8px 20px 8px 0;
+  padding-left: 56px;
   font-size: 13px;
 }
 

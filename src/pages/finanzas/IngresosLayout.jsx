@@ -38,25 +38,26 @@ export default function IngresosLayout() {
   const [error, setError] = useState(null)
   const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0, total_pages: 1 })
 
-  const loadIncomes = useCallback(async (page = 1, search = '', min = '', max = '') => {
+  const loadIncomes = useCallback(async (page = 1, search = '', min = '', max = '', shiftIdInput = undefined, loyalCustomerId = undefined) => {
     setError(null)
     setLoading(true)
     try {
-      const shiftRes = await getCurrentShiftUseCase()
-      const shiftId = shiftRes?.data?.id ?? null
-      setCurrentShiftId(shiftId)
-      if (!shiftId) {
-        setFacturasVentas([])
-        setPagination({ page: 1, limit: 10, total: 0, total_pages: 1 })
-        return
+      let shiftIdToUse = shiftIdInput
+      if (shiftIdToUse === undefined) {
+        const shiftRes = await getCurrentShiftUseCase()
+        shiftIdToUse = shiftRes?.data?.id ?? null
       }
+
+      setCurrentShiftId(shiftIdToUse)
+
       const res = await getIncomesUseCase(
-        shiftId,
+        shiftIdToUse || undefined,
         page,
         10,
         search.trim() || undefined,
         min ? Number(min) : undefined,
-        max ? Number(max) : undefined
+        max ? Number(max) : undefined,
+        loyalCustomerId || undefined
       )
       if (res?.success && Array.isArray(res?.data?.data)) {
         setFacturasVentas(res.data.data.map(mapIncomeApiToUI))

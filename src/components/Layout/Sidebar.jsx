@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { NavLink } from 'react-router-dom'
+import { NavLink, useLocation } from 'react-router-dom'
 import {
   Home,
   ShoppingCart,
@@ -102,10 +102,21 @@ const menuItems = [
 ]
 
 export default function Sidebar({ isExpanded = false, onToggle }) {
+  const location = useLocation()
   const [expanded, setExpanded] = useState({ 'app/menu': true, 'app/maestros': true, 'app/finanzas': true, 'app/turnos': true, 'app/gastos': true, 'app/contabilidad': true, 'app/nomina': true, 'app/configuracion': true })
 
+  const isParentActive = (item) => {
+    if (!item.children) return false
+    return item.children.some(child => location.pathname === child.path)
+  }
+
   const toggle = (key) => {
-    setExpanded((prev) => ({ ...prev, [key]: !prev[key] }))
+    if (!isExpanded && onToggle) {
+      onToggle()
+      setExpanded((prev) => ({ ...prev, [key]: true }))
+    } else {
+      setExpanded((prev) => ({ ...prev, [key]: !prev[key] }))
+    }
   }
 
   return (
@@ -124,7 +135,7 @@ export default function Sidebar({ isExpanded = false, onToggle }) {
           item.children ? (
             <div key={item.path} className="sidebar-group">
               <button
-                className="sidebar-group-toggle"
+                className={`sidebar-group-toggle ${isParentActive(item) ? 'active' : ''}`}
                 onClick={() => toggle(item.path.replace('/', ''))}
               >
                 <span className="sidebar-icon">{item.icon ? <item.icon size={20} /> : null}</span>
@@ -138,6 +149,7 @@ export default function Sidebar({ isExpanded = false, onToggle }) {
                     <NavLink
                       key={child.path}
                       to={child.path}
+                      end
                       className={({ isActive }) =>
                         `sidebar-link sidebar-link-child ${isActive ? 'active' : ''}`
                       }

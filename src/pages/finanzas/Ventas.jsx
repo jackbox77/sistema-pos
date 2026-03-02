@@ -1,10 +1,10 @@
 import { useRef, useState, useEffect, useCallback } from 'react'
-import { Pencil, Trash2, Plus, X } from 'lucide-react'
+import { Pencil, Trash2, Plus, X, Search, User, History, DollarSign, Filter, Eraser } from 'lucide-react'
 import { useIngresos } from './IngresosLayout'
 import { formatoTurno } from '../../utils/fechaUtils'
 import { useMaestros } from '../../context/MaestrosContext'
 import { getSalesUseCase } from '../../feature/finance/Sales/use-case'
-import { getCurrentShiftUseCase } from '../../feature/shifts/use-case'
+import { getCurrentShiftUseCase, getShiftsUseCase } from '../../feature/shifts/use-case'
 import { getLoyalCustomersAllUseCase } from '../../feature/masters/loyal-customers/use-case'
 import PageModule from '../../components/PageModule/PageModule'
 import TableResponsive from '../../components/TableResponsive/TableResponsive'
@@ -25,7 +25,7 @@ function mapSaleApiToUI(sale, shiftName = '') {
     cliente: sale.loyal_customer_id ? String(sale.loyal_customer_id).slice(0, 8) + '...' : '-',
     fecha: formatISOToFecha(sale.created_at),
     fechaFin: '',
-    turno: shiftName,
+    turno: sale.shift?.name || shiftName || '-',
     total: sale.total ?? 0,
     estado: 'Registrada',
   }
@@ -69,13 +69,19 @@ function IngresosOVentasView({ mode }) {
   const [minAmount, setMinAmount] = useState('')
   const [maxAmount, setMaxAmount] = useState('')
   const [loyalCustomerId, setLoyalCustomerId] = useState('')
+  const [selectedShiftId, setSelectedShiftId] = useState('')
   const [clientes, setClientes] = useState([])
+  const [shifts, setShifts] = useState([])
   const [page, setPage] = useState(1)
   const [paginationVentas, setPaginationVentas] = useState({ page: 1, limit: 10, total: 0, total_pages: 1 })
 
   useEffect(() => {
     getLoyalCustomersAllUseCase().then((res) => {
       if (res?.success && Array.isArray(res.data)) setClientes(res.data)
+    }).catch(console.error)
+
+    getShiftsUseCase(1, 50).then((res) => {
+      if (res?.success && Array.isArray(res.data?.data)) setShifts(res.data.data)
     }).catch(console.error)
   }, [])
 
@@ -84,33 +90,27 @@ function IngresosOVentasView({ mode }) {
     search = searchTerm,
     min = minAmount,
     max = maxAmount,
-    customer = loyalCustomerId
+    customer = loyalCustomerId,
+    shift = selectedShiftId
   ) => {
     if (isIngresos) {
-      loadIncomes(currentPage, search, min, max)
+      loadIncomes(currentPage, search, min, max, shift, customer)
       return
     }
     setErrorVentas(null)
     setLoadingVentas(true)
     try {
-      const shiftRes = await getCurrentShiftUseCase()
-      const shiftId = shiftRes?.data?.id
-      const shiftName = shiftRes?.data?.name ?? ''
-      if (!shiftId) {
-        setVentasList([])
-        return
-      }
       const res = await getSalesUseCase(
-        shiftId,
+        shift || null,
         currentPage,
         10,
-        customer || undefined, // loyal_customer_id
+        customer || undefined,
         search.trim() || undefined,
         min ? Number(min) : undefined,
         max ? Number(max) : undefined
       )
       if (res?.success && Array.isArray(res?.data?.data)) {
-        setVentasList(res.data.data.map((s) => mapSaleApiToUI(s, shiftName)))
+        setVentasList(res.data.data.map((s) => mapSaleApiToUI(s)))
         if (res.data.pagination) setPaginationVentas(res.data.pagination)
       } else {
         setVentasList([])
@@ -123,11 +123,11 @@ function IngresosOVentasView({ mode }) {
     } finally {
       setLoadingVentas(false)
     }
-  }, [isIngresos])
+  }, [isIngresos, loadIncomes])
 
   useEffect(() => {
-    loadVentas(page, searchTerm, minAmount, maxAmount, loyalCustomerId)
-  }, [page, isIngresos]) // Remove loadVentas from dependency to avoid loop if defined outside
+    loadVentas(page, searchTerm, minAmount, maxAmount, loyalCustomerId, selectedShiftId)
+  }, [page, isIngresos, searchTerm, minAmount, maxAmount, loyalCustomerId, selectedShiftId, loadVentas])
 
   const aplicarFiltros = () => {
     setPage(1)
@@ -137,12 +137,15 @@ function IngresosOVentasView({ mode }) {
     if (maxAmount) nuevos.push({ id: 'max', label: `Máximo: $${Number(maxAmount).toLocaleString()}` })
     if (loyalCustomerId) {
       const c = clientes.find(x => x.id === loyalCustomerId)
-      nuevos.push({ id: 'customer', label: `Cliente: ${c ? (c.first_name + ' ' + c.last_name) : loyalCustomerId}` })
+      if (c) nuevos.push({ id: 'customer', label: `Cliente: ${c.full_name || (c.first_name + ' ' + (c.last_name || ''))}` })
+    }
+    if (selectedShiftId) {
+      const s = shifts.find(x => x.id === selectedShiftId)
+      if (s) nuevos.push({ id: 'shift', label: `Turno: ${s.name}` })
     }
     setFiltrosActivos(nuevos)
 
-    if (isIngresos) loadIncomes(1, searchTerm, minAmount, maxAmount)
-    else loadVentas(1, searchTerm, minAmount, maxAmount, loyalCustomerId)
+    loadVentas(1, searchTerm, minAmount, maxAmount, loyalCustomerId, selectedShiftId)
   }
 
   const quitarFiltro = (id) => {
@@ -150,16 +153,17 @@ function IngresosOVentasView({ mode }) {
     if (id === 'min') setMinAmount('')
     if (id === 'max') setMaxAmount('')
     if (id === 'customer') setLoyalCustomerId('')
-    setFiltrosActivos((p) => p.filter((f) => f.id !== id))
+    if (id === 'shift') setSelectedShiftId('')
+    const nuevos = filtrosActivos.filter(f => f.id !== id)
+    setFiltrosActivos(nuevos)
 
-    const newSearch = id === 'search' ? '' : searchTerm
-    const newMin = id === 'min' ? '' : minAmount
-    const newMax = id === 'max' ? '' : maxAmount
-    const newCust = id === 'customer' ? '' : loyalCustomerId
-
-    setPage(1)
-    if (isIngresos) loadIncomes(1, newSearch, newMin, newMax)
-    else loadVentas(1, newSearch, newMin, newMax, newCust)
+    loadVentas(1,
+      id === 'search' ? '' : searchTerm,
+      id === 'min' ? '' : minAmount,
+      id === 'max' ? '' : maxAmount,
+      id === 'customer' ? '' : loyalCustomerId,
+      id === 'shift' ? '' : selectedShiftId
+    )
   }
 
   const handleKeyDown = (e) => {
@@ -259,7 +263,7 @@ function IngresosOVentasView({ mode }) {
     : 'Registra y consulta las ventas realizadas. Genera ventas con los productos del catálogo.'
   const emptyMessage = isIngresos
     ? 'No hay ingresos registrados. Registra ventas o facturas usando los productos del catálogo.'
-    : (errorVentas || 'No hay ventas registradas para el turno actual.')
+    : (errorVentas || 'No hay ventas registradas en el sistema.')
   const colSpan = isIngresos ? 7 : 6
   const datosVentas = isIngresos ? facturasVentas : ventasList
 
@@ -280,75 +284,137 @@ function IngresosOVentasView({ mode }) {
             )}
           </div>
         </div>
-        <div className="maestro-encabezado-filtros" style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', alignItems: 'flex-end', paddingBottom: '16px' }}>
-          <div style={{ flex: '1', minWidth: '200px' }}>
-            <label className="maestro-encabezado-label">Buscar {isIngresos ? 'factura o cliente' : 'venta o referencia'}</label>
-            <input
-              type="search"
-              className="input-search"
-              placeholder="Ej: FACT-001 o REF-001..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              onKeyDown={handleKeyDown}
-              style={{ width: '100%', marginTop: '6px' }}
-            />
-          </div>
-          {!isIngresos && (
-            <div>
-              <label className="maestro-encabezado-label">Cliente Fidelizado</label>
+        <div className="maestro-encabezado-filtros" style={{
+          background: 'linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%)',
+          padding: '24px',
+          borderRadius: '16px',
+          border: '1px solid #e2e8f0',
+          boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
+          marginBottom: '24px',
+          position: 'relative',
+          overflow: 'hidden'
+        }}>
+          {/* Sutil gradiente de adorno */}
+          <div style={{ position: 'absolute', top: '-50px', right: '-50px', width: '150px', height: '150px', background: 'rgba(13, 148, 136, 0.05)', borderRadius: '50%' }}></div>
+
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+            gap: '20px',
+            alignItems: 'end'
+          }}>
+            <div className="filter-group">
+              <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600, color: '#334155', fontSize: '13px', marginBottom: '8px' }}>
+                <Search size={14} style={{ color: '#0d9488' }} /> Buscar venta o referencia
+              </label>
+              <div style={{ position: 'relative' }}>
+                <input
+                  type="search"
+                  placeholder="Ej: FACT-001..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  style={{ width: '100%', padding: '12px 14px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '14px', transition: 'all 0.2s', boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.05)' }}
+                />
+              </div>
+            </div>
+
+            <div className="filter-group">
+              <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600, color: '#334155', fontSize: '13px', marginBottom: '8px' }}>
+                <User size={14} style={{ color: '#0d9488' }} /> Cliente Fidelizado
+              </label>
               <select
-                className="input-search"
                 value={loyalCustomerId}
                 onChange={(e) => setLoyalCustomerId(e.target.value)}
-                style={{ width: '180px', marginTop: '6px' }}
+                style={{ width: '100%', padding: '12px 14px', borderRadius: '10px', border: '1px solid #cbd5e1', background: '#fff', fontSize: '14px', cursor: 'pointer', appearance: 'none', backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%2364748b\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\'/%3E%3C/svg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center', backgroundSize: '16px' }}
               >
                 <option value="">Todos los clientes</option>
                 {clientes.map(c => (
                   <option key={c.id} value={c.id}>
-                    {c.first_name} {c.last_name}
+                    {c.full_name || (c.first_name + ' ' + (c.last_name || ''))}
                   </option>
                 ))}
               </select>
             </div>
-          )}
-          <div>
-            <label className="maestro-encabezado-label">Monto mínimo</label>
-            <input
-              type="number"
-              className="input-search"
-              placeholder="0"
-              value={minAmount}
-              onChange={(e) => setMinAmount(e.target.value)}
-              onKeyDown={handleKeyDown}
-              style={{ width: '140px', marginTop: '6px' }}
-            />
-          </div>
-          <div>
-            <label className="maestro-encabezado-label">Monto máximo</label>
-            <input
-              type="number"
-              className="input-search"
-              placeholder="Sin límite"
-              value={maxAmount}
-              onChange={(e) => setMaxAmount(e.target.value)}
-              onKeyDown={handleKeyDown}
-              style={{ width: '140px', marginTop: '6px' }}
-            />
-          </div>
-          <div>
-            <button type="button" className="btn-primary" onClick={aplicarFiltros}>
-              Filtrar
-            </button>
+
+            <div className="filter-group">
+              <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600, color: '#334155', fontSize: '13px', marginBottom: '8px' }}>
+                <History size={14} style={{ color: '#0d9488' }} /> Filtrar por Turno
+              </label>
+              <select
+                value={selectedShiftId}
+                onChange={(e) => setSelectedShiftId(e.target.value)}
+                style={{ width: '100%', padding: '12px 14px', borderRadius: '10px', border: '1px solid #cbd5e1', background: '#fff', fontSize: '14px', cursor: 'pointer', appearance: 'none', backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%2364748b\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\'/%3E%3C/svg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center', backgroundSize: '16px' }}
+              >
+                <option value="">Todos los turnos registrado</option>
+                {shifts.map(s => (
+                  <option key={s.id} value={s.id}>
+                    {s.name} ({new Date(s.start_at).toLocaleDateString()})
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="filter-group">
+              <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600, color: '#334155', fontSize: '13px', marginBottom: '8px' }}>
+                <DollarSign size={14} style={{ color: '#0d9488' }} /> Rango de Monto
+              </label>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                <input
+                  type="number"
+                  placeholder="Mín."
+                  value={minAmount}
+                  onChange={(e) => setMinAmount(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  style={{ width: '100%', padding: '12px 14px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '14px' }}
+                />
+                <input
+                  type="number"
+                  placeholder="Máx."
+                  value={maxAmount}
+                  onChange={(e) => setMaxAmount(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  style={{ width: '100%', padding: '12px 14px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '14px' }}
+                />
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchTerm('')
+                  setMinAmount('')
+                  setMaxAmount('')
+                  setLoyalCustomerId('')
+                  setSelectedShiftId('')
+                  setFiltrosActivos([])
+                  loadVentas(1, '', '', '', '', '')
+                }}
+                style={{ flex: '0.4', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '12px', borderRadius: '10px', border: '1px solid #e2e8f0', background: '#fff', color: '#64748b', fontWeight: 600, cursor: 'pointer', fontSize: '14px', transition: 'all 0.2s' }}
+                title="Limpiar filtros"
+              >
+                <Eraser size={18} />
+              </button>
+              <button
+                type="button"
+                className="btn-primary"
+                onClick={aplicarFiltros}
+                style={{ flex: '1', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '12px', borderRadius: '10px', background: '#0d9488', color: '#fff', fontWeight: 600, cursor: 'pointer', border: 'none', fontSize: '14px', transition: 'all 0.2s', boxShadow: '0 4px 6px -1px rgba(13, 148, 136, 0.2)' }}
+              >
+                <Filter size={18} /> Filtrar
+              </button>
+            </div>
           </div>
         </div>
 
         {filtrosActivos.length > 0 && (
-          <div className="maestro-encabezado-filtros-right" style={{ paddingBottom: '16px', borderTop: 'none' }}>
-            <span className="maestro-encabezado-label">Filtros Activos:</span>
+          <div className="maestro-encabezado-filtros-right" style={{ paddingBottom: '20px', borderTop: 'none', display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+            <span style={{ fontSize: '13px', fontWeight: 600, color: '#64748b' }}>Filtros aplicados:</span>
             {filtrosActivos.map((f) => (
-              <span key={f.id} className="maestro-filtro-tag" style={{ marginLeft: '8px' }}>
+              <span key={f.id} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#f1f5f9', color: '#334155', padding: '6px 12px', borderRadius: '20px', fontSize: '13px', border: '1px solid #e2e8f0' }}>
                 {f.label}
-                <button type="button" onClick={() => quitarFiltro(f.id)} aria-label="Quitar filtro"><X size={14} /></button>
+                <button type="button" onClick={() => quitarFiltro(f.id)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', display: 'flex', padding: '2px' }}><X size={14} /></button>
               </span>
             ))}
           </div>

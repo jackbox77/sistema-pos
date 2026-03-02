@@ -1,5 +1,6 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react'
-import { Plus, User, UserPlus, Search, ChevronDown, X, RefreshCw } from 'lucide-react'
+import { Plus, Minus, User, UserPlus, Search, ChevronDown, X, RefreshCw, ShoppingBag } from 'lucide-react'
+import { createLoyalCustomerUseCase } from '../../feature/masters/loyal-customers/use-case'
 import { usePos } from './PosLayout'
 import ApiErrorRecargar from '../../components/ApiErrorRecargar/ApiErrorRecargar'
 import ComprobanteVentaDiarias from './ComprobanteVentaDiarias'
@@ -9,7 +10,7 @@ function createNuevaFactura(pedidos) {
   const n = pedidos.length + 1
   const id = `f-${Date.now()}-${n}`
   const nombre = `Factura ${n}`
-  return { id, nombre, cart: [], customerId: '', paymentMethodId: '', customTaxStr: '' }
+  return { id, nombre, cart: [], customerId: '', paymentMethodId: '', customTaxStr: '', orderType: 'dine_in' }
 }
 
 const POS_TABS = [
@@ -34,6 +35,27 @@ function getProductInitial(name) {
   return n.charAt(0).toUpperCase() || '?'
 }
 
+const TIPOS_DOCUMENTO = ['NIT', 'Cédula de ciudadanía', 'Cédula de extranjería', 'Pasaporte', 'Otro']
+
+const TIPO_DOC_UI_TO_API = {
+  'Cédula de ciudadanía': 'CC',
+  'Cédula de extranjería': 'CE',
+  Pasaporte: 'PASSPORT',
+  Otro: 'OTHER',
+  NIT: 'OTHER',
+}
+
+function mapFormToApi(data) {
+  return {
+    document_type: TIPO_DOC_UI_TO_API[data.tipoDocumento] ?? 'OTHER',
+    document_number: data.numeroDocumento ?? '',
+    full_name: data.nombre ?? '',
+    email: data.email ?? '',
+    birth_date: data.fechaCumpleanos ? String(data.fechaCumpleanos).trim() : '',
+    status: data.estado === 'Activo' ? 'active' : 'inactive',
+  }
+}
+
 export default function Facturar() {
   const { categoriesWithProducts, paymentMethods, customers, taxes, currentShiftId, loading, error, loadData, registerSale, lastUpdate } = usePos()
   const [activeTab, setActiveTab] = useState('facturar')
@@ -48,8 +70,10 @@ export default function Facturar() {
   const [search, setSearch] = useState('')
   const [confirmAction, setConfirmAction] = useState(null)
   const [showValidationPopup, setShowValidationPopup] = useState(false)
+  const [showNewCustomerModal, setShowNewCustomerModal] = useState(false)
   const [customerSearch, setCustomerSearch] = useState('')
   const [showCustomerDropdown, setShowCustomerDropdown] = useState(false)
+  const [newCustomerError, setNewCustomerError] = useState(null)
   const customerDropdownRef = useRef(null)
 
   useEffect(() => {
@@ -145,7 +169,16 @@ export default function Facturar() {
   }
 
   const removeFromCart = (product_id) => {
-    updateCurrentPedidoCart((prev) => prev.filter((x) => x.product_id !== product_id))
+    const item = cart.find(x => x.product_id === product_id)
+    if (!item) return
+    setConfirmAction({
+      title: 'Quitar producto',
+      message: `¿Estás seguro de que deseas quitar "${item.product_name}" del pedido?`,
+      onConfirm: () => {
+        updateCurrentPedidoCart((prev) => prev.filter((x) => x.product_id !== product_id))
+        setConfirmAction(null)
+      }
+    })
   }
 
   const clearOrder = () => {
@@ -359,49 +392,90 @@ export default function Facturar() {
                         : 'No hay productos que coincidan con el filtro o la búsqueda.'}
                     </p>
                   ) : (
-                    filteredProducts.map((p) => (
-                      <div key={p.id} className="facturar-producto-card">
-                        <div className="facturar-producto-inicial">
-                          {getProductInitial(p.name ?? p.code)}
+                    filteredProducts.map((p) => {
+                      const cartItem = cart.find(it => it.product_id === p.id)
+                      const quantityInCart = cartItem ? cartItem.quantity : 0
+
+                      return (
+                        <div key={p.id} className={`facturar-producto-card ${quantityInCart > 0 ? 'active' : ''}`}>
+                          <div className="facturar-producto-inicial">
+                            {getProductInitial(p.name ?? p.code)}
+                          </div>
+                          <h4 className="facturar-producto-nombre">{p.name ?? p.code ?? 'Producto'}</h4>
+                          <span className="facturar-producto-categoria">{p.categoryName || 'General'}</span>
+
+                          {(p.description || '').trim() && (
+                            <p className="facturar-producto-desc">
+                              {(p.description || '').trim().slice(0, 50)}
+                              {(p.description || '').trim().length > 50 ? '...' : ''}
+                            </p>
+                          )}
+
+                          <div className="facturar-producto-footer">
+                            <span className="facturar-producto-precio">
+                              ${Number(p.price ?? p.unit_price ?? 0).toLocaleString('es-CO')}/und
+                            </span>
+
+                            {quantityInCart > 0 ? (
+                              <div className="facturar-producto-counter">
+                                <button type="button" onClick={() => updateQuantity(p.id, -1)} aria-label="Menos">
+                                  <Minus size={14} />
+                                </button>
+                                <span>{quantityInCart}</span>
+                                <button type="button" onClick={() => updateQuantity(p.id, 1)} aria-label="Más">
+                                  <Plus size={14} />
+                                </button>
+                              </div>
+                            ) : (
+                              <button
+                                type="button"
+                                className="facturar-producto-btn-mas"
+                                onClick={() => addToCart(p)}
+                                aria-label="Agregar a la factura"
+                              >
+                                <Plus size={20} strokeWidth={2.5} />
+                              </button>
+                            )}
+                          </div>
                         </div>
-                        <h4 className="facturar-producto-nombre">{p.name ?? p.code ?? 'Producto'}</h4>
-                        {(p.description ?? p.categoryName ?? '').trim() && (
-                          <p className="facturar-producto-desc">
-                            {(p.description ?? p.categoryName ?? '').trim().slice(0, 50)}
-                            {(p.description ?? p.categoryName ?? '').trim().length > 50 ? '...' : ''}
-                          </p>
-                        )}
-                        <div className="facturar-producto-footer">
-                          <span className="facturar-producto-precio">
-                            ${Number(p.price ?? p.unit_price ?? 0).toLocaleString('es-CO')}/und
-                          </span>
-                          <button
-                            type="button"
-                            className="facturar-producto-btn-mas"
-                            onClick={() => addToCart(p)}
-                            aria-label="Agregar a la factura"
-                          >
-                            <Plus size={20} strokeWidth={2.5} />
-                          </button>
-                        </div>
-                      </div>
-                    ))
+                      )
+                    })
                   )}
                 </div>
               </div>
 
               {/* Derecha: panel de facturación */}
               <div className="facturar-panel-factura">
-                <h3 className="facturar-panel-titulo">{currentPedido?.nombre ?? 'Pedido'}</h3>
-                {saleError && (
-                  <div role="alert" className="facturar-error">
-                    {saleError}
-                  </div>
-                )}
-                {cart.length === 0 ? (
-                  <p className="facturar-panel-empty">Añade productos desde el catálogo</p>
-                ) : (
-                  <>
+                <div className="facturar-order-types">
+                  <button
+                    type="button"
+                    className={`facturar-order-type-btn ${currentPedido?.orderType === 'dine_in' ? 'active' : ''}`}
+                    onClick={() => updateCurrentPedidoField('orderType', 'dine_in')}
+                  >
+                    Comer aquí
+                  </button>
+                  <button
+                    type="button"
+                    className={`facturar-order-type-btn ${currentPedido?.orderType === 'take_away' ? 'active' : ''}`}
+                    onClick={() => updateCurrentPedidoField('orderType', 'take_away')}
+                  >
+                    Para llevar
+                  </button>
+                </div>
+
+                <div className="facturar-carrito-seccion">
+                  {cart.length === 0 ? (
+                    <div className="facturar-no-order">
+                      <div className="facturar-no-order-icon-wrapper">
+                        <ShoppingBag size={48} />
+                        <div className="facturar-no-order-subicon">
+                          <Search size={16} />
+                        </div>
+                      </div>
+                      <h4>Sin pedidos</h4>
+                      <p>Toca un producto para añadirlo al pedido</p>
+                    </div>
+                  ) : (
                     <ul className="facturar-carrito-lista">
                       {cart.map((it) => (
                         <li key={it.product_id} className="facturar-carrito-item">
@@ -418,161 +492,142 @@ export default function Facturar() {
                         </li>
                       ))}
                     </ul>
-                    <div className="facturar-detalle-pago">
-                      <div className="facturar-detalle-linea" style={{ borderBottom: '1px solid #e5e7eb', paddingBottom: '12px', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
-                        <div style={{ width: '100%', position: 'relative' }} ref={customerDropdownRef}>
-                          <label style={{ fontSize: '12px', color: '#6b7280', display: 'block', marginBottom: '4px' }}>Cliente</label>
-                          <div
-                            onClick={() => { setShowCustomerDropdown(!showCustomerDropdown); setCustomerSearch(''); }}
-                            style={{
-                              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                              width: '100%', minHeight: '36px', padding: '6px 10px', background: '#fff', border: '1px solid #d1d5db',
-                              borderRadius: '6px', cursor: 'pointer', fontSize: '13px', color: '#111827'
-                            }}
-                          >
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden' }}>
-                              <User size={16} color="#6b7280" />
-                              <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                {selectedCustomer ? selectedCustomer.name : 'Consumidor final'}
-                              </span>
-                            </div>
-                            {selectedCustomer ? (
-                              <button
-                                type="button"
-                                onClick={(e) => { e.stopPropagation(); updateCurrentPedidoField('customerId', '') }}
-                                style={{ background: 'none', border: 'none', display: 'flex', alignItems: 'center', color: '#9ca3af', cursor: 'pointer', padding: '2px' }}
-                              >
-                                <X size={14} />
-                              </button>
-                            ) : (
-                              <ChevronDown size={14} color="#9ca3af" />
-                            )}
-                          </div>
+                  )}
+                </div>
 
-                          {showCustomerDropdown && (
-                            <div style={{
-                              position: 'absolute', top: '100%', left: 0, right: 0, marginTop: '4px',
-                              background: '#fff', border: '1px solid #e5e7eb', borderRadius: '8px',
-                              boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05)',
-                              zIndex: 50, display: 'flex', flexDirection: 'column'
-                            }}>
-                              <div style={{ padding: '8px', borderBottom: '1px solid #e5e7eb', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                <Search size={14} color="#9ca3af" />
-                                <input
-                                  type="text"
-                                  placeholder="Buscar cliente..."
-                                  value={customerSearch}
-                                  onChange={e => setCustomerSearch(e.target.value)}
-                                  style={{ border: 'none', outline: 'none', width: '100%', fontSize: '13px' }}
-                                  autoFocus
-                                />
-                              </div>
-                              <ul style={{ listStyle: 'none', margin: 0, padding: 0, maxHeight: '200px', overflowY: 'auto' }}>
-                                <li
-                                  onClick={() => { updateCurrentPedidoField('customerId', ''); setShowCustomerDropdown(false); setCustomerSearch('') }}
-                                  style={{ padding: '10px 12px', cursor: 'pointer', fontSize: '13px', color: '#374151', display: 'flex', alignItems: 'center', gap: '8px', borderBottom: '1px solid #f3f4f6' }}
-                                  onMouseEnter={(e) => e.currentTarget.style.background = '#f3f4f6'}
-                                  onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
-                                >
-                                  <User size={14} color="#9ca3af" /> Consumidor final
-                                </li>
-                                {customers.filter(c => (c.name || '').toLowerCase().includes(customerSearch.toLowerCase()) || (c.identification_number || '').includes(customerSearch)).map(c => (
-                                  <li
-                                    key={c.id}
-                                    onClick={() => { updateCurrentPedidoField('customerId', c.id); setShowCustomerDropdown(false); setCustomerSearch('') }}
-                                    style={{ padding: '10px 12px', cursor: 'pointer', fontSize: '13px', color: '#111827', display: 'flex', alignItems: 'center', gap: '10px' }}
-                                    onMouseEnter={(e) => e.currentTarget.style.background = '#f3f4f6'}
-                                    onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
-                                  >
-                                    <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#e0e7ff', color: '#4f46e5', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 'bold', flexShrink: 0 }}>
-                                      {(c.name || 'C').charAt(0).toUpperCase()}
-                                    </div>
-                                    <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-                                      <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.name}</span>
-                                      {c.identification_number && <span style={{ fontSize: '11px', color: '#6b7280' }}>ID: {c.identification_number}</span>}
-                                    </div>
-                                  </li>
-                                ))}
-                              </ul>
-                              <div style={{ padding: '10px', borderTop: '1px solid #e5e7eb', background: '#f9fafb', borderBottomLeftRadius: '8px', borderBottomRightRadius: '8px' }}>
-                                <button type="button" style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', background: 'none', border: 'none', color: '#4f46e5', fontSize: '13px', fontWeight: 500, cursor: 'pointer' }}>
-                                  <UserPlus size={14} /> Nuevo cliente
-                                </button>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                        <div style={{ width: '100%', marginTop: '4px' }}>
-                          <label style={{ fontSize: '12px', color: '#6b7280', display: 'block', marginBottom: '4px' }}>Método de pago ({paymentMethods.length})</label>
-                          <select
-                            className="input-select"
-                            style={{ width: '100%', minHeight: '36px', padding: '6px 10px', fontSize: '13px' }}
-                            value={currentPedido?.paymentMethodId || ''}
-                            onChange={(e) => updateCurrentPedidoField('paymentMethodId', e.target.value)}
-                          >
-                            <option value="">Efectivo (Por defecto)</option>
-                            {paymentMethods.map(m => (
-                              <option key={m.id} value={m.id}>{m.name}</option>
-                            ))}
-                          </select>
-                        </div>
-                      </div>
-
-                      <div className="facturar-detalle-linea">
-                        <span>Total productos</span>
-                        <span>{totalPcs} und</span>
-                      </div>
-                      <div className="facturar-detalle-linea">
-                        <span>Subtotal</span>
-                        <span>${subtotal.toLocaleString('es-CO')}</span>
-                      </div>
-                      <div className="facturar-detalle-linea">
-                        <span>Descuento</span>
-                        <span>${discount.toLocaleString('es-CO')}</span>
-                      </div>
-                      <div className="facturar-detalle-linea" style={{ alignItems: 'center' }}>
-                        <span>Impuesto</span>
-                        <select
-                          className="input-select"
-                          style={{ width: '180px', padding: '4px 8px', minHeight: '32px', fontSize: '13px' }}
-                          value={currentPedido?.customTaxStr ?? ''}
-                          onChange={(e) => updateCurrentPedidoField('customTaxStr', e.target.value)}
-                        >
-                          {(!taxes || taxes.length === 0) ? (
-                            <option value="">0% (Sin impuestos en Almacén)</option>
-                          ) : (
-                            <>
-                              <option value="">Por productos (${cart.reduce((sum, it) => sum + (it.tax_amount ?? 0) * it.quantity, 0).toLocaleString('es-CO')})</option>
-                              {taxes.map(t => (
-                                <option key={t.id} value={t.id}>{t.name} ({t.percentage}%)</option>
-                              ))}
-                            </>
-                          )}
-                        </select>
-                      </div>
-                      <div className="facturar-detalle-linea facturar-total-linea">
-                        <span>Total</span>
-                        <span>${totalCart.toLocaleString('es-CO')}</span>
-                      </div>
-                    </div>
-                    <div className="facturar-panel-botones">
-                      <button type="button" className="facturar-btn-secundario" onClick={clearOrder}>
-                        Eliminar pedido
-                      </button>
-                      <button type="button" className="facturar-btn-secundario">
-                        Guardar pedido
-                      </button>
-                      <button
-                        type="button"
-                        className="facturar-btn-registrar"
-                        onClick={handleRegisterSale}
-                        disabled={saving || !currentShiftId}
+                <div className="facturar-detalle-pago">
+                  <div className="facturar-detalle-linea" style={{ borderBottom: '1px solid #e5e7eb', paddingBottom: '12px', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
+                    <div style={{ width: '100%', position: 'relative' }} ref={customerDropdownRef}>
+                      <label style={{ fontSize: '12px', color: '#6b7280', display: 'block', marginBottom: '4px' }}>Cliente</label>
+                      <div
+                        onClick={() => { setShowCustomerDropdown(!showCustomerDropdown); setCustomerSearch(''); }}
+                        style={{
+                          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                          width: '100%', minHeight: '36px', padding: '6px 10px', background: '#fff', border: '1px solid #d1d5db',
+                          borderRadius: '6px', cursor: 'pointer', fontSize: '13px', color: '#111827'
+                        }}
                       >
-                        {saving ? 'Registrando...' : 'Continuar a pagar'}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden' }}>
+                          <User size={16} color="#6b7280" />
+                          <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            {selectedCustomer ? selectedCustomer.name : 'Consumidor final'}
+                          </span>
+                        </div>
+                        {selectedCustomer ? (
+                          <button
+                            type="button"
+                            onClick={(e) => { e.stopPropagation(); updateCurrentPedidoField('customerId', '') }}
+                            style={{ background: 'none', border: 'none', display: 'flex', alignItems: 'center', color: '#9ca3af', cursor: 'pointer', padding: '2px' }}
+                          >
+                            <X size={14} />
+                          </button>
+                        ) : (
+                          <ChevronDown size={14} color="#9ca3af" />
+                        )}
+                      </div>
+
+                      {showCustomerDropdown && (
+                        <div style={{
+                          position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 50, marginTop: '4px',
+                          background: '#fff', border: '1px solid #e5e7eb', borderRadius: '8px',
+                          boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05)',
+                        }}>
+                          <div style={{ padding: '8px', borderBottom: '1px solid #f3f4f6' }}>
+                            <div style={{ position: 'relative' }}>
+                              <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }} />
+                              <input
+                                type="text"
+                                placeholder="Buscar cliente..."
+                                value={customerSearch}
+                                onChange={(e) => setCustomerSearch(e.target.value)}
+                                autoFocus
+                                style={{ width: '100%', padding: '8px 8px 8px 30px', border: '1px solid #e5e7eb', borderRadius: '6px', fontSize: '13px' }}
+                                onClick={(e) => e.stopPropagation()}
+                              />
+                            </div>
+                          </div>
+                          <ul style={{ listStyle: 'none', padding: 0, margin: 0, maxHeight: '200px', overflowY: 'auto' }}>
+                            {customers.filter(c => (c.name || '').toLowerCase().includes(customerSearch.toLowerCase())).map(c => (
+                              <li
+                                key={c.id}
+                                onClick={() => { updateCurrentPedidoField('customerId', String(c.id)); setShowCustomerDropdown(false); }}
+                                style={{ padding: '8px 12px', fontSize: '13px', cursor: 'pointer', borderBottom: '1px solid #f9fafb', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+                                onMouseEnter={(e) => e.target.style.background = '#f3f4f6'}
+                                onMouseLeave={(e) => e.target.style.background = 'transparent'}
+                              >
+                                {c.name}
+                              </li>
+                            ))}
+                          </ul>
+                          <div style={{ padding: '10px', borderTop: '1px solid #e5e7eb', background: '#f9fafb', borderBottomLeftRadius: '8px', borderBottomRightRadius: '8px' }}>
+                            <button
+                              type="button"
+                              onClick={() => { setShowNewCustomerModal(true); setShowCustomerDropdown(false); }}
+                              style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', background: 'none', border: 'none', color: '#4f46e5', fontSize: '13px', fontWeight: 500, cursor: 'pointer' }}
+                            >
+                              <UserPlus size={14} /> Nuevo cliente
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="facturar-detalle-linea">
+                    <span>Subtotal</span>
+                    <span>${subtotal.toLocaleString('es-CO')}</span>
+                  </div>
+                  <div className="facturar-detalle-linea">
+                    <span>Impuestos</span>
+                    <select
+                      className="input-select"
+                      style={{ width: '150px', padding: '2px 8px', minHeight: '28px', fontSize: '12px', border: 'none', textAlign: 'right', background: 'transparent' }}
+                      value={currentPedido?.customTaxStr ?? ''}
+                      onChange={(e) => updateCurrentPedidoField('customTaxStr', e.target.value)}
+                    >
+                      {(!taxes || taxes.length === 0) ? (
+                        <option value="">0% (Default)</option>
+                      ) : (
+                        <>
+                          <option value="">Por prod. (${cart.reduce((sum, it) => sum + (it.tax_amount ?? 0) * it.quantity, 0).toLocaleString('es-CO')})</option>
+                          {taxes.filter(t => t.name && t.name.trim() !== '').map(t => (
+                            <option key={t.id} value={t.id}>{t.name} ({t.percentage}%)</option>
+                          ))}
+                        </>
+                      )}
+                    </select>
+                  </div>
+                  <div className="facturar-detalle-linea">
+                    <span>Descuento</span>
+                    <span>${discount.toLocaleString('es-CO')}</span>
+                  </div>
+                  <div className="facturar-detalle-linea facturar-total-linea">
+                    <span>Total</span>
+                    <span>${totalCart.toLocaleString('es-CO')}</span>
+                  </div>
+                </div>
+
+                <div className="facturar-panel-botones">
+                  <button
+                    type="button"
+                    className="facturar-btn-registrar"
+                    onClick={handleRegisterSale}
+                    disabled={cart.length === 0 || saving || !currentShiftId}
+                    style={{ width: '100%', padding: '16px' }}
+                  >
+                    {saving ? 'Registrando...' : 'Procesar Pago'}
+                  </button>
+                  {cart.length > 0 && (
+                    <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
+                      <button type="button" className="facturar-btn-secundario" onClick={clearOrder} style={{ flex: 1, padding: '10px' }}>
+                        Borrar
+                      </button>
+                      <button type="button" className="facturar-btn-secundario" style={{ flex: 1, padding: '10px' }}>
+                        Guardar
                       </button>
                     </div>
-                  </>
-                )}
+                  )}
+                </div>
               </div>
             </div>
           )}
@@ -649,6 +704,110 @@ export default function Facturar() {
           onConfirm={confirmRegisterSale}
         />
       )}
+
+      {showNewCustomerModal && (
+        <ModalFormClienteRapido
+          tiposDocumento={TIPOS_DOCUMENTO}
+          onClose={() => { setShowNewCustomerModal(false); setNewCustomerError(null); }}
+          error={newCustomerError}
+          onGuardar={async (formData) => {
+            setNewCustomerError(null)
+            try {
+              const res = await createLoyalCustomerUseCase(mapFormToApi(formData))
+              await loadData() // Refrescar lista de clientes en el contexto
+              const newId = res?.data?.id ?? res?.id
+              if (newId) {
+                updateCurrentPedidoField('customerId', String(newId))
+              }
+              setShowNewCustomerModal(false)
+            } catch (err) {
+              setNewCustomerError(err?.message ?? 'Error al crear cliente')
+            }
+          }}
+        />
+      )}
+    </div>
+  )
+}
+
+function ModalFormClienteRapido({ tiposDocumento, onClose, onGuardar, error: apiError }) {
+  const [tipoDocumento, setTipoDocumento] = useState('Cédula de ciudadanía')
+  const [numeroDocumento, setNumeroDocumento] = useState('')
+  const [nombre, setNombre] = useState('')
+  const [email, setEmail] = useState('')
+  const [saving, setSaving] = useState(false)
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setSaving(true)
+    try {
+      await onGuardar({ tipoDocumento, numeroDocumento, nombre, email, estado: 'Activo' })
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <div className="form-overlay" onClick={onClose} style={{ zIndex: 10000 }}>
+      <div className="form-modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '400px' }}>
+        <div className="form-header">
+          <h3>Nuevo cliente</h3>
+          <button className="form-close" onClick={onClose} aria-label="Cerrar">✕</button>
+        </div>
+        <form onSubmit={handleSubmit} className="form-body">
+          {apiError && (
+            <p style={{ color: '#dc2626', fontSize: '13px', marginBottom: '12px' }}>{apiError}</p>
+          )}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div className="form-field">
+              <label>Tipo de documento *</label>
+              <select value={tipoDocumento} onChange={(e) => setTipoDocumento(e.target.value)} required style={{ fontSize: '14px' }}>
+                {tiposDocumento.map((t) => (
+                  <option key={t} value={t}>{t}</option>
+                ))}
+              </select>
+            </div>
+            <div className="form-field">
+              <label>Número de documento *</label>
+              <input
+                type="text"
+                value={numeroDocumento}
+                onChange={(e) => setNumeroDocumento(e.target.value)}
+                placeholder="Ej: 10203040"
+                required
+                style={{ fontSize: '14px' }}
+              />
+            </div>
+            <div className="form-field">
+              <label>Nombre completo *</label>
+              <input
+                type="text"
+                value={nombre}
+                onChange={(e) => setNombre(e.target.value)}
+                placeholder="Nombre del cliente"
+                required
+                style={{ fontSize: '14px' }}
+              />
+            </div>
+            <div className="form-field">
+              <label>Email (opcional)</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="cliente@correo.com"
+                style={{ fontSize: '14px' }}
+              />
+            </div>
+          </div>
+          <div className="form-footer" style={{ marginTop: '20px' }}>
+            <button type="button" className="form-btn-secondary" onClick={onClose}>Cancelar</button>
+            <button type="submit" className="form-btn-primary" disabled={saving}>
+              {saving ? 'Guardando...' : 'Crear cliente'}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   )
 }

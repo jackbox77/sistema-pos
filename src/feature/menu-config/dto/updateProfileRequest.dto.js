@@ -22,6 +22,9 @@
 
 /**
  * @typedef {Object} UpdateProfileCompanyDto
+ * @property {string} [name]
+ * @property {string} [subtitle]
+ * @property {string} [description]
  * @property {string} [logo]
  * @property {string} [business_type]
  */
@@ -61,6 +64,9 @@ export function createUpdateProfileRequest(params = {}) {
   const body = {}
   if (params.company != null) {
     body.company = {
+      ...(params.company.name != null && { name: params.company.name }),
+      ...(params.company.subtitle != null && { subtitle: params.company.subtitle }),
+      ...(params.company.description != null && { description: params.company.description }),
       ...(params.company.logo != null && { logo: params.company.logo }),
       ...(params.company.business_type != null && { business_type: params.company.business_type }),
     }

@@ -31,25 +31,34 @@ export default function Egresos() {
   const [searchTerm, setSearchTerm] = useState('')
   const [minAmount, setMinAmount] = useState('')
   const [maxAmount, setMaxAmount] = useState('')
+  const [selectedShiftId, setSelectedShiftId] = useState('')
+  const [shifts, setShifts] = useState([])
   const [filtrosActivos, setFiltrosActivos] = useState([])
+
+  useEffect(() => {
+    getShiftsUseCase(1, 100).then((res) => {
+      if (res?.success && Array.isArray(res.data?.data)) setShifts(res.data.data)
+    }).catch(console.error)
+  }, [])
 
   const loadEgresos = useCallback(async (
     currentPage = page,
     search = searchTerm,
     min = minAmount,
-    max = maxAmount
+    max = maxAmount,
+    shiftIdInput = undefined
   ) => {
     setError(null)
     setLoading(true)
     try {
-      const shiftRes = await getCurrentShiftUseCase()
-      const shiftId = shiftRes?.data?.id
-      if (!shiftId) {
-        setEgresos([])
-        return
+      let shiftIdToUse = shiftIdInput
+      if (shiftIdToUse === undefined) {
+        const shiftRes = await getCurrentShiftUseCase()
+        shiftIdToUse = shiftRes?.data?.id ?? null
       }
+
       const res = await getExpensesUseCase(
-        shiftId,
+        shiftIdToUse || undefined,
         currentPage,
         limit,
         search.trim() || undefined,
@@ -75,8 +84,8 @@ export default function Egresos() {
   }, [limit])
 
   useEffect(() => {
-    loadEgresos(page, searchTerm, minAmount, maxAmount)
-  }, [page, loadEgresos])
+    loadEgresos(page, searchTerm, minAmount, maxAmount, selectedShiftId)
+  }, [page, searchTerm, minAmount, maxAmount, selectedShiftId, loadEgresos])
 
   const aplicarFiltros = () => {
     setPage(1) // Volver a la página 1 al filtrar
@@ -85,25 +94,31 @@ export default function Egresos() {
     if (searchTerm.trim()) nuevosFiltros.push({ id: 'search', label: `Búsqueda: ${searchTerm}` })
     if (minAmount) nuevosFiltros.push({ id: 'min', label: `Mínimo: $${Number(minAmount).toLocaleString()}` })
     if (maxAmount) nuevosFiltros.push({ id: 'max', label: `Máximo: $${Number(maxAmount).toLocaleString()}` })
+    if (selectedShiftId) {
+      const s = shifts.find(x => x.id === selectedShiftId)
+      if (s) nuevosFiltros.push({ id: 'shift', label: `Turno: ${s.name}` })
+    }
     setFiltrosActivos(nuevosFiltros)
 
-    loadEgresos(1, searchTerm, minAmount, maxAmount)
+    loadEgresos(1, searchTerm, minAmount, maxAmount, selectedShiftId)
   }
 
   const quitarFiltro = (id) => {
     if (id === 'search') setSearchTerm('')
     if (id === 'min') setMinAmount('')
     if (id === 'max') setMaxAmount('')
+    if (id === 'shift') setSelectedShiftId('')
 
-    setFiltrosActivos((p) => p.filter((f) => f.id !== id))
-
-    // Al quitar un filtro, recargamos con los valores limpiados
-    const newSearch = id === 'search' ? '' : searchTerm
-    const newMin = id === 'min' ? '' : minAmount
-    const newMax = id === 'max' ? '' : maxAmount
+    const nuevos = filtrosActivos.filter(f => f.id !== id)
+    setFiltrosActivos(nuevos)
 
     setPage(1)
-    loadEgresos(1, newSearch, newMin, newMax)
+    loadEgresos(1,
+      id === 'search' ? '' : searchTerm,
+      id === 'min' ? '' : minAmount,
+      id === 'max' ? '' : maxAmount,
+      id === 'shift' ? '' : selectedShiftId
+    )
   }
 
   const handleKeyDown = (e) => {
@@ -167,45 +182,81 @@ export default function Egresos() {
             </button>
           </div>
         </div>
-        <div className="maestro-encabezado-filtros" style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', alignItems: 'flex-end', paddingBottom: '16px' }}>
-          <div style={{ flex: '1', minWidth: '200px' }}>
-            <label className="maestro-encabezado-label">Buscar concepto o referencia</label>
+        <div className="maestro-encabezado-filtros" style={{
+          background: 'linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%)',
+          padding: '24px',
+          borderRadius: '16px',
+          border: '1px solid #e2e8f0',
+          boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
+          marginBottom: '24px',
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+          gap: '20px',
+          alignItems: 'end'
+        }}>
+          <div className="filter-group">
+            <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600, color: '#334155', fontSize: '13px', marginBottom: '8px' }}>
+              Buscar concepto o referencia
+            </label>
             <input
               type="search"
-              className="input-search"
               placeholder="Ej: transporte..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               onKeyDown={handleKeyDown}
-              style={{ width: '100%', marginTop: '6px' }}
+              style={{ width: '100%', padding: '12px 14px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '14px' }}
             />
           </div>
-          <div>
-            <label className="maestro-encabezado-label">Monto mínimo</label>
-            <input
-              type="number"
-              className="input-search"
-              placeholder="0"
-              value={minAmount}
-              onChange={(e) => setMinAmount(e.target.value)}
-              onKeyDown={handleKeyDown}
-              style={{ width: '140px', marginTop: '6px' }}
-            />
+
+          <div className="filter-group">
+            <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600, color: '#334155', fontSize: '13px', marginBottom: '8px' }}>
+              Filtrar por Turno
+            </label>
+            <select
+              value={selectedShiftId}
+              onChange={(e) => setSelectedShiftId(e.target.value)}
+              style={{ width: '100%', padding: '12px 14px', borderRadius: '10px', border: '1px solid #cbd5e1', background: '#fff', fontSize: '14px', cursor: 'pointer', appearance: 'none', backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%2364748b\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\'/%3E%3C/svg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center', backgroundSize: '16px' }}
+            >
+              <option value="">Todos los turnos registrados</option>
+              {shifts.map(s => (
+                <option key={s.id} value={s.id}>
+                  {s.name} ({new Date(s.start_at).toLocaleDateString()})
+                </option>
+              ))}
+            </select>
           </div>
-          <div>
-            <label className="maestro-encabezado-label">Monto máximo</label>
-            <input
-              type="number"
-              className="input-search"
-              placeholder="Sin límite"
-              value={maxAmount}
-              onChange={(e) => setMaxAmount(e.target.value)}
-              onKeyDown={handleKeyDown}
-              style={{ width: '140px', marginTop: '6px' }}
-            />
+
+          <div className="filter-group">
+            <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600, color: '#334155', fontSize: '13px', marginBottom: '8px' }}>
+              Rango de Monto
+            </label>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+              <input
+                type="number"
+                placeholder="Mín."
+                value={minAmount}
+                onChange={(e) => setMinAmount(e.target.value)}
+                onKeyDown={handleKeyDown}
+                style={{ width: '100%', padding: '12px 14px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '14px' }}
+              />
+              <input
+                type="number"
+                placeholder="Máx."
+                value={maxAmount}
+                onChange={(e) => setMaxAmount(e.target.value)}
+                onKeyDown={handleKeyDown}
+                style={{ width: '100%', padding: '12px 14px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '14px' }}
+              />
+            </div>
           </div>
-          <div>
-            <button type="button" className="btn-primary" onClick={aplicarFiltros}>
+
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <button
+              type="button"
+              className="btn-primary"
+              onClick={aplicarFiltros}
+              style={{ flex: '1', padding: '12px', borderRadius: '10px', background: '#0d9488', color: '#fff', fontWeight: 600, cursor: 'pointer', border: 'none', fontSize: '14px' }}
+            >
               Filtrar
             </button>
           </div>

@@ -9,10 +9,11 @@ import { INCOMES_API } from '../api-const'
  * @param {string} [search]
  * @param {number} [min_amount]
  * @param {number} [max_amount]
+ * @param {string} [loyal_customer_id]
  * @returns {Promise<import('../dto/incomesListResponse.dto').IncomesListResponseDto>}
  */
-export async function getIncomes(shift_id, page = 1, limit = 10, search, min_amount, max_amount) {
-  const url = INCOMES_API.LIST(shift_id, page, limit, search, min_amount, max_amount)
+export async function getIncomes(shift_id, page = 1, limit = 10, search, min_amount, max_amount, loyal_customer_id) {
+  const url = INCOMES_API.LIST(shift_id, page, limit, search, min_amount, max_amount, loyal_customer_id)
   const response = await requestWithToken.get(url)
   return response
 }

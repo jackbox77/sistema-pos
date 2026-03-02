@@ -33,15 +33,7 @@ export default function HistorialVentas() {
     setError(null)
     setLoading(true)
     try {
-      const shiftRes = await getCurrentShiftUseCase()
-      const shiftId = shiftRes?.data?.id
-      const name = shiftRes?.data?.name ?? 'Turno actual'
-      setShiftName(name)
-      if (!shiftId) {
-        setVentas([])
-        return
-      }
-      const res = await getSalesUseCase(shiftId, 1, 100)
+      const res = await getSalesUseCase(null, 1, 150)
       if (res?.success && Array.isArray(res?.data?.data)) {
         setVentas(res.data.data)
       } else {
@@ -76,14 +68,14 @@ export default function HistorialVentas() {
 
   return (
     <PageModule
-      title="Historial de ventas"
-      description="Consulta el historial completo de ventas realizadas en el punto de venta."
+      title="Historial de todas las ventas"
+      description="Consulta el historial completo de todas las ventas realizadas en el sistema."
     >
       {error && (
         <ApiErrorRecargar message={error} onRecargar={loadVentas} loading={loading} />
       )}
       <div className="page-module-toolbar">
-        <span style={{ fontSize: '14px', color: '#6b7280' }}>{shiftName && `Turno: ${shiftName}`}</span>
+        <span style={{ fontSize: '14px', color: '#6b7280' }}>Total registros: {ventas.length}</span>
         <div style={{ display: 'flex', gap: '8px' }}>
           <button
             type="button"
@@ -121,7 +113,7 @@ export default function HistorialVentas() {
               <tr>
                 <td colSpan="5">
                   <div className="page-module-empty">
-                    {shiftName ? 'No hay ventas registradas en este turno. Las ventas que registres en Facturar aparecerán aquí.' : 'No hay turno abierto. Abre un turno en Turnos para ver las ventas.'}
+                    No hay ventas registradas en el sistema.
                   </div>
                 </td>
               </tr>

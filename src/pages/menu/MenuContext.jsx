@@ -177,7 +177,9 @@ export default function MenuProvider({ children }) {
             ...prev,
             logoUrl: company.logo ?? prev.logoUrl,
             nombreEmpresa: company.name ?? prev.nombreEmpresa,
+            subtitulo: company.subtitle ?? prev.subtitulo,
             tipoNegocio: company.business_type ?? prev.tipoNegocio,
+            descripcion: company.description ?? prev.descripcion,
           }))
         }
         if (menu_config) {

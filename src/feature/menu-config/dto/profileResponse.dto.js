@@ -17,6 +17,8 @@
  * @property {string} id
  * @property {string} name
  * @property {string|null} slug
+ * @property {string|null} subtitle
+ * @property {string|null} description
  * @property {string|null} logo
  * @property {string|null} business_type
  * @property {string} email
@@ -43,6 +45,12 @@
  * @property {string} content_background_color
  * @property {string} text_color
  * @property {string} title_color
+ * @property {string} subtitle_color
+ * @property {string} price_color
+ * @property {string} accent_color
+ * @property {string} contact_icon_color
+ * @property {string} contact_text_color
+ * @property {string} contact_background_color
  * @property {string} created_at
  * @property {string} updated_at
  */

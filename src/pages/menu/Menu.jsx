@@ -313,6 +313,9 @@ export default function Menu() {
         const logo = typeof logoUrl === 'string' && (logoUrl.startsWith('http://') || logoUrl.startsWith('https://')) ? logoUrl : undefined
         await updateProfileUseCase({
           company: {
+            name: empresaInfo.nombreEmpresa?.trim() || undefined,
+            subtitle: empresaInfo.subtitulo?.trim() || undefined,
+            description: empresaInfo.descripcion?.trim() || undefined,
             ...(logo != null && { logo }),
             business_type: empresaInfo.tipoNegocio?.trim() || undefined,
           },
