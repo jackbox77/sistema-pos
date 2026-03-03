@@ -51,6 +51,8 @@
  * @property {string} contact_icon_color
  * @property {string} contact_text_color
  * @property {string} contact_background_color
+ * @property {string} menu_background_image
+ * @property {string} header_background_image
  * @property {string} created_at
  * @property {string} updated_at
  */

@@ -45,6 +45,8 @@
  * @property {string} [contact_icon_color]
  * @property {string} [contact_text_color]
  * @property {string} [contact_background_color]
+ * @property {string} [menu_background_image]
+ * @property {string} [header_background_image]
  */
 
 /**
@@ -89,6 +91,8 @@ export function createUpdateProfileRequest(params = {}) {
       ...(mc.contact_icon_color != null && { contact_icon_color: mc.contact_icon_color }),
       ...(mc.contact_text_color != null && { contact_text_color: mc.contact_text_color }),
       ...(mc.contact_background_color != null && { contact_background_color: mc.contact_background_color }),
+      ...(mc.menu_background_image != null && { menu_background_image: mc.menu_background_image }),
+      ...(mc.header_background_image != null && { header_background_image: mc.header_background_image }),
     }
     if (Object.keys(body.menu_config).length === 0) delete body.menu_config
   }

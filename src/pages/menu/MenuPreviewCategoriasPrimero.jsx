@@ -5,10 +5,13 @@ import MenuContactBar from './MenuContactBar'
 import './MenuPreviewCategoriasPrimero.css'
 
 const aparienciaDefault = {
-  colorFondo: '#fefce8',
+  colorFondo: '#f8f9fa',
   colorContenido: '#ffffff',
-  colorTexto: '#1f2937',
-  colorTitulo: '#1f2937',
+  colorTexto: '#4a5568',
+  colorTitulo: '#1a202c',
+  colorSubtitulo: '#718096',
+  colorPrecio: '#2d3748',
+  colorAcento: '#C7D02C',
   imagenFondo: '',
 }
 
@@ -82,9 +85,9 @@ export default function MenuPreviewCategoriasPrimero({ categorias, apariencia = 
                       <span className="menu-preview-cat-primero-card-icon" style={{ color: colorTexto }}>
                         <UtensilsCrossed size={28} />
                       </span>
-                      <span className="menu-preview-cat-primero-card-nombre">{cat.nombre}</span>
+                      <span className="menu-preview-cat-primero-card-nombre" style={{ color: colorTitulo }}>{cat.nombre}</span>
                       {cat.items?.length > 0 && (
-                        <span className="menu-preview-cat-primero-card-count" style={{ color: colorTexto }}>
+                        <span className="menu-preview-cat-primero-card-count" style={{ color: `${colorTexto}80` }}>
                           {cat.items.length} {cat.items.length === 1 ? 'producto' : 'productos'}
                         </span>
                       )}

@@ -8,7 +8,7 @@ import '../../components/FormularioProductos/FormularioProductos.css'
 import './Perfil.css'
 
 const TABS = [
-  { id: 'compania', label: 'COMPAÑÍA' },
+  { id: 'general', label: 'General' },
   { id: 'apikey', label: 'API KEY' },
 ]
 
@@ -32,7 +32,7 @@ const TIPOS_NEGOCIO = [
 ]
 
 export default function Compania() {
-  const [tabActiva, setTabActiva] = useState('compania')
+  const [tabActiva, setTabActiva] = useState('general')
   const [companyLoading, setCompanyLoading] = useState(true)
   const [companyError, setCompanyError] = useState(null)
   const [companySaving, setCompanySaving] = useState(false)
@@ -82,7 +82,7 @@ export default function Compania() {
   }, [])
 
   useEffect(() => {
-    if (tabActiva === 'compania') cargarCompany()
+    if (tabActiva === 'general') cargarCompany()
   }, [tabActiva, cargarCompany])
 
   const handleCompanyChange = (field, value) => {
@@ -150,8 +150,8 @@ export default function Compania() {
 
   return (
     <PageModule
-      title="Compañía"
-      description="Datos de la empresa y configuración de integraciones. Gestiona la compañía y las claves API."
+      title="Configuración"
+      description="Datos de la empresa y configuración de integraciones. General y claves API."
     >
       <div className="perfil-tabs">
         {TABS.map((tab) => (
@@ -167,7 +167,7 @@ export default function Compania() {
       </div>
 
       <div className="perfil-content">
-        {tabActiva === 'compania' && (
+        {tabActiva === 'general' && (
           <section className="perfil-section">
             {companyError && (
               <p className="page-module-empty" style={{ color: '#dc2626', marginBottom: '12px' }}>
@@ -175,7 +175,24 @@ export default function Compania() {
               </p>
             )}
             {companyLoading ? (
-              <p className="perfil-section-desc">Cargando datos de la empresa...</p>
+              <div className="config-form">
+                <div className="perfil-skeleton-title" />
+                <div className="config-form-grid">
+                  <div className="config-field" style={{ gridColumn: '1 / -1' }}>
+                    <div className="perfil-skeleton-label" />
+                    <div className="perfil-skeleton-input" style={{ width: 140, height: 40 }} />
+                  </div>
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => (
+                    <div key={i} className="config-field">
+                      <div className="perfil-skeleton-label" />
+                      <div className="perfil-skeleton-input" />
+                    </div>
+                  ))}
+                </div>
+                <div className="config-form-actions">
+                  <div className="perfil-skeleton-btn" />
+                </div>
+              </div>
             ) : (
               <form className="config-form" onSubmit={handleCompanySubmit}>
                 <h3 className="perfil-section-title">Datos de la empresa</h3>
@@ -299,34 +316,51 @@ export default function Compania() {
               No compartas tu clave con terceros.
             </p>
             <div className="config-form-grid" style={{ maxWidth: '560px' }}>
-              <div className="config-field" style={{ gridColumn: '1 / -1' }}>
-                <label>Clave API (solo lectura)</label>
-                <div className="perfil-apikey-wrap">
-                  <input
-                    type={showApiKeyValue ? 'text' : 'password'}
-                    className="perfil-apikey-input"
-                    value={apiKeyLoading ? 'Cargando' : valorClave}
-                    readOnly
-                  />
-                  <button
-                    type="button"
-                    className="btn-secondary perfil-apikey-btn"
-                    onClick={() => setShowApiKeyValue((v) => !v)}
-                  >
-                    {showApiKeyValue ? 'Ocultar' : 'Mostrar'}
-                  </button>
-                </div>
-              </div>
-              <div className="config-field" style={{ gridColumn: '1 / -1' }}>
-                <button
-                  type="button"
-                  className="btn-secondary"
-                  disabled={apiKeyRegenerating}
-                  onClick={handleRegenerar}
-                >
-                  {apiKeyRegenerating ? 'Regenerando...' : 'Regenerar clave API'}
-                </button>
-              </div>
+              {apiKeyLoading ? (
+                <>
+                  <div className="config-field" style={{ gridColumn: '1 / -1' }}>
+                    <div className="perfil-skeleton-label" />
+                    <div className="perfil-apikey-wrap">
+                      <div className="perfil-skeleton-input perfil-apikey-input" style={{ flex: 1 }} />
+                      <div className="perfil-skeleton-btn" style={{ width: 100, flexShrink: 0 }} />
+                    </div>
+                  </div>
+                  <div className="config-field" style={{ gridColumn: '1 / -1' }}>
+                    <div className="perfil-skeleton-btn" style={{ width: 180 }} />
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="config-field" style={{ gridColumn: '1 / -1' }}>
+                    <label>Clave API (solo lectura)</label>
+                    <div className="perfil-apikey-wrap">
+                      <input
+                        type={showApiKeyValue ? 'text' : 'password'}
+                        className="perfil-apikey-input"
+                        value={valorClave}
+                        readOnly
+                      />
+                      <button
+                        type="button"
+                        className="btn-secondary perfil-apikey-btn"
+                        onClick={() => setShowApiKeyValue((v) => !v)}
+                      >
+                        {showApiKeyValue ? 'Ocultar' : 'Mostrar'}
+                      </button>
+                    </div>
+                  </div>
+                  <div className="config-field" style={{ gridColumn: '1 / -1' }}>
+                    <button
+                      type="button"
+                      className="btn-secondary"
+                      disabled={apiKeyRegenerating}
+                      onClick={handleRegenerar}
+                    >
+                      {apiKeyRegenerating ? 'Regenerando...' : 'Regenerar clave API'}
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
           </section>
         )}

@@ -281,6 +281,40 @@ export default function Proveedores() {
         </div>
         <div className="maestro-encabezado-filtros">
           <div className="maestro-encabezado-filtros-left">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <label className="maestro-encabezado-label">Tipo doc.</label>
+              <select
+                className="maestro-encabezado-select"
+                style={{ height: '40px', boxSizing: 'border-box' }}
+                value={filtrosActivos.find((f) => f.id === 'document_type')?.value ?? ''}
+                onChange={(e) => {
+                  const v = e.target.value
+                  setFiltrosActivos((prev) => {
+                    const rest = prev.filter((f) => f.id !== 'document_type')
+                    if (!v) return rest
+                    const tipoLabel = TIPOS_DOCUMENTO.find((t) => TIPO_UI_A_API[t] === v) ?? v
+                    return [...rest, { id: 'document_type', label: `Tipo doc.: ${tipoLabel}`, value: v }]
+                  })
+                  setPage(1)
+                }}
+                aria-label="Filtrar por tipo de documento"
+              >
+                <option value="">Todos</option>
+                {TIPOS_DOCUMENTO.map((t) => (
+                  <option key={t} value={TIPO_UI_A_API[t]}>{t}</option>
+                ))}
+              </select>
+              <input
+                type="search"
+                className="input-search"
+                placeholder="Nº documento..."
+                value={searchDocument}
+                onChange={(e) => setSearchDocument(e.target.value)}
+                aria-label="Buscar por número de documento"
+                style={{ height: '40px', boxSizing: 'border-box', minWidth: '140px' }}
+              />
+            </div>
+            <label className="maestro-encabezado-label">Nombre</label>
             <input
               type="search"
               className="input-search"
@@ -288,10 +322,12 @@ export default function Proveedores() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               aria-label="Buscar por nombre"
+              style={{ height: '40px', boxSizing: 'border-box' }}
             />
             <label className="maestro-encabezado-label">Estado</label>
             <select
               className="maestro-encabezado-select"
+              style={{ height: '40px', boxSizing: 'border-box' }}
               value={filtrosActivos.find((f) => f.id === 'estado')?.value ?? ''}
               onChange={(e) => {
                 const v = e.target.value
@@ -308,35 +344,6 @@ export default function Proveedores() {
               <option value="active">Activos</option>
               <option value="inactive">Inactivos</option>
             </select>
-            <label className="maestro-encabezado-label">Tipo doc.</label>
-            <select
-              className="maestro-encabezado-select"
-              value={filtrosActivos.find((f) => f.id === 'document_type')?.value ?? ''}
-              onChange={(e) => {
-                const v = e.target.value
-                setFiltrosActivos((prev) => {
-                  const rest = prev.filter((f) => f.id !== 'document_type')
-                  if (!v) return rest
-                  const tipoLabel = TIPOS_DOCUMENTO.find((t) => TIPO_UI_A_API[t] === v) ?? v
-                  return [...rest, { id: 'document_type', label: `Tipo doc.: ${tipoLabel}`, value: v }]
-                })
-                setPage(1)
-              }}
-              aria-label="Filtrar por tipo de documento"
-            >
-              <option value="">Todos</option>
-              {TIPOS_DOCUMENTO.map((t) => (
-                <option key={t} value={TIPO_UI_A_API[t]}>{t}</option>
-              ))}
-            </select>
-            <input
-              type="search"
-              className="input-search"
-              placeholder="Buscar por número de documento..."
-              value={searchDocument}
-              onChange={(e) => setSearchDocument(e.target.value)}
-              aria-label="Buscar por número de documento"
-            />
           </div>
           <div className="maestro-encabezado-filtros-right">
             <span className="maestro-encabezado-label">Filtros Activos:</span>

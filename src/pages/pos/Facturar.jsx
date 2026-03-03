@@ -91,6 +91,7 @@ export default function Facturar() {
     [pedidos, currentPedidoId]
   )
   const selectedCustomer = customers.find(c => String(c.id) === String(currentPedido?.customerId))
+  const customerName = selectedCustomer?.full_name || selectedCustomer?.name || 'Consumidor final'
   const cart = currentPedido?.cart ?? []
   useEffect(() => {
     if (pedidos.length > 0 && (currentPedidoId == null || !pedidos.some((p) => p.id === currentPedidoId))) {
@@ -314,7 +315,7 @@ export default function Facturar() {
               Actualizado: {lastUpdate.toLocaleTimeString()}
             </span>
           )}
-          <button
+      <button
             type="button"
             onClick={loadData}
             disabled={loading}
@@ -330,7 +331,7 @@ export default function Facturar() {
           >
             <RefreshCw size={14} className={loading ? "animate-spin" : ""} style={{ animation: loading ? 'spin 1s linear infinite' : 'none' }} />
             <span>Sincronizar</span>
-          </button>
+      </button>
 
           <style>
             {`
@@ -350,7 +351,30 @@ export default function Facturar() {
           {error && <ApiErrorRecargar message={error} onRecargar={loadData} loading={loading} />}
 
           {loading ? (
-            <p className="facturar-loading">Cargando categorías y productos...</p>
+            <div className="facturar-grid">
+              <div className="facturar-productos">
+                <div className="facturar-filtros">
+                  <div className="facturar-categorias-filtro">
+                    {[1, 2, 3, 4, 5].map((i) => (
+                      <div key={i} className="facturar-skeleton-pill" style={{ width: i === 1 ? 80 : 70 + i * 18 }} />
+                    ))}
+                  </div>
+                  <div className="facturar-skeleton-input" />
+                  <p className="facturar-skeleton-actualizado">Actualizado —</p>
+                </div>
+                <div className="facturar-productos-grid">
+                  {Array.from({ length: 12 }, (_, i) => (
+                    <div key={i} className="facturar-skeleton-card">
+                      <div className="facturar-skeleton-card-image" />
+                      <div className="facturar-skeleton-card-line" style={{ width: '90%' }} />
+                      <div className="facturar-skeleton-card-line facturar-skeleton-card-line--short" />
+                      <div className="facturar-skeleton-card-line facturar-skeleton-card-line--price" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="facturar-panel-factura" style={{ minHeight: 320 }} />
+            </div>
           ) : (
             <div className="facturar-grid">
               {/* Izquierda: categorías + búsqueda + grid de productos */}
@@ -382,6 +406,11 @@ export default function Facturar() {
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                   />
+                  {lastUpdate && (
+                    <p className="facturar-skeleton-actualizado">
+                      Actualizado {lastUpdate.toLocaleString('es-CO', { dateStyle: 'short', timeStyle: 'short' })}
+                    </p>
+                  )}
                 </div>
 
                 <div className="facturar-productos-grid">
@@ -397,27 +426,27 @@ export default function Facturar() {
                       const quantityInCart = cartItem ? cartItem.quantity : 0
 
                       return (
-                        <div key={p.id} className={`facturar-producto-card ${quantityInCart > 0 ? 'active' : ''}`}>
-                          <div className="facturar-producto-inicial">
-                            {getProductInitial(p.name ?? p.code)}
+                        <div key={p.id} className={`facturar-producto-card ${quantityInCart > 0 ? 'active' : ''}`} onClick={() => quantityInCart === 0 && addToCart(p)}>
+                          <div className="facturar-producto-img-container">
+                            {p.image_url ? (
+                              <img src={p.image_url} alt={p.name} className="facturar-producto-img" />
+                            ) : (
+                              <div className="facturar-producto-inicial">
+                                {getProductInitial(p.name ?? p.code)}
+                              </div>
+                            )}
                           </div>
-                          <h4 className="facturar-producto-nombre">{p.name ?? p.code ?? 'Producto'}</h4>
-                          <span className="facturar-producto-categoria">{p.categoryName || 'General'}</span>
-
-                          {(p.description || '').trim() && (
-                            <p className="facturar-producto-desc">
-                              {(p.description || '').trim().slice(0, 50)}
-                              {(p.description || '').trim().length > 50 ? '...' : ''}
-                            </p>
-                          )}
+                          <div className="facturar-producto-info">
+                            <h4 className="facturar-producto-nombre">{p.name ?? p.code ?? 'Producto'}</h4>
+                            <span className="facturar-producto-categoria">{p.categoryName || 'General'}</span>
+                            <span className="facturar-producto-precio">
+                              ${Number(p.price ?? p.unit_price ?? 0).toLocaleString('es-CO')}
+                            </span>
+                          </div>
 
                           <div className="facturar-producto-footer">
-                            <span className="facturar-producto-precio">
-                              ${Number(p.price ?? p.unit_price ?? 0).toLocaleString('es-CO')}/und
-                            </span>
-
                             {quantityInCart > 0 ? (
-                              <div className="facturar-producto-counter">
+                              <div className="facturar-producto-counter" onClick={(e) => e.stopPropagation()}>
                                 <button type="button" onClick={() => updateQuantity(p.id, -1)} aria-label="Menos">
                                   <Minus size={14} />
                                 </button>
@@ -430,7 +459,7 @@ export default function Facturar() {
                               <button
                                 type="button"
                                 className="facturar-producto-btn-mas"
-                                onClick={() => addToCart(p)}
+                                onClick={(e) => { e.stopPropagation(); addToCart(p); }}
                                 aria-label="Agregar a la factura"
                               >
                                 <Plus size={20} strokeWidth={2.5} />
@@ -452,14 +481,14 @@ export default function Facturar() {
                     className={`facturar-order-type-btn ${currentPedido?.orderType === 'dine_in' ? 'active' : ''}`}
                     onClick={() => updateCurrentPedidoField('orderType', 'dine_in')}
                   >
-                    Comer aquí
+                    Local
                   </button>
                   <button
                     type="button"
                     className={`facturar-order-type-btn ${currentPedido?.orderType === 'take_away' ? 'active' : ''}`}
                     onClick={() => updateCurrentPedidoField('orderType', 'take_away')}
                   >
-                    Para llevar
+                    Delivery
                   </button>
                 </div>
 
@@ -510,7 +539,7 @@ export default function Facturar() {
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden' }}>
                           <User size={16} color="#6b7280" />
                           <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                            {selectedCustomer ? selectedCustomer.name : 'Consumidor final'}
+                            {selectedCustomer ? customerName : 'Consumidor final'}
                           </span>
                         </div>
                         {selectedCustomer ? (
@@ -547,7 +576,7 @@ export default function Facturar() {
                             </div>
                           </div>
                           <ul style={{ listStyle: 'none', padding: 0, margin: 0, maxHeight: '200px', overflowY: 'auto' }}>
-                            {customers.filter(c => (c.name || '').toLowerCase().includes(customerSearch.toLowerCase())).map(c => (
+                            {customers.filter(c => ((c.full_name || c.name || '').toLowerCase().includes(customerSearch.toLowerCase()))).map(c => (
                               <li
                                 key={c.id}
                                 onClick={() => { updateCurrentPedidoField('customerId', String(c.id)); setShowCustomerDropdown(false); }}
@@ -555,7 +584,7 @@ export default function Facturar() {
                                 onMouseEnter={(e) => e.target.style.background = '#f3f4f6'}
                                 onMouseLeave={(e) => e.target.style.background = 'transparent'}
                               >
-                                {c.name}
+                                {c.full_name || c.name}
                               </li>
                             ))}
                           </ul>

@@ -7,10 +7,13 @@ import MenuContactBar from './MenuContactBar'
 import './Menu.css'
 
 const aparienciaDefault = {
-  colorFondo: '#fefce8',
+  colorFondo: '#f8f9fa',
   colorContenido: '#ffffff',
-  colorTexto: '#1f2937',
-  colorTitulo: '#1f2937',
+  colorTexto: '#4a5568',
+  colorTitulo: '#1a202c',
+  colorSubtitulo: '#718096',
+  colorPrecio: '#2d3748',
+  colorAcento: '#C7D02C',
   imagenFondo: '',
 }
 
@@ -38,9 +41,9 @@ export default function MenuPreview({ categorias, apariencia = aparienciaDefault
     colorContenido,
     colorTexto,
     colorTitulo,
-    colorSubtitulo = colorTexto,
-    colorPrecio = colorTexto,
-    colorAcento = colorTitulo,
+    colorSubtitulo = colorTexto || '#4a5568',
+    colorPrecio = colorTexto || '#2d3748',
+    colorAcento = colorTitulo || '#C7D02C',
     imagenFondo,
   } = { ...aparienciaDefault, ...apariencia }
 
@@ -97,7 +100,7 @@ export default function MenuPreview({ categorias, apariencia = aparienciaDefault
                           <div className="menu-preview-item-texto">
                             <span
                               className="menu-preview-item-nombre"
-                              style={{ color: colorTexto }}
+                              style={{ color: colorTitulo }}
                             >
                               {item.nombre}
                             </span>

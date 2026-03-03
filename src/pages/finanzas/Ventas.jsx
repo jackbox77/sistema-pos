@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect, useCallback } from 'react'
-import { Pencil, Trash2, Plus, X, Search, User, History, DollarSign, Filter, Eraser } from 'lucide-react'
+import { Pencil, Trash2, Plus, X, Search, User, History, DollarSign, Filter, Eraser, AlertCircle } from 'lucide-react'
 import { useIngresos } from './IngresosLayout'
 import { formatoTurno } from '../../utils/fechaUtils'
 import { useMaestros } from '../../context/MaestrosContext'
@@ -64,6 +64,7 @@ function IngresosOVentasView({ mode }) {
   const [cantidadAgregar, setCantidadAgregar] = useState(1)
   const [listaPrecios, setListaPrecios] = useState('general')
   const [filtrosActivos, setFiltrosActivos] = useState([])
+  const [showInfoReportes, setShowInfoReportes] = useState(false)
 
   const [searchTerm, setSearchTerm] = useState('')
   const [minAmount, setMinAmount] = useState('')
@@ -94,7 +95,7 @@ function IngresosOVentasView({ mode }) {
     shift = selectedShiftId
   ) => {
     if (isIngresos) {
-      loadIncomes(currentPage, search, min, max, shift, customer)
+      loadIncomes(currentPage, search, min, max, shift, undefined)
       return
     }
     setErrorVentas(null)
@@ -135,7 +136,7 @@ function IngresosOVentasView({ mode }) {
     if (searchTerm.trim()) nuevos.push({ id: 'search', label: `Búsqueda: ${searchTerm}` })
     if (minAmount) nuevos.push({ id: 'min', label: `Mínimo: $${Number(minAmount).toLocaleString()}` })
     if (maxAmount) nuevos.push({ id: 'max', label: `Máximo: $${Number(maxAmount).toLocaleString()}` })
-    if (loyalCustomerId) {
+    if (!isIngresos && loyalCustomerId) {
       const c = clientes.find(x => x.id === loyalCustomerId)
       if (c) nuevos.push({ id: 'customer', label: `Cliente: ${c.full_name || (c.first_name + ' ' + (c.last_name || ''))}` })
     }
@@ -274,7 +275,6 @@ function IngresosOVentasView({ mode }) {
           <div className="maestro-encabezado-info">
             <h1 className="maestro-encabezado-titulo">{titulo}</h1>
             <p className="maestro-encabezado-desc">{descripcion}</p>
-            <a href="#ver-mas" className="maestro-encabezado-link">Ver más</a>
           </div>
           <div className="maestro-encabezado-acciones">
             {isIngresos ? (
@@ -284,7 +284,26 @@ function IngresosOVentasView({ mode }) {
             )}
           </div>
         </div>
-        <div className="maestro-encabezado-filtros" style={{
+      </header>
+      {showInfoReportes && (
+        <div className="form-overlay" onClick={() => setShowInfoReportes(false)} role="dialog" aria-modal="true" aria-labelledby="info-reportes-finanzas">
+          <div className="form-modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '380px' }}>
+            <div className="form-header">
+              <h3 id="info-reportes-finanzas">Información</h3>
+              <button className="form-close" onClick={() => setShowInfoReportes(false)} aria-label="Cerrar">✕</button>
+            </div>
+            <div className="form-body">
+              <p style={{ margin: 0, color: '#374151' }}>
+                Si quieres visualizar información anterior al turno, revisa reportes.
+              </p>
+              <div className="form-footer" style={{ marginTop: '1rem' }}>
+                <button type="button" className="form-btn-primary" onClick={() => setShowInfoReportes(false)}>Entendido</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      <div className="maestro-encabezado-filtros" style={{
           background: 'linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%)',
           padding: '24px',
           borderRadius: '16px',
@@ -298,12 +317,13 @@ function IngresosOVentasView({ mode }) {
           <div style={{ position: 'absolute', top: '-50px', right: '-50px', width: '150px', height: '150px', background: 'rgba(13, 148, 136, 0.05)', borderRadius: '50%' }}></div>
 
           <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-            gap: '20px',
-            alignItems: 'end'
+            display: 'flex',
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            alignItems: 'flex-end',
+            gap: '16px'
           }}>
-            <div className="filter-group">
+            <div className="filter-group" style={{ flex: '1 1 160px', minWidth: '140px', maxWidth: '220px' }}>
               <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600, color: '#334155', fontSize: '13px', marginBottom: '8px' }}>
                 <Search size={14} style={{ color: '#0d9488' }} /> Buscar venta o referencia
               </label>
@@ -319,25 +339,27 @@ function IngresosOVentasView({ mode }) {
               </div>
             </div>
 
-            <div className="filter-group">
-              <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600, color: '#334155', fontSize: '13px', marginBottom: '8px' }}>
-                <User size={14} style={{ color: '#0d9488' }} /> Cliente Fidelizado
-              </label>
-              <select
-                value={loyalCustomerId}
-                onChange={(e) => setLoyalCustomerId(e.target.value)}
-                style={{ width: '100%', padding: '12px 14px', borderRadius: '10px', border: '1px solid #cbd5e1', background: '#fff', fontSize: '14px', cursor: 'pointer', appearance: 'none', backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%2364748b\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\'/%3E%3C/svg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center', backgroundSize: '16px' }}
-              >
-                <option value="">Todos los clientes</option>
-                {clientes.map(c => (
-                  <option key={c.id} value={c.id}>
-                    {c.full_name || (c.first_name + ' ' + (c.last_name || ''))}
-                  </option>
-                ))}
-              </select>
-            </div>
+            {!isIngresos && (
+              <div className="filter-group" style={{ flex: '1 1 160px', minWidth: '140px', maxWidth: '220px' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600, color: '#334155', fontSize: '13px', marginBottom: '8px' }}>
+                  <User size={14} style={{ color: '#0d9488' }} /> Cliente Fidelizado
+                </label>
+                <select
+                  value={loyalCustomerId}
+                  onChange={(e) => setLoyalCustomerId(e.target.value)}
+                  style={{ width: '100%', padding: '12px 14px', borderRadius: '10px', border: '1px solid #cbd5e1', background: '#fff', fontSize: '14px', cursor: 'pointer', appearance: 'none', backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%2364748b\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\'/%3E%3C/svg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center', backgroundSize: '16px' }}
+                >
+                  <option value="">Todos los clientes</option>
+                  {clientes.map(c => (
+                    <option key={c.id} value={c.id}>
+                      {c.full_name || (c.first_name + ' ' + (c.last_name || ''))}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
 
-            <div className="filter-group">
+            <div className="filter-group" style={{ flex: '1 1 160px', minWidth: '140px', maxWidth: '220px' }}>
               <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600, color: '#334155', fontSize: '13px', marginBottom: '8px' }}>
                 <History size={14} style={{ color: '#0d9488' }} /> Filtrar por Turno
               </label>
@@ -355,11 +377,11 @@ function IngresosOVentasView({ mode }) {
               </select>
             </div>
 
-            <div className="filter-group">
+            <div className="filter-group" style={{ flex: '1 1 140px', minWidth: '120px', maxWidth: '180px' }}>
               <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600, color: '#334155', fontSize: '13px', marginBottom: '8px' }}>
                 <DollarSign size={14} style={{ color: '#0d9488' }} /> Rango de Monto
               </label>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+              <div style={{ display: 'flex', flexDirection: 'row', gap: '8px' }}>
                 <input
                   type="number"
                   placeholder="Mín."
@@ -379,7 +401,7 @@ function IngresosOVentasView({ mode }) {
               </div>
             </div>
 
-            <div style={{ display: 'flex', gap: '10px' }}>
+            <div style={{ display: 'flex', gap: '10px', flex: '0 0 auto', alignItems: 'flex-end' }}>
               <button
                 type="button"
                 onClick={() => {
@@ -404,9 +426,18 @@ function IngresosOVentasView({ mode }) {
               >
                 <Filter size={18} /> Filtrar
               </button>
+              <button
+                type="button"
+                onClick={() => setShowInfoReportes(true)}
+                className="metodos-pago-btn-alert"
+                title="Información sobre datos anteriores al turno"
+                aria-label="Información: ver reportes para datos anteriores al turno"
+                style={{ flexShrink: 0 }}
+              >
+                <AlertCircle size={22} strokeWidth={2.5} />
+              </button>
             </div>
           </div>
-        </div>
 
         {filtrosActivos.length > 0 && (
           <div className="maestro-encabezado-filtros-right" style={{ paddingBottom: '20px', borderTop: 'none', display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
@@ -419,7 +450,7 @@ function IngresosOVentasView({ mode }) {
             ))}
           </div>
         )}
-      </header>
+      </div>
       {isIngresos && errorIngresos && (
         <div role="alert" style={{ marginTop: '16px', padding: '12px 16px', background: '#fef2f2', color: '#b91c1c', borderRadius: '8px', fontSize: '14px' }}>
           {errorIngresos}

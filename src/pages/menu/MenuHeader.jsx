@@ -17,7 +17,13 @@ export default function MenuHeader({
   style = {},
 }) {
   const empresa = { ...empresaDefault, ...empresaInfo }
-  const { colorTexto, colorTitulo, colorAcento, imagenHeaderFondo } = apariencia
+  const {
+    colorTexto,
+    colorTitulo,
+    colorSubtitulo = colorTexto || '#6b7280',
+    colorAcento = colorTitulo || '#1f2937',
+    imagenHeaderFondo,
+  } = apariencia || {}
 
   // Header con imagen de fondo
   if (tipoHeader === 'imagen-fondo') {
@@ -34,7 +40,11 @@ export default function MenuHeader({
             </div>
           )}
           <h2 className="menu-header-imagen-fondo-titulo">{empresa.nombreEmpresa || 'Menú'}</h2>
-          {empresa.subtitulo && <p className="menu-header-imagen-fondo-sub">{empresa.subtitulo}</p>}
+          {empresa.subtitulo && (
+            <p className="menu-header-imagen-fondo-sub" style={{ color: '#ffffff' }}>
+              {empresa.subtitulo}
+            </p>
+          )}
         </div>
       </header>
     )
@@ -51,7 +61,7 @@ export default function MenuHeader({
           {empresa.nombreEmpresa || 'Menú'}
         </h2>
         {empresa.subtitulo && (
-          <p className="menu-header-minimalista-sub" style={{ color: colorTexto || '#6b7280' }}>
+          <p className="menu-header-minimalista-sub" style={{ color: colorSubtitulo || '#6b7280' }}>
             {empresa.subtitulo}
           </p>
         )}
@@ -76,7 +86,7 @@ export default function MenuHeader({
             {empresa.nombreEmpresa || 'Menú'}
           </h2>
           {empresa.subtitulo && (
-            <p className="menu-header-editorial-sub" style={{ color: colorTexto || '#6b7280' }}>
+            <p className="menu-header-editorial-sub" style={{ color: colorSubtitulo || '#6b7280' }}>
               {empresa.subtitulo}
             </p>
           )}
@@ -103,7 +113,7 @@ export default function MenuHeader({
       <h2 className="menu-header-clasico-titulo" style={{ color: colorTitulo || '#1f2937' }}>
         {empresa.nombreEmpresa || 'Menú'}
       </h2>
-      <p className="menu-header-clasico-sub" style={{ color: colorTexto || '#6b7280' }}>
+      <p className="menu-header-clasico-sub" style={{ color: colorSubtitulo || '#6b7280' }}>
         {empresa.subtitulo || 'Tu restaurante'}
       </p>
     </header>

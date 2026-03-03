@@ -9,6 +9,9 @@ const aparienciaDefault = {
   colorContenido: '#ffffff',
   colorTexto: '#4a5568',
   colorTitulo: '#1a202c',
+  colorSubtitulo: '#718096',
+  colorPrecio: '#2d3748',
+  colorAcento: '#C7D02C',
   imagenFondo: '',
 }
 
@@ -24,9 +27,9 @@ export default function MenuPreviewTarjetas({ categorias, apariencia = aparienci
     colorContenido,
     colorTexto,
     colorTitulo,
-    colorSubtitulo = colorTexto,
-    colorPrecio = colorTexto,
-    colorAcento = colorTitulo,
+    colorSubtitulo = colorTexto || '#4a5568',
+    colorPrecio = colorTexto || '#2d3748',
+    colorAcento = colorTitulo || '#C7D02C',
     imagenFondo,
   } = { ...aparienciaDefault, ...apariencia }
 

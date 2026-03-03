@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { X, Info } from 'lucide-react'
+import { X, AlertCircle } from 'lucide-react'
 import PageModule from '../../components/PageModule/PageModule'
 import ApiErrorRecargar from '../../components/ApiErrorRecargar/ApiErrorRecargar'
 import TableResponsive from '../../components/TableResponsive/TableResponsive'
@@ -141,11 +141,11 @@ export default function MetodosPago() {
         <button
           type="button"
           onClick={() => setShowInfoSoporte(true)}
-          style={{ background: 'transparent', color: '#dc2626', border: 'none', width: '40px', height: '40px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0, padding: 0 }}
-          title="Para editar o eliminar métodos de pago, comuníquese con soporte"
-          aria-label="Información sobre edición y eliminación"
+          className="metodos-pago-btn-alert"
+          title="Editar o eliminar: solo soporte puede hacerlo. Contacte a soporte para cambios en métodos de pago existentes."
+          aria-label="Aviso: edición y eliminación de métodos de pago solo mediante soporte"
         >
-          <Info size={22} strokeWidth={2.5} />
+          <AlertCircle size={22} strokeWidth={2.5} />
         </button>
       </div>
       {showInfoSoporte && (

@@ -172,6 +172,9 @@ export default function MenuProvider({ children }) {
 
       if (res?.success && res?.data) {
         const { company, menu_config } = res.data
+        console.log('--- loadProfile mapping received data ---')
+        console.log('company:', company)
+        console.log('menu_config:', menu_config)
         if (company) {
           setEmpresaInfo((prev) => ({
             ...prev,
@@ -195,6 +198,8 @@ export default function MenuProvider({ children }) {
             colorIconoContacto: menu_config.contact_icon_color ?? prev.colorIconoContacto,
             colorTextoContacto: menu_config.contact_text_color ?? prev.colorTextoContacto,
             colorFondoContacto: menu_config.contact_background_color ?? prev.colorFondoContacto,
+            imagenFondo: menu_config.menu_background_image ?? prev.imagenFondo,
+            imagenHeaderFondo: menu_config.header_background_image ?? prev.imagenHeaderFondo,
           }))
           setTipoHeader(API_HEADER_TO_CONTEXT[menu_config.header_type] ?? 'clasico')
           setTipoMenu(API_MENU_TO_CONTEXT[menu_config.menu_type] ?? 'tarjetas-categorias')

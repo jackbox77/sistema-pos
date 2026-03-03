@@ -4,10 +4,13 @@ import MenuContactBar from './MenuContactBar'
 import './MenuPreviewPlatosHorizontal.css'
 
 const aparienciaDefault = {
-  colorFondo: '#fefce8',
+  colorFondo: '#f8f9fa',
   colorContenido: '#ffffff',
-  colorTexto: '#1f2937',
-  colorTitulo: '#1f2937',
+  colorTexto: '#4a5568',
+  colorTitulo: '#1a202c',
+  colorSubtitulo: '#718096',
+  colorPrecio: '#2d3748',
+  colorAcento: '#C7D02C',
   imagenFondo: '',
 }
 

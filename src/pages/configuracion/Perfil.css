@@ -72,3 +72,53 @@
 .perfil-apikey-btn {
   flex-shrink: 0;
 }
+
+/* Skeleton (General / API Key) */
+.perfil-skeleton-shimmer {
+  background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
+  background-size: 200% 100%;
+  animation: perfil-skeleton-shimmer 1.2s ease-in-out infinite;
+}
+
+@keyframes perfil-skeleton-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.perfil-skeleton-title {
+  height: 20px;
+  width: 180px;
+  border-radius: 6px;
+  margin-bottom: 16px;
+  background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
+  background-size: 200% 100%;
+  animation: perfil-skeleton-shimmer 1.2s ease-in-out infinite;
+}
+
+.perfil-skeleton-label {
+  height: 14px;
+  width: 120px;
+  max-width: 100%;
+  border-radius: 4px;
+  margin-bottom: 8px;
+  background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
+  background-size: 200% 100%;
+  animation: perfil-skeleton-shimmer 1.2s ease-in-out infinite;
+}
+
+.perfil-skeleton-input {
+  height: 42px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
+  background-size: 200% 100%;
+  animation: perfil-skeleton-shimmer 1.2s ease-in-out infinite;
+}
+
+.perfil-skeleton-btn {
+  height: 40px;
+  border-radius: 8px;
+  min-width: 100px;
+  background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
+  background-size: 200% 100%;
+  animation: perfil-skeleton-shimmer 1.2s ease-in-out infinite;
+}

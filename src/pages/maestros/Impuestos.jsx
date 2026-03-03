@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { X, Info } from 'lucide-react'
+import { X, AlertCircle } from 'lucide-react'
 import PageModule from '../../components/PageModule/PageModule'
 import ApiErrorRecargar from '../../components/ApiErrorRecargar/ApiErrorRecargar'
 import TableResponsive from '../../components/TableResponsive/TableResponsive'
@@ -151,11 +151,11 @@ export default function Impuestos() {
         <button
           type="button"
           onClick={() => setShowInfoSoporte(true)}
-          style={{ background: 'transparent', color: '#dc2626', border: 'none', width: '40px', height: '40px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0, padding: 0 }}
-          title="Para editar o eliminar impuestos, comuníquese con soporte"
-          aria-label="Información sobre edición y eliminación"
+          className="metodos-pago-btn-alert"
+          title="Editar o eliminar: solo soporte puede hacerlo. Contacte a soporte para cambios en impuestos existentes."
+          aria-label="Aviso: edición y eliminación de impuestos solo mediante soporte"
         >
-          <Info size={22} strokeWidth={2.5} />
+          <AlertCircle size={22} strokeWidth={2.5} />
         </button>
       </div>
       {showInfoSoporte && (
@@ -167,7 +167,7 @@ export default function Impuestos() {
             </div>
             <div className="form-body">
               <p style={{ margin: 0, color: '#374151' }}>
-                Para editar o eliminar impuestos debe comunicarse con soporte.
+                Para editar o eliminar impuestos existentes debe comunicarse con soporte.
               </p>
               <div className="form-footer" style={{ marginTop: '1rem' }}>
                 <button type="button" className="form-btn-primary" onClick={() => setShowInfoSoporte(false)}>Entendido</button>
@@ -258,19 +258,27 @@ export default function Impuestos() {
 function ModalFormImpuesto({ impuesto, onClose, onGuardar, esEdicion = false, error: apiError }) {
   const [codigo, setCodigo] = useState(impuesto?.codigo ?? '')
   const [nombre, setNombre] = useState(impuesto?.nombre ?? '')
-  const [porcentaje, setPorcentaje] = useState(impuesto?.porcentaje ?? '0%')
+  const porcentajeInicial = impuesto != null ? String(parsePorcentaje(impuesto.porcentaje)) : ''
+  const [porcentaje, setPorcentaje] = useState(porcentajeInicial)
   const [descripcion, setDescripcion] = useState(impuesto?.descripcion ?? '')
   const [estado, setEstado] = useState(impuesto?.estado ?? 'Activo')
   const [saving, setSaving] = useState(false)
+  const [validationError, setValidationError] = useState('')
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    setValidationError('')
+    const num = parsePorcentaje(porcentaje)
+    if (Number.isNaN(num) || num < 0) {
+      setValidationError('El porcentaje debe ser un número mayor o igual a 0.')
+      return
+    }
     setSaving(true)
     try {
       await onGuardar(
         normalizarCodigo(codigo),
         nombre.trim(),
-        parsePorcentaje(porcentaje),
+        num,
         descripcion.trim(),
         estado === 'Activo' ? 'active' : 'inactive'
       )
@@ -287,9 +295,9 @@ function ModalFormImpuesto({ impuesto, onClose, onGuardar, esEdicion = false, er
           <button className="form-close" onClick={onClose} aria-label="Cerrar">✕</button>
         </div>
         <form onSubmit={handleSubmit} className="form-body">
-          {apiError && (
+          {(apiError || validationError) && (
             <p className="form-api-error" role="alert" style={{ color: '#dc2626', fontSize: '14px', marginBottom: '12px' }}>
-              {apiError}
+              {validationError || apiError}
             </p>
           )}
           <div className="config-form-grid" style={{ gridTemplateColumns: '1fr' }}>
@@ -314,12 +322,17 @@ function ModalFormImpuesto({ impuesto, onClose, onGuardar, esEdicion = false, er
               />
             </div>
             <div className="config-field">
-              <label>Porcentaje *</label>
+              <label>Porcentaje (%) *</label>
               <input
-                type="text"
+                type="number"
+                min={0}
+                step="0.01"
                 value={porcentaje}
-                onChange={(e) => setPorcentaje(e.target.value)}
-                placeholder="Ej: 19% o 0%"
+                onChange={(e) => {
+                  setPorcentaje(e.target.value)
+                  setValidationError('')
+                }}
+                placeholder="Ej: 19 o 0"
                 required
               />
             </div>

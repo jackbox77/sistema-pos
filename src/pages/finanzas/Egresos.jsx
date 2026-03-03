@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from 'react'
-import { X } from 'lucide-react'
+import { X, Search, History, DollarSign, Filter, Eraser, AlertCircle } from 'lucide-react'
 import PageModule from '../../components/PageModule/PageModule'
 import TableResponsive from '../../components/TableResponsive/TableResponsive'
 import '../../components/TableResponsive/TableResponsive.css'
+import '../../components/FormularioProductos/FormularioProductos.css'
 import { getExpensesUseCase, createExpenseUseCase } from '../../feature/finance/Discharge/use-case'
-import { getCurrentShiftUseCase } from '../../feature/shifts/use-case'
+import { getCurrentShiftUseCase, getShiftsUseCase } from '../../feature/shifts/use-case'
 
 function formatISOToFecha(iso) {
   if (!iso) return '-'
@@ -34,6 +35,7 @@ export default function Egresos() {
   const [selectedShiftId, setSelectedShiftId] = useState('')
   const [shifts, setShifts] = useState([])
   const [filtrosActivos, setFiltrosActivos] = useState([])
+  const [showInfoReportes, setShowInfoReportes] = useState(false)
 
   useEffect(() => {
     getShiftsUseCase(1, 100).then((res) => {
@@ -174,7 +176,6 @@ export default function Egresos() {
           <div className="maestro-encabezado-info">
             <h1 className="maestro-encabezado-titulo">Egresos</h1>
             <p className="maestro-encabezado-desc">Registro de salidas de dinero: pagos, gastos operativos y demás egresos.</p>
-            <a href="#ver-mas" className="maestro-encabezado-link">Ver más</a>
           </div>
           <div className="maestro-encabezado-acciones">
             <button type="button" className="btn-primary" onClick={abrirModal}>
@@ -182,98 +183,150 @@ export default function Egresos() {
             </button>
           </div>
         </div>
-        <div className="maestro-encabezado-filtros" style={{
+      </header>
+      {showInfoReportes && (
+        <div className="form-overlay" onClick={() => setShowInfoReportes(false)} role="dialog" aria-modal="true" aria-labelledby="info-reportes-egresos">
+          <div className="form-modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '380px' }}>
+            <div className="form-header">
+              <h3 id="info-reportes-egresos">Información</h3>
+              <button className="form-close" onClick={() => setShowInfoReportes(false)} aria-label="Cerrar">✕</button>
+            </div>
+            <div className="form-body">
+              <p style={{ margin: 0, color: '#374151' }}>
+                Si quieres visualizar información anterior al turno, revisa reportes.
+              </p>
+              <div className="form-footer" style={{ marginTop: '1rem' }}>
+                <button type="button" className="form-btn-primary" onClick={() => setShowInfoReportes(false)}>Entendido</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      <div className="maestro-encabezado-filtros" style={{
           background: 'linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%)',
           padding: '24px',
           borderRadius: '16px',
           border: '1px solid #e2e8f0',
           boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
           marginBottom: '24px',
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-          gap: '20px',
-          alignItems: 'end'
+          position: 'relative',
+          overflow: 'hidden'
         }}>
-          <div className="filter-group">
-            <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600, color: '#334155', fontSize: '13px', marginBottom: '8px' }}>
-              Buscar concepto o referencia
-            </label>
-            <input
-              type="search"
-              placeholder="Ej: transporte..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              onKeyDown={handleKeyDown}
-              style={{ width: '100%', padding: '12px 14px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '14px' }}
-            />
-          </div>
+          <div style={{ position: 'absolute', top: '-50px', right: '-50px', width: '150px', height: '150px', background: 'rgba(13, 148, 136, 0.05)', borderRadius: '50%' }} />
 
-          <div className="filter-group">
-            <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600, color: '#334155', fontSize: '13px', marginBottom: '8px' }}>
-              Filtrar por Turno
-            </label>
-            <select
-              value={selectedShiftId}
-              onChange={(e) => setSelectedShiftId(e.target.value)}
-              style={{ width: '100%', padding: '12px 14px', borderRadius: '10px', border: '1px solid #cbd5e1', background: '#fff', fontSize: '14px', cursor: 'pointer', appearance: 'none', backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%2364748b\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\'/%3E%3C/svg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center', backgroundSize: '16px' }}
-            >
-              <option value="">Todos los turnos registrados</option>
-              {shifts.map(s => (
-                <option key={s.id} value={s.id}>
-                  {s.name} ({new Date(s.start_at).toLocaleDateString()})
-                </option>
-              ))}
-            </select>
-          </div>
+          <div style={{
+            display: 'flex',
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            alignItems: 'flex-end',
+            gap: '16px'
+          }}>
+            <div className="filter-group" style={{ flex: '1 1 160px', minWidth: '140px', maxWidth: '220px' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600, color: '#334155', fontSize: '13px', marginBottom: '8px' }}>
+                <Search size={14} style={{ color: '#0d9488' }} /> Buscar concepto o referencia
+              </label>
+              <input
+                type="search"
+                placeholder="Ej: transporte..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onKeyDown={handleKeyDown}
+                style={{ width: '100%', padding: '12px 14px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '14px', transition: 'all 0.2s', boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.05)' }}
+              />
+            </div>
 
-          <div className="filter-group">
-            <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600, color: '#334155', fontSize: '13px', marginBottom: '8px' }}>
-              Rango de Monto
-            </label>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-              <input
-                type="number"
-                placeholder="Mín."
-                value={minAmount}
-                onChange={(e) => setMinAmount(e.target.value)}
-                onKeyDown={handleKeyDown}
-                style={{ width: '100%', padding: '12px 14px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '14px' }}
-              />
-              <input
-                type="number"
-                placeholder="Máx."
-                value={maxAmount}
-                onChange={(e) => setMaxAmount(e.target.value)}
-                onKeyDown={handleKeyDown}
-                style={{ width: '100%', padding: '12px 14px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '14px' }}
-              />
+            <div className="filter-group" style={{ flex: '1 1 160px', minWidth: '140px', maxWidth: '220px' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600, color: '#334155', fontSize: '13px', marginBottom: '8px' }}>
+                <History size={14} style={{ color: '#0d9488' }} /> Filtrar por Turno
+              </label>
+              <select
+                value={selectedShiftId}
+                onChange={(e) => setSelectedShiftId(e.target.value)}
+                style={{ width: '100%', padding: '12px 14px', borderRadius: '10px', border: '1px solid #cbd5e1', background: '#fff', fontSize: '14px', cursor: 'pointer', appearance: 'none', backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%2364748b\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\'/%3E%3C/svg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center', backgroundSize: '16px' }}
+              >
+                <option value="">Todos los turnos registrados</option>
+                {shifts.map(s => (
+                  <option key={s.id} value={s.id}>
+                    {s.name} ({new Date(s.start_at).toLocaleDateString()})
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="filter-group" style={{ flex: '1 1 140px', minWidth: '120px', maxWidth: '180px' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600, color: '#334155', fontSize: '13px', marginBottom: '8px' }}>
+                <DollarSign size={14} style={{ color: '#0d9488' }} /> Rango de Monto
+              </label>
+              <div style={{ display: 'flex', flexDirection: 'row', gap: '8px' }}>
+                <input
+                  type="number"
+                  placeholder="Mín."
+                  value={minAmount}
+                  onChange={(e) => setMinAmount(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  style={{ width: '100%', padding: '12px 14px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '14px' }}
+                />
+                <input
+                  type="number"
+                  placeholder="Máx."
+                  value={maxAmount}
+                  onChange={(e) => setMaxAmount(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  style={{ width: '100%', padding: '12px 14px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '14px' }}
+                />
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: '10px', flex: '0 0 auto', alignItems: 'flex-end' }}>
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchTerm('')
+                  setMinAmount('')
+                  setMaxAmount('')
+                  setSelectedShiftId('')
+                  setFiltrosActivos([])
+                  setPage(1)
+                  loadEgresos(1, '', '', '', '')
+                }}
+                style={{ flex: '0.4', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '12px', borderRadius: '10px', border: '1px solid #e2e8f0', background: '#fff', color: '#64748b', fontWeight: 600, cursor: 'pointer', fontSize: '14px', transition: 'all 0.2s' }}
+                title="Limpiar filtros"
+              >
+                <Eraser size={18} />
+              </button>
+              <button
+                type="button"
+                className="btn-primary"
+                onClick={aplicarFiltros}
+                style={{ flex: '1', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '12px', borderRadius: '10px', background: '#0d9488', color: '#fff', fontWeight: 600, cursor: 'pointer', border: 'none', fontSize: '14px', transition: 'all 0.2s', boxShadow: '0 4px 6px -1px rgba(13, 148, 136, 0.2)' }}
+              >
+                <Filter size={18} /> Filtrar
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowInfoReportes(true)}
+                className="metodos-pago-btn-alert"
+                title="Información sobre datos anteriores al turno"
+                aria-label="Información: ver reportes para datos anteriores al turno"
+                style={{ flexShrink: 0 }}
+              >
+                <AlertCircle size={22} strokeWidth={2.5} />
+              </button>
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: '10px' }}>
-            <button
-              type="button"
-              className="btn-primary"
-              onClick={aplicarFiltros}
-              style={{ flex: '1', padding: '12px', borderRadius: '10px', background: '#0d9488', color: '#fff', fontWeight: 600, cursor: 'pointer', border: 'none', fontSize: '14px' }}
-            >
-              Filtrar
-            </button>
-          </div>
-        </div>
-
         {filtrosActivos.length > 0 && (
-          <div className="maestro-encabezado-filtros-right" style={{ paddingBottom: '16px', borderTop: 'none' }}>
-            <span className="maestro-encabezado-label">Filtros Activos:</span>
+          <div className="maestro-encabezado-filtros-right" style={{ paddingBottom: '20px', borderTop: 'none', display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+            <span style={{ fontSize: '13px', fontWeight: 600, color: '#64748b' }}>Filtros aplicados:</span>
             {filtrosActivos.map((f) => (
-              <span key={f.id} className="maestro-filtro-tag" style={{ marginLeft: '8px' }}>
+              <span key={f.id} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#f1f5f9', color: '#334155', padding: '6px 12px', borderRadius: '20px', fontSize: '13px', border: '1px solid #e2e8f0' }}>
                 {f.label}
-                <button type="button" onClick={() => quitarFiltro(f.id)} aria-label="Quitar filtro"><X size={14} /></button>
+                <button type="button" onClick={() => quitarFiltro(f.id)} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', display: 'flex', padding: '2px' }} aria-label="Quitar filtro"><X size={14} /></button>
               </span>
             ))}
           </div>
         )}
-      </header>
+      </div>
       {error && (
         <div role="alert" style={{ marginTop: '16px', padding: '12px 16px', background: '#fef2f2', color: '#b91c1c', borderRadius: '8px', fontSize: '14px' }}>
           {error}

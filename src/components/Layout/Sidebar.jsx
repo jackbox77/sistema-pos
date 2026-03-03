@@ -43,16 +43,16 @@ const menuItems = [
     ],
   },
   {
-    path: '/app/maestros',
+    path: '/app/almacen',
     label: 'Almacén',
     icon: ClipboardList,
     children: [
-      { path: '/app/maestros/categorias', label: 'Categorías' },
-      { path: '/app/maestros/productos', label: 'Productos' },
-      { path: '/app/maestros/proveedores', label: 'Proveedores' },
-      { path: '/app/maestros/clientes-fidelizados', label: 'Clientes fidelizados' },
-      { path: '/app/maestros/impuestos', label: 'Impuestos' },
-      { path: '/app/maestros/metodos-pago', label: 'Métodos de pago' },
+      { path: '/app/almacen/categorias', label: 'Categorías' },
+      { path: '/app/almacen/productos', label: 'Productos' },
+      { path: '/app/almacen/proveedores', label: 'Proveedores' },
+      { path: '/app/almacen/clientes-fidelizados', label: 'Clientes fidelizados' },
+      { path: '/app/almacen/impuestos', label: 'Impuestos' },
+      { path: '/app/almacen/metodos-pago', label: 'Métodos de pago' },
     ],
   },
   // Módulo Gastos comentado
@@ -93,7 +93,7 @@ const menuItems = [
     label: 'Configuración',
     icon: Settings,
     children: [
-      { path: '/app/configuracion/compani', label: 'Compañía' },
+      { path: '/app/configuracion/general', label: 'General' },
       { path: '/app/configuracion/usuarios-permisos', label: 'Usuarios y permisos' },
       { path: '/app/configuracion/subscripciones', label: 'Subscripciones' },
       { path: '/app/configuracion/imagenes', label: 'Imágenes almacenadas' },
@@ -103,7 +103,7 @@ const menuItems = [
 
 export default function Sidebar({ isExpanded = false, onToggle }) {
   const location = useLocation()
-  const [expanded, setExpanded] = useState({ 'app/menu': true, 'app/maestros': true, 'app/finanzas': true, 'app/turnos': true, 'app/gastos': true, 'app/contabilidad': true, 'app/nomina': true, 'app/configuracion': true })
+  const [expanded, setExpanded] = useState({ 'app/menu': false, 'app/almacen': false, 'app/finanzas': false, 'app/turnos': false, 'app/gastos': false, 'app/contabilidad': false, 'app/nomina': false, 'app/configuracion': false })
 
   const isParentActive = (item) => {
     if (!item.children) return false
@@ -113,10 +113,16 @@ export default function Sidebar({ isExpanded = false, onToggle }) {
   const toggle = (key) => {
     if (!isExpanded && onToggle) {
       onToggle()
-      setExpanded((prev) => ({ ...prev, [key]: true }))
-    } else {
-      setExpanded((prev) => ({ ...prev, [key]: !prev[key] }))
     }
+    setExpanded((prev) => {
+      const isCurrentlyOpen = prev[key]
+      if (isCurrentlyOpen) {
+        return { ...prev, [key]: false }
+      }
+      const next = { ...prev }
+      Object.keys(next).forEach((k) => { next[k] = k === key })
+      return next
+    })
   }
 
   return (

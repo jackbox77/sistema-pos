@@ -307,50 +307,58 @@ export default function Menu() {
     e.preventDefault()
     setSaveError(null)
     setSaving(true)
+    console.log('--- handleSubmit start ---')
+    console.log('apariencia before save:', apariencia)
     try {
-      if (activeTab === 'general') {
-        const logoUrl = empresaInfo.logoUrl
-        const logo = typeof logoUrl === 'string' && (logoUrl.startsWith('http://') || logoUrl.startsWith('https://')) ? logoUrl : undefined
-        await updateProfileUseCase({
-          company: {
-            name: empresaInfo.nombreEmpresa?.trim() || undefined,
-            subtitle: empresaInfo.subtitulo?.trim() || undefined,
-            description: empresaInfo.descripcion?.trim() || undefined,
-            ...(logo != null && { logo }),
-            business_type: empresaInfo.tipoNegocio?.trim() || undefined,
-          },
-          menu_config: {
-            header_type: CONTEXT_HEADER_TO_API[tipoHeader] ?? 'classic',
-            menu_type: CONTEXT_MENU_TO_API[tipoMenu] ?? 'targets_with_category',
-            visualization: mostrarImagenes ? 'image' : 'text',
-            view_more: mostrarVerMas ? 'yes' : 'no',
-            menu_background_color: apariencia.colorFondo || undefined,
-            content_background_color: apariencia.colorContenido || undefined,
-            text_color: apariencia.colorTexto || undefined,
-            title_color: apariencia.colorTitulo || undefined,
-            subtitle_color: apariencia.colorSubtitulo || undefined,
-            price_color: apariencia.colorPrecio || undefined,
-            accent_color: apariencia.colorAcento,
-            contact_icon_color: apariencia.colorIconoContacto,
-            contact_text_color: apariencia.colorTextoContacto,
-            contact_background_color: apariencia.colorFondoContacto,
-          },
-        })
-      } else if (activeTab === 'contacto') {
-        await updateContactUseCase({
-          whatsapp_contact: empresaInfo.whatsapp_contact?.trim() || undefined,
-          visibility_whatsapp_contact: empresaInfo.visibility_whatsapp_contact,
-          mail_contact: empresaInfo.mail_contact?.trim() || undefined,
-          visibility_mail_contact: empresaInfo.visibility_mail_contact,
-          phone_contact: empresaInfo.phone_contact?.trim() || undefined,
-          visibility_phone_contact: empresaInfo.visibility_phone_contact,
-          location: empresaInfo.location?.trim() || undefined,
-          visibility_location: empresaInfo.visibility_location,
-          schedule_visibility: empresaInfo.schedule_visibility,
-          schedule: empresaInfo.schedule,
-        })
-      }
+      const logoUrl = empresaInfo.logoUrl
+      const logo = typeof logoUrl === 'string' && (logoUrl.startsWith('http://') || logoUrl.startsWith('https://')) ? logoUrl : undefined
+
+      // Guardar perfil y configuración del menú
+      await updateProfileUseCase({
+        company: {
+          name: empresaInfo.nombreEmpresa?.trim() || undefined,
+          subtitle: empresaInfo.subtitulo?.trim() || undefined,
+          description: empresaInfo.descripcion?.trim() || undefined,
+          ...(logo != null && { logo }),
+          business_type: empresaInfo.tipoNegocio?.trim() || undefined,
+        },
+        menu_config: {
+          header_type: CONTEXT_HEADER_TO_API[tipoHeader] ?? 'classic',
+          menu_type: CONTEXT_MENU_TO_API[tipoMenu] ?? 'targets_with_category',
+          visualization: mostrarImagenes ? 'image' : 'text',
+          view_more: mostrarVerMas ? 'yes' : 'no',
+          menu_background_color: apariencia.colorFondo || undefined,
+          content_background_color: apariencia.colorContenido || undefined,
+          text_color: apariencia.colorTexto || undefined,
+          title_color: apariencia.colorTitulo || undefined,
+          subtitle_color: apariencia.colorSubtitulo || undefined,
+          price_color: apariencia.colorPrecio || undefined,
+          accent_color: apariencia.colorAcento || undefined,
+          contact_icon_color: apariencia.colorIconoContacto || undefined,
+          contact_text_color: apariencia.colorTextoContacto || undefined,
+          contact_background_color: apariencia.colorFondoContacto || undefined,
+          menu_background_image: apariencia.imagenFondo || undefined,
+          header_background_image: apariencia.imagenHeaderFondo || undefined,
+        },
+      })
+
+      // Guardar información de contacto
+      await updateContactUseCase({
+        whatsapp_contact: empresaInfo.whatsapp_contact?.trim() || undefined,
+        visibility_whatsapp_contact: empresaInfo.visibility_whatsapp_contact,
+        mail_contact: empresaInfo.mail_contact?.trim() || undefined,
+        visibility_mail_contact: empresaInfo.visibility_mail_contact,
+        phone_contact: empresaInfo.phone_contact?.trim() || undefined,
+        visibility_phone_contact: empresaInfo.visibility_phone_contact,
+        location: empresaInfo.location?.trim() || undefined,
+        visibility_location: empresaInfo.visibility_location,
+        schedule_visibility: empresaInfo.schedule_visibility,
+        schedule: empresaInfo.schedule,
+      })
+
+      console.log('Updates sent successfully. Reloading profile...')
       await loadProfile()
+      console.log('Profile reloaded.')
     } catch (err) {
       setSaveError(err?.message ?? 'Error al guardar')
     } finally {

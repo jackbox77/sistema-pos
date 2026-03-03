@@ -45,7 +45,7 @@ export default function App() {
       <Route path="/login" element={<Navigate to="/" replace />} />
       <Route path="/registro" element={<Registro />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
-      <Route path="/configuracion" element={<Navigate to="/app/configuracion/compani" replace />} />
+      <Route path="/configuracion" element={<Navigate to="/app/configuracion/general" replace />} />
       <Route path="/app" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
         <Route index element={<Inicio />} />
         <Route path="pos" element={<PosLayout />}>
@@ -58,13 +58,14 @@ export default function App() {
           <Route path="productos" element={<MenuProductos />} />
           <Route path="vista-completa" element={<VistaCompletaMenu />} />
         </Route>
-        <Route path="maestros" element={<Navigate to="/app/maestros/categorias" replace />} />
-        <Route path="maestros/categorias" element={<Categorias />} />
-        <Route path="maestros/productos" element={<Productos />} />
-        <Route path="maestros/proveedores" element={<Proveedores />} />
-        <Route path="maestros/clientes-fidelizados" element={<ClientesFidelizados />} />
-        <Route path="maestros/impuestos" element={<Impuestos />} />
-        <Route path="maestros/metodos-pago" element={<MetodosPago />} />
+        <Route path="maestros" element={<Navigate to="/app/almacen/categorias" replace />} />
+        <Route path="almacen" element={<Navigate to="/app/almacen/categorias" replace />} />
+        <Route path="almacen/categorias" element={<Categorias />} />
+        <Route path="almacen/productos" element={<Productos />} />
+        <Route path="almacen/proveedores" element={<Proveedores />} />
+        <Route path="almacen/clientes-fidelizados" element={<ClientesFidelizados />} />
+        <Route path="almacen/impuestos" element={<Impuestos />} />
+        <Route path="almacen/metodos-pago" element={<MetodosPago />} />
         <Route path="finanzas" element={<IngresosLayout />}>
           <Route index element={<Navigate to="/app/finanzas/ingresos" replace />} />
           <Route path="ingresos" element={<FacturaVentas />} />
@@ -83,7 +84,7 @@ export default function App() {
           <Route path="activos" element={<Activos />} />
           <Route path="catalogo-cuentas" element={<CatalogoCuentas />} />
         </Route>
-        <Route path="configuracion/compani" element={<Compania />} />
+        <Route path="configuracion/general" element={<Compania />} />
         <Route path="configuracion/usuarios-permisos" element={<UsuariosPermisos />} />
         <Route path="configuracion/historial-subscripciones" element={<Navigate to="/app/configuracion/subscripciones" state={{ tab: 'historial' }} replace />} />
         <Route path="configuracion/subscripciones" element={<Subscripciones />} />
