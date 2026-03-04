@@ -1,16 +1,23 @@
 .page-module {
   max-width: 1200px;
+  min-height: 0;
+}
+
+.page-module--full-width {
+  max-width: none;
+  width: 100%;
 }
 
 .page-module h1 {
   font-size: 1.5rem;
-  margin-bottom: 8px;
+  margin: 0 0 8px;
   color: #1a1d21;
 }
 
 .page-module-desc {
   color: #6b7280;
-  margin-bottom: 24px;
+  margin: 0 0 20px;
+  line-height: 1.45;
 }
 
 /* Ocultar h1 vacío cuando el maestro usa encabezado custom */

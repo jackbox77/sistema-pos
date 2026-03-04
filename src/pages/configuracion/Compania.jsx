@@ -152,6 +152,7 @@ export default function Compania() {
     <PageModule
       title="Configuración"
       description="Datos de la empresa y configuración de integraciones. General y claves API."
+      fullWidth
     >
       <div className="perfil-tabs">
         {TABS.map((tab) => (

@@ -64,6 +64,7 @@ export default function MenuCategoria() {
     <PageModule
       title="Categorías en el menú"
       description="Elige qué categorías del maestro Categorías se muestran en el menú. Las que actives aquí aparecerán en el editor y en la vista previa."
+      fullWidth
     >
       {error && (
         <div className="menu-categoria-error">

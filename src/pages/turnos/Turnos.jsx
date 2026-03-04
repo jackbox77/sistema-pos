@@ -40,7 +40,7 @@ export default function Turnos() {
   }
 
   return (
-    <PageModule title="" description="">
+    <PageModule title="" description="" fullWidth>
       <TurnosTabs />
       <header className="maestro-encabezado">
         <div className="maestro-encabezado-top">

@@ -73,6 +73,7 @@ export default function Subscripciones() {
     <PageModule
       title="Subscripciones"
       description="Administra tu plan, nivel de suscripción y consulta el historial."
+      fullWidth
     >
       <div className="perfil-tabs">
         {TABS.map((tab) => (

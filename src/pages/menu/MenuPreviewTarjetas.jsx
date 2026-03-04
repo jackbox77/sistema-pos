@@ -12,6 +12,9 @@ const aparienciaDefault = {
   colorSubtitulo: '#718096',
   colorPrecio: '#2d3748',
   colorAcento: '#C7D02C',
+  colorIconoContacto: '#C7D02C',
+  colorTextoContacto: '#ffffff',
+  colorFondoContacto: '#134e4a',
   imagenFondo: '',
 }
 

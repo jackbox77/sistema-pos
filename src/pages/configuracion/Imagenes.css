@@ -123,7 +123,7 @@
 }
 
 .folder-icon {
-    color: #60a5fa;
+    color: #0d9488;
     flex-shrink: 0;
 }
 
@@ -214,6 +214,6 @@
 }
 
 .file-card-action-btn:hover {
-    background: #e5e7eb;
-    color: #111827;
+    background: #ecfdf5;
+    color: #0d9488;
 }

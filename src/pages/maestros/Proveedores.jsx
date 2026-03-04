@@ -242,7 +242,7 @@ export default function Proveedores() {
   const hasta = Math.min(page * limit, total)
 
   return (
-    <PageModule title="" description="">
+    <PageModule title="" description="" fullWidth>
       <header className="maestro-encabezado">
         <div className="maestro-encabezado-top">
           <div className="maestro-encabezado-info">

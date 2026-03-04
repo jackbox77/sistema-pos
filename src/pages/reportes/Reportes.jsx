@@ -6,18 +6,12 @@ import {
   getReportSummaryShiftsUseCase,
   getReportSummaryUseCase,
   getReportSummaryByIntervalUseCase,
-} from '../../feature/report/use-case'
+  getReportSummaryData,
+  isSummaryByShift,
+  getSummaryEntries,
+  formatShiftLabel,
+} from '../../feature/report'
 import './Reportes.css'
-
-function formatShiftLabel(shift) {
-  if (!shift) return ''
-  const start = shift.start_at ? new Date(shift.start_at) : null
-  const startStr = start && !isNaN(start.getTime())
-    ? start.toLocaleString('es-CO', { dateStyle: 'short', timeStyle: 'short' })
-    : ''
-  const name = shift.name ?? 'Turno'
-  return startStr ? `${name} (${startStr})` : name
-}
 
 function formatShiftShortDate(shift) {
   if (!shift?.start_at) return ''
@@ -191,8 +185,9 @@ export default function Reportes() {
       } else {
         res = await getReportSummaryByIntervalUseCase(turnoInicioId, turnoFinId)
       }
-      if (res?.success && res?.data) {
-        setResultadoReporte(res.data)
+      const data = getReportSummaryData(res)
+      if (data) {
+        setResultadoReporte(data)
       } else {
         setErrorReporte(res?.message ?? 'No se pudo obtener el reporte.')
       }
@@ -408,22 +403,69 @@ export default function Reportes() {
       )}
 
       {resultadoReporte && (
-        <ResultadoReporte data={resultadoReporte} formatShiftLabel={formatShiftLabel} />
+        <ResultadoReporte data={resultadoReporte} />
       )}
     </PageModule>
   )
 }
 
-/** Detecta si data es respuesta de summary (un turno o intervalos) vs summary/shifts (meses) */
-function isSummaryByShift(data) {
-  return data && typeof data.shifts_count === 'number'
-}
-
-function ResultadoReporte({ data, formatShiftLabel }) {
+function ResultadoReporte({ data }) {
   const isByShift = isSummaryByShift(data)
-  const shifts = data?.shifts ?? []
   const from = data?.from ?? ''
   const to = data?.to ?? ''
+  const entries = getSummaryEntries(data)
+
+  const renderTotales = (totales) => (
+    <div className="reportes-kpis">
+      <div className="reportes-kpi reportes-kpi-ingresos">
+        <span className="reportes-kpi-label">Total ingresos</span>
+        <span className="reportes-kpi-valor">${Number(totales.ingresos).toLocaleString('es-CO')}</span>
+      </div>
+      <div className="reportes-kpi reportes-kpi-egresos">
+        <span className="reportes-kpi-label">Total egresos</span>
+        <span className="reportes-kpi-valor">${Number(totales.egresos).toLocaleString('es-CO')}</span>
+      </div>
+      <div className="reportes-kpi reportes-kpi-ventas">
+        <span className="reportes-kpi-label">Total ventas</span>
+        <span className="reportes-kpi-valor">${Number(totales.ventas).toLocaleString('es-CO')}</span>
+      </div>
+      {totales.salesCount != null && (
+        <div className="reportes-kpi reportes-kpi-count">
+          <span className="reportes-kpi-label">Cantidad de ventas</span>
+          <span className="reportes-kpi-valor">{totales.salesCount}</span>
+        </div>
+      )}
+    </div>
+  )
+
+  const renderTablaTurnos = (titulo) =>
+    entries.length > 0 ? (
+      <div className="reportes-tabla-wrap">
+        <h3 className="reportes-resultado-subtitulo">{titulo}</h3>
+        <div className="reportes-tabla-scroll">
+          <table className="reportes-tabla" role="grid">
+            <thead>
+              <tr>
+                <th scope="col">Turno</th>
+                <th scope="col" className="reportes-tabla-num">Ventas</th>
+                <th scope="col" className="reportes-tabla-num">Ingresos</th>
+                <th scope="col" className="reportes-tabla-num">Egresos</th>
+              </tr>
+            </thead>
+            <tbody>
+              {entries.map((e) => (
+                <tr key={e.shift?.id ?? e.id}>
+                  <td className="reportes-tabla-turno">{formatShiftLabel(e.shift || e)}</td>
+                  <td className="reportes-tabla-num">${Number(e.total_ventas ?? 0).toLocaleString('es-CO')}</td>
+                  <td className="reportes-tabla-num">${Number(e.total_ingresos ?? 0).toLocaleString('es-CO')}</td>
+                  <td className="reportes-tabla-num">${Number(e.total_egresos ?? 0).toLocaleString('es-CO')}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    ) : null
 
   if (isByShift) {
     const totalIngresos = data.total_ingresos ?? 0
@@ -433,78 +475,31 @@ function ResultadoReporte({ data, formatShiftLabel }) {
     const shiftsCount = data.shifts_count ?? 0
     return (
       <div className="reportes-resultado">
-        <h2 className="reportes-resultado-titulo">Resumen del período</h2>
-        <p className="reportes-resultado-periodo">
-          Del {from} al {to} · {shiftsCount} turno(s)
-        </p>
-        <div className="reportes-resultado-totales">
-          <div className="reportes-resultado-item">
-            <span className="reportes-resultado-label">Total ingresos</span>
-            <span className="reportes-resultado-valor">${Number(totalIngresos).toLocaleString('es-CO')}</span>
-          </div>
-          <div className="reportes-resultado-item">
-            <span className="reportes-resultado-label">Total egresos</span>
-            <span className="reportes-resultado-valor">${Number(totalEgresos).toLocaleString('es-CO')}</span>
-          </div>
-          <div className="reportes-resultado-item">
-            <span className="reportes-resultado-label">Total ventas</span>
-            <span className="reportes-resultado-valor">${Number(totalVentas).toLocaleString('es-CO')}</span>
-          </div>
-          <div className="reportes-resultado-item">
-            <span className="reportes-resultado-label">Cantidad de ventas</span>
-            <span className="reportes-resultado-valor">{salesCount}</span>
-          </div>
+        <div className="reportes-resultado-head">
+          <h2 className="reportes-resultado-titulo">Resumen del período</h2>
+          <p className="reportes-resultado-periodo">
+            Del {from} al {to} · {shiftsCount} turno(s)
+          </p>
         </div>
-        {shifts.length > 0 && (
-          <div className="reportes-resultado-turnos">
-            <h3 className="reportes-resultado-subtitulo">Turnos incluidos</h3>
-            <ul className="reportes-resultado-lista">
-              {shifts.map((s) => (
-                <li key={s.id}>{formatShiftLabel(s)}</li>
-              ))}
-            </ul>
-          </div>
-        )}
+        {renderTotales({ ingresos: totalIngresos, egresos: totalEgresos, ventas: totalVentas, salesCount })}
+        {renderTablaTurnos('Turnos incluidos')}
       </div>
     )
   }
 
-  const entries = shifts.filter((e) => e && (e.shift || e.total_ingresos != null))
   const sumIngresos = entries.reduce((a, e) => a + (e.total_ingresos ?? 0), 0)
   const sumEgresos = entries.reduce((a, e) => a + (e.total_egresos ?? 0), 0)
   const sumVentas = entries.reduce((a, e) => a + (e.total_ventas ?? 0), 0)
   return (
     <div className="reportes-resultado">
-      <h2 className="reportes-resultado-titulo">Resumen últimos meses</h2>
-      <p className="reportes-resultado-periodo">
-        Del {from} al {to} · {entries.length} turno(s)
-      </p>
-      <div className="reportes-resultado-totales">
-        <div className="reportes-resultado-item">
-          <span className="reportes-resultado-label">Total ingresos</span>
-          <span className="reportes-resultado-valor">${Number(sumIngresos).toLocaleString('es-CO')}</span>
-        </div>
-        <div className="reportes-resultado-item">
-          <span className="reportes-resultado-label">Total egresos</span>
-          <span className="reportes-resultado-valor">${Number(sumEgresos).toLocaleString('es-CO')}</span>
-        </div>
-        <div className="reportes-resultado-item">
-          <span className="reportes-resultado-label">Total ventas</span>
-          <span className="reportes-resultado-valor">${Number(sumVentas).toLocaleString('es-CO')}</span>
-        </div>
+      <div className="reportes-resultado-head">
+        <h2 className="reportes-resultado-titulo">Resumen últimos meses</h2>
+        <p className="reportes-resultado-periodo">
+          Del {from} al {to} · {entries.length} turno(s)
+        </p>
       </div>
-      {entries.length > 0 && (
-        <div className="reportes-resultado-turnos">
-          <h3 className="reportes-resultado-subtitulo">Por turno</h3>
-          <ul className="reportes-resultado-lista reportes-resultado-lista-detalle">
-            {entries.map((e) => (
-              <li key={e.shift?.id ?? e.id}>
-                {formatShiftLabel(e.shift || e)} — Ventas: ${Number(e.total_ventas ?? 0).toLocaleString('es-CO')} · Ingresos: ${Number(e.total_ingresos ?? 0).toLocaleString('es-CO')} · Egresos: ${Number(e.total_egresos ?? 0).toLocaleString('es-CO')}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+      {renderTotales({ ingresos: sumIngresos, egresos: sumEgresos, ventas: sumVentas })}
+      {renderTablaTurnos('Por turno')}
     </div>
   )
 }

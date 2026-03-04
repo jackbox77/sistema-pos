@@ -226,6 +226,14 @@ export default function Facturar() {
     })
   }
 
+  const formatPrecioPos = (val) => {
+    const raw = val ?? 0
+    const num = typeof raw === 'string'
+      ? parseFloat(String(raw).replace(/\/und$/i, '').replace(/,/g, '')) || 0
+      : Number(raw) || 0
+    return `$${num.toLocaleString('es-CO')}`
+  }
+
   const subtotal = cart.reduce((sum, it) => sum + it.quantity * it.unit_price, 0)
   const discount = 0
 
@@ -439,8 +447,8 @@ export default function Facturar() {
                           <div className="facturar-producto-info">
                             <h4 className="facturar-producto-nombre">{p.name ?? p.code ?? 'Producto'}</h4>
                             <span className="facturar-producto-categoria">{p.categoryName || 'General'}</span>
-                            <span className="facturar-producto-precio">
-                              ${Number(p.price ?? p.unit_price ?? 0).toLocaleString('es-CO')}
+                            <span className="facturar-producto-precio" title={formatPrecioPos(p.price ?? p.unit_price)}>
+                              {formatPrecioPos(p.price ?? p.unit_price)}
                             </span>
                           </div>
 

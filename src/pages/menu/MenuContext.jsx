@@ -171,10 +171,9 @@ export default function MenuProvider({ children }) {
       ])
 
       if (res?.success && res?.data) {
-        const { company, menu_config } = res.data
-        console.log('--- loadProfile mapping received data ---')
-        console.log('company:', company)
-        console.log('menu_config:', menu_config)
+        const data = res.data
+        const company = data.company ?? data.profile?.company
+        const menu_config = data.menu_config ?? data.profile?.menu_config ?? data.menu_config_appearance
         if (company) {
           setEmpresaInfo((prev) => ({
             ...prev,
@@ -185,26 +184,27 @@ export default function MenuProvider({ children }) {
             descripcion: company.description ?? prev.descripcion,
           }))
         }
-        if (menu_config) {
+        if (menu_config && typeof menu_config === 'object') {
+          const mc = menu_config
           setApariencia((prev) => ({
             ...prev,
-            colorFondo: menu_config.menu_background_color ?? prev.colorFondo,
-            colorContenido: menu_config.content_background_color ?? prev.colorContenido,
-            colorTexto: menu_config.text_color ?? prev.colorTexto,
-            colorTitulo: menu_config.title_color ?? prev.colorTitulo,
-            colorSubtitulo: menu_config.subtitle_color ?? prev.colorSubtitulo,
-            colorPrecio: menu_config.price_color ?? prev.colorPrecio,
-            colorAcento: menu_config.accent_color ?? prev.colorAcento,
-            colorIconoContacto: menu_config.contact_icon_color ?? prev.colorIconoContacto,
-            colorTextoContacto: menu_config.contact_text_color ?? prev.colorTextoContacto,
-            colorFondoContacto: menu_config.contact_background_color ?? prev.colorFondoContacto,
-            imagenFondo: menu_config.menu_background_image ?? prev.imagenFondo,
-            imagenHeaderFondo: menu_config.header_background_image ?? prev.imagenHeaderFondo,
+            colorFondo: mc.menu_background_color ?? prev.colorFondo,
+            colorContenido: mc.content_background_color ?? prev.colorContenido,
+            colorTexto: mc.text_color ?? prev.colorTexto,
+            colorTitulo: mc.title_color ?? prev.colorTitulo,
+            colorSubtitulo: mc.subtitle_color ?? prev.colorSubtitulo,
+            colorPrecio: mc.price_color ?? prev.colorPrecio,
+            colorAcento: mc.accent_color ?? prev.colorAcento,
+            colorIconoContacto: mc.contact_icon_color ?? prev.colorIconoContacto,
+            colorTextoContacto: mc.contact_text_color ?? prev.colorTextoContacto,
+            colorFondoContacto: mc.contact_background_color ?? prev.colorFondoContacto,
+            imagenFondo: mc.menu_background_image ?? prev.imagenFondo,
+            imagenHeaderFondo: mc.header_background_image ?? prev.imagenHeaderFondo,
           }))
-          setTipoHeader(API_HEADER_TO_CONTEXT[menu_config.header_type] ?? 'clasico')
-          setTipoMenu(API_MENU_TO_CONTEXT[menu_config.menu_type] ?? 'tarjetas-categorias')
-          setMostrarImagenes(menu_config.visualization === 'image')
-          setMostrarVerMas(menu_config.view_more === 'yes')
+          setTipoHeader(API_HEADER_TO_CONTEXT[mc.header_type] ?? 'clasico')
+          setTipoMenu(API_MENU_TO_CONTEXT[mc.menu_type] ?? 'tarjetas-categorias')
+          setMostrarImagenes(mc.visualization === 'image')
+          setMostrarVerMas(mc.view_more === 'yes')
         }
       }
 

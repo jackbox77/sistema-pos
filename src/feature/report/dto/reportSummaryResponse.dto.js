@@ -1,47 +1,66 @@
 /**
  * DTO de respuesta GET /reports/summary
- * Usado tanto con ?shift_id=... como con ?shift_id_from=...&shift_id_to=...
+ * Misma estructura para:
+ *   - GET /reports/summary?shift_id=... (un turno)
+ *   - GET /reports/summary?shift_id_from=...&shift_id_to=... (intervalo)
  *
- * Ejemplo (un turno):
+ * Ejemplo (un turno, data.shifts con un solo ítem; shift.end_at puede ser null si está abierto):
  * {
  *   "success": true,
- *   "message": "Resumen del período",
+ *   "message": "Resumen por turnos",
  *   "data": {
  *     "shifts": [
  *       {
- *         "id": "...",
- *         "company_id": "...",
- *         "name": "Turno 20-Feb",
- *         "start_at": "2025-02-20T08:00:00Z",
- *         "end_at": "2025-02-20T18:30:00Z",
- *         "opened_by_user_id": "...",
- *         "closed_by_user_id": "...",
- *         "created_at": "...",
- *         "updated_at": "..."
- *       }
- *     ],
- *     "shifts_count": 1,
- *     "total_ingresos": 150000,
- *     "total_egresos": 80000,
- *     "total_ventas": 320000,
- *     "sales_count": 45,
- *     "sales": [
+ *         "shift": {
+ *           "id": "...",
+ *           "company_id": "...",
+ *           "name": "jueves 19 febrero noche",
+ *           "start_at": "2026-02-19T20:00:00Z",
+ *           "end_at": "2026-02-20T02:00:00Z",
+ *           "opened_by_user_id": "...",
+ *           "closed_by_user_id": "...",
+ *           "created_at": "...",
+ *           "updated_at": "..."
+ *         },
+ *         "total_ingresos": 15000,
+ *         "total_egresos": 5000,
+ *         "total_ventas": 0,
+ *         "sales": []
+ *       },
  *       {
- *         "id": "...",
- *         "shift_id": "...",
- *         "total": 15000,
- *         "reference": "...",
- *         "created_at": "..."
+ *         "shift": { ... },
+ *         "total_ingresos": 0,
+ *         "total_egresos": 0,
+ *         "total_ventas": 6000,
+ *         "sales": [
+ *           {
+ *             "id": "...",
+ *             "company_id": "...",
+ *             "shift_id": "...",
+ *             "loyal_customer_id": "...",
+ *             "total": 6000,
+ *             "subtotal": null,
+ *             "tax_amount": null,
+ *             "reference": null,
+ *             "created_at": "...",
+ *             "updated_at": "..."
+ *           }
+ *         ]
  *       }
  *     ],
- *     "from": "2025-02-20",
- *     "to": "2025-02-20"
+ *     "shifts_count": 3,
+ *     "total_ingresos": 15000,
+ *     "total_egresos": 5000,
+ *     "total_ventas": 200006000,
+ *     "sales_count": 2,
+ *     "from": "2026-02-19",
+ *     "to": "2026-02-19"
  *   }
  * }
  */
 
 /**
- * Item de turno en data.shifts
+ * Turno dentro del item del reporte (misma estructura que shift de la API de turnos)
  * @typedef {Object} ReportSummaryShiftDto
  * @property {string} id
  * @property {string} company_id
@@ -55,31 +74,45 @@
  */
 
 /**
- * Item de venta en data.sales
- * @typedef {Object} ReportSaleDto
+ * Venta dentro de un turno en data.shifts[].sales
+ * @typedef {Object} ReportSummarySaleDto
  * @property {string} id
+ * @property {string} company_id
  * @property {string} shift_id
+ * @property {string|null} loyal_customer_id
  * @property {number} total
- * @property {string} reference
+ * @property {number|null} subtotal
+ * @property {number|null} tax_amount
+ * @property {string|null} reference
  * @property {string} created_at
+ * @property {string} updated_at
+ */
+
+/**
+ * Item del array data.shifts (un turno con sus totales y ventas)
+ * @typedef {Object} ReportSummaryShiftEntryDto
+ * @property {ReportSummaryShiftDto} shift
+ * @property {number} total_ingresos
+ * @property {number} total_egresos
+ * @property {number} total_ventas
+ * @property {ReportSummarySaleDto[]} sales
  */
 
 /**
  * Datos internos de la respuesta GET /reports/summary
  * @typedef {Object} ReportSummaryDataDto
- * @property {ReportSummaryShiftDto[]} shifts
+ * @property {ReportSummaryShiftEntryDto[]} shifts
  * @property {number} shifts_count
  * @property {number} total_ingresos
  * @property {number} total_egresos
  * @property {number} total_ventas
  * @property {number} sales_count
- * @property {ReportSaleDto[]} sales
  * @property {string} from - YYYY-MM-DD
  * @property {string} to - YYYY-MM-DD
  */
 
 /**
- * Respuesta exitosa GET /reports/summary (con shift_id o shift_id_from + shift_id_to)
+ * Respuesta exitosa GET /reports/summary (shift_id o shift_id_from + shift_id_to)
  * @typedef {Object} ReportSummaryResponseDto
  * @property {true} success
  * @property {string} message

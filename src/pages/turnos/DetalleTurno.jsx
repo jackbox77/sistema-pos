@@ -16,7 +16,7 @@ export default function DetalleTurno() {
 
     if (!turno) {
         return (
-            <PageModule title="" description="">
+            <PageModule title="" description="" fullWidth>
                 <div className="detalle-turno-empty">
                     <p>El turno solicitado no existe o no se pudo cargar.</p>
                     <button type="button" className="btn-secondary" onClick={() => navigate(-1)}>Volver</button>
@@ -29,7 +29,7 @@ export default function DetalleTurno() {
     const turnoAbreviado = formatoTurno(extraerFecha(turno.inicio), extraerFecha(turno.fin))
 
     return (
-        <PageModule title="" description="">
+        <PageModule title="" description="" fullWidth>
             <header className="maestro-encabezado">
                 <div className="maestro-encabezado-top">
                     <div className="maestro-encabezado-info">

@@ -99,6 +99,7 @@ export default function MenuProductos() {
     <PageModule
       title="Productos en el menú"
       description="Elige qué productos se muestran en el menú. Filtra por categoría (definidas en Categoría) y activa los que quieras."
+      fullWidth
     >
       {error && (
         <div className="menu-productos-error">

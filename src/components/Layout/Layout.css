@@ -1,4 +1,8 @@
 .layout {
+  width: 100%;
+  max-width: 1600px;
+  margin-left: auto;
+  margin-right: auto;
   height: 100vh;
   min-height: 100vh;
   display: flex;
@@ -16,6 +20,7 @@
 
 .layout-content {
   flex: 1;
+  min-height: 0;
   padding: 24px;
   background: #fff;
   margin: 16px 16px 16px 0;
@@ -35,20 +40,19 @@
   overflow: hidden;
 }
 
-/* Tablet */
+/* Tablet y móvil: espacio para sidebar colapsado (64px) y overlay al expandir */
 @media (max-width: 1024px) {
   .layout-content {
-    padding: 16px;
+    padding: 20px 16px 16px;
     margin: 12px 12px 12px 0;
+    margin-left: 72px;
   }
 }
 
-/* Móvil: espacio para sidebar colapsado (64px) */
 @media (max-width: 768px) {
   .layout-content {
-    padding: 12px;
+    padding: 16px 12px 12px;
     margin: 8px;
     margin-left: 72px;
-    border-radius: 8px;
   }
 }

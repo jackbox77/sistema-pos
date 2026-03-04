@@ -6,7 +6,7 @@ import { useMenu, TIPOS_MENU, TIPOS_HEADER, CONTEXT_HEADER_TO_API, CONTEXT_MENU_
 import MenuContactBar from './MenuContactBar'
 import { updateProfileUseCase, updateContactUseCase } from '../../feature/menu-config'
 import { validateBucketUseCase, getBucketUseCase, createBucketUseCase, createFolderUseCase, uploadFileUseCase } from '../../feature/storage/use-case'
-import { Trash2, Settings, Image as ImageIcon, FolderOpen, Plus, ChevronRight, Upload, X, MapPin, Phone, Mail, MessageCircle, Clock, CalendarDays } from 'lucide-react'
+import { Trash2, Settings, Image as ImageIcon, FolderOpen, Plus, ChevronRight, Upload, X, MapPin, Phone, Mail, MessageCircle, Clock, CalendarDays, Eye } from 'lucide-react'
 import './Menu.css'
 import './ConfigurarEmpresa.css'
 import '../../components/FormularioProductos/FormularioProductos.css'
@@ -290,6 +290,7 @@ export default function Menu() {
   const [saveError, setSaveError] = useState(null)
   const [showLogoBucketBrowser, setShowLogoBucketBrowser] = useState(false)
   const [activeTab, setActiveTab] = useState('general')
+  const [showPreviewModal, setShowPreviewModal] = useState(false)
 
   const handleLogoSelect = (url) => {
     setEmpresaInfo((prev) => ({ ...prev, logoUrl: url }))
@@ -307,8 +308,6 @@ export default function Menu() {
     e.preventDefault()
     setSaveError(null)
     setSaving(true)
-    console.log('--- handleSubmit start ---')
-    console.log('apariencia before save:', apariencia)
     try {
       const logoUrl = empresaInfo.logoUrl
       const logo = typeof logoUrl === 'string' && (logoUrl.startsWith('http://') || logoUrl.startsWith('https://')) ? logoUrl : undefined
@@ -327,18 +326,19 @@ export default function Menu() {
           menu_type: CONTEXT_MENU_TO_API[tipoMenu] ?? 'targets_with_category',
           visualization: mostrarImagenes ? 'image' : 'text',
           view_more: mostrarVerMas ? 'yes' : 'no',
-          menu_background_color: apariencia.colorFondo || undefined,
-          content_background_color: apariencia.colorContenido || undefined,
-          text_color: apariencia.colorTexto || undefined,
-          title_color: apariencia.colorTitulo || undefined,
-          subtitle_color: apariencia.colorSubtitulo || undefined,
-          price_color: apariencia.colorPrecio || undefined,
-          accent_color: apariencia.colorAcento || undefined,
-          contact_icon_color: apariencia.colorIconoContacto || undefined,
-          contact_text_color: apariencia.colorTextoContacto || undefined,
-          contact_background_color: apariencia.colorFondoContacto || undefined,
-          menu_background_image: apariencia.imagenFondo || undefined,
-          header_background_image: apariencia.imagenHeaderFondo || undefined,
+          // Colores enviados siempre al backend (API menu-config PUT /companies/me/profile)
+          menu_background_color: apariencia.colorFondo ?? '',
+          content_background_color: apariencia.colorContenido ?? '',
+          text_color: apariencia.colorTexto ?? '',
+          title_color: apariencia.colorTitulo ?? '',
+          subtitle_color: apariencia.colorSubtitulo ?? '',
+          price_color: apariencia.colorPrecio ?? '',
+          accent_color: apariencia.colorAcento ?? '',
+          contact_icon_color: apariencia.colorIconoContacto ?? '',
+          contact_text_color: apariencia.colorTextoContacto ?? '',
+          contact_background_color: apariencia.colorFondoContacto ?? '',
+          menu_background_image: apariencia.imagenFondo ?? '',
+          header_background_image: apariencia.imagenHeaderFondo ?? '',
         },
       })
 
@@ -356,9 +356,7 @@ export default function Menu() {
         schedule: empresaInfo.schedule,
       })
 
-      console.log('Updates sent successfully. Reloading profile...')
       await loadProfile()
-      console.log('Profile reloaded.')
     } catch (err) {
       setSaveError(err?.message ?? 'Error al guardar')
     } finally {
@@ -371,6 +369,7 @@ export default function Menu() {
       <PageModule
         title="Editor de menú"
         description="Información de la empresa, diseño del menú y vista previa."
+        fullWidth
       >
         <div className="menu-skeleton">
           <div className="menu-layout">
@@ -443,6 +442,7 @@ export default function Menu() {
     <PageModule
       title="Editor de menú"
       description="Información de la empresa, diseño del menú y vista previa. Todo lo que se muestra en el menú se configura aquí."
+      fullWidth
     >
       <form className="menu-unificado-form" onSubmit={handleSubmit}>
         {saveError && (
@@ -968,6 +968,84 @@ export default function Menu() {
               <MenuPreview categorias={categoriasConProductos} apariencia={apariencia} tipoMenu={tipoMenu} empresaInfo={empresaInfo} mostrarImagenes={mostrarImagenes} mostrarVerMas={mostrarVerMas} tipoHeader={tipoHeader} />
             )}
           </div>
+
+          <button
+            type="button"
+            className="menu-preview-fab"
+            onClick={() => setShowPreviewModal(true)}
+            aria-label="Ver vista previa"
+            title="Ver vista previa"
+          >
+            <Eye size={22} />
+            <span>Vista previa</span>
+          </button>
+
+          {showPreviewModal && (
+            <div
+              className="menu-preview-modal-overlay"
+              onClick={() => setShowPreviewModal(false)}
+              role="dialog"
+              aria-modal="true"
+              aria-label="Vista previa del menú"
+            >
+              <div className="menu-preview-modal" onClick={(e) => e.stopPropagation()}>
+                <div className="menu-preview-modal-header">
+                  <h3 className="menu-preview-label">
+                    {activeTab === 'contacto' ? 'Vista previa de Contacto' : 'Vista previa del menú'}
+                  </h3>
+                  <div className="menu-preview-modal-actions">
+                    <Link to="/app/menu/vista-completa" className="btn-secondary menu-preview-btn" target="_blank" rel="noopener noreferrer">
+                      Ver menú completo
+                    </Link>
+                    <button
+                      type="button"
+                      className="menu-preview-modal-close"
+                      onClick={() => setShowPreviewModal(false)}
+                      aria-label="Cerrar vista previa"
+                    >
+                      <X size={20} />
+                    </button>
+                  </div>
+                </div>
+                <div className="menu-preview-modal-body">
+                  {activeTab === 'contacto' ? (
+                    <div
+                      className="menu-preview-contacto-wrapper"
+                      style={{
+                        borderRadius: '12px',
+                        overflow: 'hidden',
+                        border: '1px solid #e5e7eb',
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+                        backgroundColor: apariencia?.colorFondo || '#f8f9fa',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        minHeight: 220,
+                      }}
+                    >
+                      <div
+                        style={{
+                          flex: 1,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          color: apariencia?.colorTexto || '#9ca3af',
+                          fontSize: 13,
+                          padding: '32px 24px',
+                          textAlign: 'center',
+                          opacity: 0.55,
+                        }}
+                      >
+                        ··· contenido del menú ···
+                      </div>
+                      <MenuContactBar empresaInfo={empresaInfo} apariencia={apariencia} />
+                    </div>
+                  ) : (
+                    <MenuPreview categorias={categoriasConProductos} apariencia={apariencia} tipoMenu={tipoMenu} empresaInfo={empresaInfo} mostrarImagenes={mostrarImagenes} mostrarVerMas={mostrarVerMas} tipoHeader={tipoHeader} />
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </form>
     </PageModule>

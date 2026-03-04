@@ -66,7 +66,7 @@ export default function Imagenes() {
 
     if (loading) {
         return (
-            <PageModule title="Imágenes almacenadas" description="Explora la galería de imágenes de tu negocio">
+            <PageModule title="Imágenes almacenadas" description="Explora la galería de imágenes de tu negocio" fullWidth>
                 <div className="imagenes-loading">
                     <Loader2 className="spinner" size={40} />
                     <p>Cargando almacenamiento...</p>
@@ -77,7 +77,7 @@ export default function Imagenes() {
 
     if (error) {
         return (
-            <PageModule title="Imágenes almacenadas" description="Explora la galería de imágenes de tu negocio">
+            <PageModule title="Imágenes almacenadas" description="Explora la galería de imágenes de tu negocio" fullWidth>
                 <div className="imagenes-error">
                     <p>{error}</p>
                     <button onClick={loadBucket} className="btn-primary">Reintentar</button>
@@ -91,7 +91,7 @@ export default function Imagenes() {
     const images = currentDirNode.images || []
 
     return (
-        <PageModule title="Imágenes almacenadas" description="Explora y visualiza todas las imágenes guardadas en tu cuenta">
+        <PageModule title="Imágenes almacenadas" description="Explora y visualiza todas las imágenes guardadas en tu cuenta" fullWidth>
             <div className="imagenes-container">
 
                 {/* Breadcrumb Navigation */}

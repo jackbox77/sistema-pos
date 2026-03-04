@@ -1,0 +1,166 @@
+/* Dashboard / Inicio */
+
+.dashboard-loading {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.dashboard-skeleton-card {
+  height: 100px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
+  background-size: 200% 100%;
+  animation: dashboard-shimmer 1.2s ease-in-out infinite;
+}
+
+.dashboard-skeleton-chart {
+  height: 280px;
+  border-radius: 12px;
+  background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
+  background-size: 200% 100%;
+  animation: dashboard-shimmer 1.2s ease-in-out infinite;
+}
+
+@keyframes dashboard-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.dashboard-error {
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  background: #fef2f2;
+  color: #b91c1c;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.dashboard-section {
+  margin-bottom: 32px;
+}
+
+.dashboard-section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 16px;
+}
+
+.dashboard-section-title svg {
+  color: #0d9488;
+}
+
+.dashboard-cards {
+  margin-bottom: 12px;
+}
+
+.dashboard-card--ventas .dashboard-value {
+  color: #0d9488;
+}
+
+.dashboard-card--ingresos .dashboard-value {
+  color: #059669;
+}
+
+.dashboard-card--egresos .dashboard-value {
+  color: #dc2626;
+}
+
+.dashboard-hint {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0 0 24px;
+}
+
+.dashboard-hint a {
+  color: #0d9488;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.dashboard-hint a:hover {
+  text-decoration: underline;
+}
+
+.dashboard-chart-wrap {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.dashboard-chart-subtitle {
+  font-weight: 500;
+  color: #6b7280;
+  font-size: 0.95rem;
+  margin-left: 6px;
+}
+
+.dashboard-chart-wrap--scroll {
+  padding: 20px;
+  max-height: 520px;
+  overflow: auto;
+}
+
+.dashboard-chart-wrap--scroll .dashboard-chart-inner {
+  min-height: 260px;
+  width: 100%;
+}
+
+/* Tooltip del gráfico: datos del turno seleccionado */
+.dashboard-tooltip {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 12px 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  min-width: 180px;
+}
+
+.dashboard-tooltip-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #f3f4f6;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 220px;
+}
+
+.dashboard-tooltip-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  font-size: 13px;
+  padding: 4px 0;
+}
+
+.dashboard-tooltip-row span {
+  color: #6b7280;
+}
+
+.dashboard-tooltip-row strong {
+  color: #111827;
+  font-variant-numeric: tabular-nums;
+}
+
+.dashboard-tooltip-ventas strong {
+  color: #0d9488;
+}
+
+.dashboard-tooltip-ingresos strong {
+  color: #059669;
+}
+
+.dashboard-tooltip-egresos strong {
+  color: #dc2626;
+}

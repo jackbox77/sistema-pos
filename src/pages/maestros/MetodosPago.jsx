@@ -90,7 +90,7 @@ export default function MetodosPago() {
   const handleCrear = () => setShowCreateModal(true)
 
   return (
-    <PageModule title="" description="">
+    <PageModule title="" description="" fullWidth>
       <header className="maestro-encabezado">
         <div className="maestro-encabezado-top">
           <div className="maestro-encabezado-info">
