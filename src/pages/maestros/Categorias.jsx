@@ -1,9 +1,8 @@
 import { useRef, useState, useEffect, useCallback, useMemo, Fragment } from 'react'
-import { Pencil, Trash2, Upload, Download, ChevronDown, ChevronLeft, ChevronRight, Image as ImageIcon, X, Eye, EyeOff, FolderOpen, Plus } from 'lucide-react'
+import { Pencil, Trash2, Upload, Download, ChevronLeft, ChevronRight, Image as ImageIcon, X, Eye, EyeOff, FolderOpen, Plus } from 'lucide-react'
 import PageModule from '../../components/PageModule/PageModule'
 import MaestroThumbImage from './MaestroThumbImage'
-import { parsearCSV } from '../../utils/csvMaestros'
-import { descargarDatosExcel, parsearExcel } from '../../utils/excelMaestros'
+import { descargarDatosExcel } from '../../utils/excelMaestros'
 import ApiErrorRecargar from '../../components/ApiErrorRecargar/ApiErrorRecargar'
 import TableResponsive from '../../components/TableResponsive/TableResponsive'
 import '../../components/TableResponsive/TableResponsive.css'
@@ -63,8 +62,6 @@ export default function Categorias() {
   const [formError, setFormError] = useState(null)
   const [categoriaEditando, setCategoriaEditando] = useState(null)
   const [categoriaEliminar, setCategoriaEliminar] = useState(null)
-  const [showMasAcciones, setShowMasAcciones] = useState(false)
-  const masAccionesRef = useRef(null)
   const [filtrosActivos, setFiltrosActivos] = useState([{ id: 'estado', label: 'Estado: activos', value: 'active' }])
   const [visibilityUpdatingId, setVisibilityUpdatingId] = useState(null)
   const [search, setSearch] = useState('')
@@ -118,16 +115,6 @@ export default function Categorias() {
     }
   }, [search])
 
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (masAccionesRef.current && !masAccionesRef.current.contains(e.target)) {
-        setShowMasAcciones(false)
-      }
-    }
-    if (showMasAcciones) document.addEventListener('click', handleClickOutside)
-    return () => document.removeEventListener('click', handleClickOutside)
-  }, [showMasAcciones])
-
   const handleCrear = () => setShowCreateModal(true)
   const handleEditar = (cat) => {
     setCategoriaEditando(cat)
@@ -138,7 +125,6 @@ export default function Categorias() {
     setShowDeleteModal(true)
   }
 
-  const inputCargaRef = useRef(null)
   const descargarTodoCategorias = async () => {
     try {
       const list = await getCategoriesAllUseCase()
@@ -146,31 +132,6 @@ export default function Categorias() {
       const filas = (Array.isArray(list) ? list : []).map((c) => [c.code ?? '', c.name ?? '', c.description ?? ''])
       descargarDatosExcel(columnas, filas, 'categorias.xlsx')
     } catch (_) { }
-  }
-  const handleCargaMasiva = async (e) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    const isExcel = /\.xlsx?$/i.test(file.name)
-    const reader = new FileReader()
-    reader.onload = async () => {
-      const filas = isExcel ? parsearExcel(reader.result) : parsearCSV(reader.result)
-      if (filas.length < 2) return
-      const [, ...datos] = filas
-      const filasValidas = datos.filter((f) => (f[1] ?? '').trim())
-      for (const f of filasValidas) {
-        const codigo = normalizarCodigo((f[0] ?? '').trim())
-        const nombre = (f[1] ?? '').trim()
-        const descripcion = (f[2] ?? '').trim()
-        if (!codigo || !nombre) continue
-        try {
-          await createCategoryUseCase(codigo, nombre, descripcion, 'active')
-        } catch (_) { }
-      }
-    }
-    await cargarCategorias()
-    if (isExcel) reader.readAsArrayBuffer(file)
-    else reader.readAsText(file, 'UTF-8')
-    e.target.value = ''
   }
 
   const total = pagination?.total ?? 0
@@ -214,27 +175,13 @@ export default function Categorias() {
             <a href="#ver-mas" className="maestro-encabezado-link">Ver más</a>
           </div>
           <div className="maestro-encabezado-acciones">
-            <div className="toolbar-mas-acciones-wrap" ref={masAccionesRef}>
-              <button
-                type="button"
-                className="toolbar-mas-acciones"
-                onClick={() => setShowMasAcciones((v) => !v)}
-                aria-expanded={showMasAcciones}
-                aria-haspopup="true"
-              >
-                Más acciones <ChevronDown size={18} />
-              </button>
-              {showMasAcciones && (
-                <div className="toolbar-dropdown">
-                  <button type="button" onClick={() => { descargarTodoCategorias(); setShowMasAcciones(false); }}>
-                    <Download size={18} /> Descargar todo
-                  </button>
-                  <button type="button" onClick={() => { inputCargaRef.current?.click(); setShowMasAcciones(false); }}>
-                    <Upload size={18} /> Carga masiva
-                  </button>
-                </div>
-              )}
-            </div>
+            <button
+              type="button"
+              className="toolbar-mas-acciones"
+              onClick={descargarTodoCategorias}
+            >
+              <Download size={18} /> Descargar todo
+            </button>
             <button type="button" className="btn-primary" onClick={handleCrear}>
               + Nueva categoría
             </button>
@@ -311,19 +258,10 @@ export default function Categorias() {
           </div>
         </div>
       </header>
-      <input
-        ref={inputCargaRef}
-        type="file"
-        accept=".csv,.xlsx"
-        className="input-file"
-        style={{ position: 'absolute', width: 0, height: 0, opacity: 0 }}
-        onChange={handleCargaMasiva}
-      />
       {error && (
-        <ApiErrorRecargar message={error} onRecargar={cargarCategorias} loading={loading} />
+        <ApiErrorRecargar message={error} onCerrar={() => setError(null)} showRecargar={false} />
       )}
-      {!error && (
-        <TableResponsive>
+      <TableResponsive>
           <table className="page-module-table">
             <thead>
               <tr>
@@ -384,9 +322,8 @@ export default function Categorias() {
             </tbody>
           </table>
         </TableResponsive>
-      )}
 
-      {!error && pagination && total > 0 && (
+      {pagination && total > 0 && (
         <div className="page-module-pagination">
           <div className="page-module-pagination-info">
             Mostrando {desde}-{hasta} de {total}

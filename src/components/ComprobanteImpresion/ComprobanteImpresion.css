@@ -1,0 +1,89 @@
+.comprobante-impresion-overlay {
+  z-index: 1000;
+}
+
+.comprobante-impresion-modal {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  max-width: 420px;
+  width: 100%;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.comprobante-impresion-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.comprobante-impresion-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.comprobante-impresion-cerrar {
+  background: none;
+  border: none;
+  padding: 6px;
+  color: #6b7280;
+  cursor: pointer;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.comprobante-impresion-cerrar:hover {
+  background: #f3f4f6;
+  color: #111827;
+}
+
+.comprobante-impresion-body {
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.comprobante-impresion-fecha {
+  font-size: 12px;
+  color: #9ca3af;
+  margin: 0 0 16px 0;
+}
+
+.comprobante-impresion-linea {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 10px 0;
+  font-size: 14px;
+}
+
+.comprobante-impresion-label {
+  color: #6b7280;
+  margin-right: 12px;
+}
+
+.comprobante-impresion-value {
+  font-weight: 600;
+  color: #111827;
+  text-align: right;
+}
+
+.comprobante-impresion-footer {
+  display: flex;
+  gap: 12px;
+  padding: 16px 20px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.comprobante-impresion-footer .btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}

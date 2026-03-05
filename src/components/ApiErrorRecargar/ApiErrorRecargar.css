@@ -36,3 +36,19 @@
   opacity: 0.7;
   cursor: not-allowed;
 }
+
+.api-error-recargar-cerrar {
+  padding: 6px;
+  background: transparent;
+  border: none;
+  color: #b91c1c;
+  cursor: pointer;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.api-error-recargar-cerrar:hover {
+  background: #fee2e2;
+}

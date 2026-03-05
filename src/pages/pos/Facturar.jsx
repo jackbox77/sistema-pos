@@ -397,7 +397,7 @@ export default function Facturar() {
           {error && <ApiErrorRecargar message={error} onRecargar={loadData} loading={loading} />}
 
           {loading ? (
-            <div className="facturar-grid">
+            <div className="facturar-grid facturar-grid--skeleton">
               <div className="facturar-productos">
                 <div className="facturar-filtros">
                   <div className="facturar-categorias-filtro">
@@ -406,22 +406,21 @@ export default function Facturar() {
                     ))}
                   </div>
                   <div className="facturar-skeleton-input" />
-                  <p className="facturar-skeleton-actualizado">Actualizado —</p>
+                  <p className="facturar-skeleton-actualizado">Actualizado dd/mm/aa, h:mm</p>
                 </div>
                 <div className="facturar-productos-scroll">
-                <div className="facturar-productos-grid">
-                  {Array.from({ length: 12 }, (_, i) => (
-                    <div key={i} className="facturar-skeleton-card">
-                      <div className="facturar-skeleton-card-image" />
-                      <div className="facturar-skeleton-card-line" style={{ width: '90%' }} />
-                      <div className="facturar-skeleton-card-line facturar-skeleton-card-line--short" />
-                      <div className="facturar-skeleton-card-line facturar-skeleton-card-line--price" />
-                    </div>
-                  ))}
-                </div>
+                  <div className="facturar-productos-grid">
+                    {Array.from({ length: 12 }, (_, i) => (
+                      <div key={i} className="facturar-skeleton-card">
+                        <div className="facturar-skeleton-card-image" />
+                        <div className="facturar-skeleton-card-line" style={{ width: '90%' }} />
+                        <div className="facturar-skeleton-card-line facturar-skeleton-card-line--short" />
+                        <div className="facturar-skeleton-card-line facturar-skeleton-card-line--price" />
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
-              <div className="facturar-panel-factura" style={{ minHeight: 320 }} />
             </div>
           ) : (
             <div className="facturar-grid">

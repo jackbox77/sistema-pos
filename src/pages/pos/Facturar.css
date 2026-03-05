@@ -144,6 +144,15 @@
   }
 }
 
+/* Skeleton: solo productos, categorías y actualizado (sin panel factura) */
+.facturar-grid--skeleton {
+  grid-template-columns: 1fr;
+}
+
+.facturar-grid--skeleton .facturar-productos {
+  max-height: none;
+}
+
 /* —— Columna izquierda: productos + barra Factura 1 (no ocupa espacio de factura) —— */
 .facturar-col-productos {
   display: flex;

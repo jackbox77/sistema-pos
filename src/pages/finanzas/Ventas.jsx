@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect, useCallback } from 'react'
-import { Pencil, Trash2, Plus, X, Search, User, History, DollarSign, Filter, Eraser, AlertCircle } from 'lucide-react'
+import { Pencil, Trash2, Plus, X, Search, User, History, DollarSign, Filter, Eraser, AlertCircle, Printer } from 'lucide-react'
 import { useIngresos } from './IngresosLayout'
 import { formatoTurno } from '../../utils/fechaUtils'
 import { useMaestros } from '../../context/MaestrosContext'
@@ -8,6 +8,7 @@ import { getCurrentShiftUseCase, getShiftsUseCase } from '../../feature/shifts/u
 import { getLoyalCustomersAllUseCase } from '../../feature/masters/loyal-customers/use-case'
 import PageModule from '../../components/PageModule/PageModule'
 import TableResponsive from '../../components/TableResponsive/TableResponsive'
+import ComprobanteImpresion from '../../components/ComprobanteImpresion/ComprobanteImpresion'
 import '../../components/TableResponsive/TableResponsive.css'
 import '../../components/FormularioProductos/FormularioProductos.css'
 
@@ -65,6 +66,7 @@ function IngresosOVentasView({ mode }) {
   const [listaPrecios, setListaPrecios] = useState('general')
   const [filtrosActivos, setFiltrosActivos] = useState([])
   const [showInfoReportes, setShowInfoReportes] = useState(false)
+  const [comprobanteImpresion, setComprobanteImpresion] = useState(null)
 
   const [searchTerm, setSearchTerm] = useState('')
   const [minAmount, setMinAmount] = useState('')
@@ -265,7 +267,7 @@ function IngresosOVentasView({ mode }) {
   const emptyMessage = isIngresos
     ? 'No hay ingresos registrados. Registra ventas o facturas usando los productos del catálogo.'
     : (errorVentas || 'No hay ventas registradas en el sistema.')
-  const colSpan = isIngresos ? 7 : 6
+  const colSpan = isIngresos ? 8 : 7
   const datosVentas = isIngresos ? facturasVentas : ventasList
 
   return (
@@ -466,31 +468,32 @@ function IngresosOVentasView({ mode }) {
               <th>Turno</th>
               <th>Total</th>
               <th>Estado</th>
+              <th>Imprimir</th>
               {isIngresos && <th>Acciones</th>}
             </tr>
           </thead>
           <tbody>
             {isIngresos && loadingIngresos ? (
               <tr>
-                <td colSpan={colSpan}>
+                <td colSpan={isIngresos ? 8 : 7}>
                   <div className="page-module-empty">Cargando ingresos...</div>
                 </td>
               </tr>
             ) : isIngresos && facturasVentas.length === 0 ? (
               <tr>
-                <td colSpan={colSpan}>
+                <td colSpan={isIngresos ? 8 : 7}>
                   <div className="page-module-empty">{emptyMessage}</div>
                 </td>
               </tr>
             ) : !isIngresos && loadingVentas ? (
               <tr>
-                <td colSpan={colSpan}>
+                <td colSpan={isIngresos ? 8 : 7}>
                   <div className="page-module-empty">Cargando ventas...</div>
                 </td>
               </tr>
             ) : !isIngresos && ventasList.length === 0 ? (
               <tr>
-                <td colSpan={colSpan}>
+                <td colSpan={isIngresos ? 8 : 7}>
                   <div className="page-module-empty">{emptyMessage}</div>
                 </td>
               </tr>
@@ -504,6 +507,11 @@ function IngresosOVentasView({ mode }) {
                   <td data-label="Total">${Number(f.total || 0).toLocaleString('es-CO')}</td>
                   <td data-label="Estado">
                     <span className={`badge ${f.estado === 'Pagada' ? 'badge-success' : 'badge-pending'}`}>{f.estado}</span>
+                  </td>
+                  <td data-label="Imprimir">
+                    <button type="button" className="btn-icon-action" onClick={() => setComprobanteImpresion(f)} title="Visualizar impresión" aria-label="Imprimir">
+                      <Printer size={18} />
+                    </button>
                   </td>
                   {isIngresos && (
                     <td data-label="Acciones">
@@ -671,6 +679,22 @@ function IngresosOVentasView({ mode }) {
             </div>
           </div>
         </div>
+      )}
+
+      {comprobanteImpresion && (
+        <ComprobanteImpresion
+          open={!!comprobanteImpresion}
+          onClose={() => setComprobanteImpresion(null)}
+          title={isIngresos ? 'Comprobante de ingreso' : 'Comprobante de venta'}
+          lineas={[
+            { label: 'Nº', value: comprobanteImpresion.numero },
+            { label: 'Cliente', value: comprobanteImpresion.cliente },
+            { label: 'Fecha', value: comprobanteImpresion.fecha },
+            { label: 'Turno', value: comprobanteImpresion.turno || '-' },
+            { label: 'Total', value: `$${Number(comprobanteImpresion.total || 0).toLocaleString('es-CO')}` },
+            { label: 'Estado', value: comprobanteImpresion.estado },
+          ]}
+        />
       )}
     </PageModule>
   )

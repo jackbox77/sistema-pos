@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react'
-import { X, Search, History, DollarSign, Filter, Eraser, AlertCircle } from 'lucide-react'
+import { X, Search, History, DollarSign, Filter, Eraser, AlertCircle, Printer } from 'lucide-react'
 import PageModule from '../../components/PageModule/PageModule'
 import TableResponsive from '../../components/TableResponsive/TableResponsive'
+import ComprobanteImpresion from '../../components/ComprobanteImpresion/ComprobanteImpresion'
 import '../../components/TableResponsive/TableResponsive.css'
 import '../../components/FormularioProductos/FormularioProductos.css'
 import { getExpensesUseCase, createExpenseUseCase } from '../../feature/finance/Discharge/use-case'
@@ -36,6 +37,7 @@ export default function Egresos() {
   const [shifts, setShifts] = useState([])
   const [filtrosActivos, setFiltrosActivos] = useState([])
   const [showInfoReportes, setShowInfoReportes] = useState(false)
+  const [comprobanteEgreso, setComprobanteEgreso] = useState(null)
 
   useEffect(() => {
     getShiftsUseCase(1, 100).then((res) => {
@@ -340,18 +342,19 @@ export default function Egresos() {
               <th>Concepto</th>
               <th>Referencia</th>
               <th>Monto</th>
+              <th>Imprimir</th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan="4">
+                <td colSpan="5">
                   <div className="page-module-empty">Cargando egresos...</div>
                 </td>
               </tr>
             ) : egresos.length === 0 ? (
               <tr>
-                <td colSpan="4">
+                <td colSpan="5">
                   <div className="page-module-empty">
                     No hay egresos registrados. Usa &quot;+ Registrar egreso&quot; para registrar pagos y salidas de dinero.
                   </div>
@@ -364,6 +367,17 @@ export default function Egresos() {
                   <td data-label="Concepto">{eg.concept ?? '-'}</td>
                   <td data-label="Referencia">{eg.reference ?? '-'}</td>
                   <td data-label="Monto">${Number(eg.amount ?? 0).toLocaleString('es-CO')}</td>
+                  <td data-label="Imprimir">
+                    <button
+                      type="button"
+                      className="btn-icon-action"
+                      onClick={() => setComprobanteEgreso(eg)}
+                      title="Visualizar impresión"
+                      aria-label="Imprimir"
+                    >
+                      <Printer size={18} />
+                    </button>
+                  </td>
                 </tr>
               ))
             )}
@@ -462,6 +476,20 @@ export default function Egresos() {
             </form>
           </div>
         </div>
+      )}
+
+      {comprobanteEgreso && (
+        <ComprobanteImpresion
+          open={!!comprobanteEgreso}
+          onClose={() => setComprobanteEgreso(null)}
+          title="Comprobante de egreso"
+          lineas={[
+            { label: 'Fecha', value: formatISOToFecha(comprobanteEgreso.created_at) },
+            { label: 'Concepto', value: comprobanteEgreso.concept ?? '-' },
+            { label: 'Referencia', value: comprobanteEgreso.reference ?? '-' },
+            { label: 'Monto', value: `$${Number(comprobanteEgreso.amount ?? 0).toLocaleString('es-CO')}` },
+          ]}
+        />
       )}
     </PageModule>
   )
