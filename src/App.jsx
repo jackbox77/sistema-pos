@@ -24,6 +24,7 @@ import Subscripciones from './pages/configuracion/Subscripciones'
 import Compania from './pages/configuracion/Compania'
 import UsuariosPermisos from './pages/configuracion/UsuariosPermisos'
 import Imagenes from './pages/configuracion/Imagenes'
+import Impresion from './pages/configuracion/Impresion'
 import RolesUsuarios from './pages/nomina/RolesUsuarios'
 import Categorias from './pages/maestros/Categorias'
 import Productos from './pages/maestros/Productos'
@@ -89,6 +90,7 @@ export default function App() {
         <Route path="configuracion/historial-subscripciones" element={<Navigate to="/app/configuracion/subscripciones" state={{ tab: 'historial' }} replace />} />
         <Route path="configuracion/subscripciones" element={<Subscripciones />} />
         <Route path="configuracion/imagenes" element={<Imagenes />} />
+        <Route path="configuracion/impresion" element={<Impresion />} />
         <Route path="nomina" element={<Navigate to="/app/nomina/roles-usuarios" replace />} />
         <Route path="nomina/roles-usuarios" element={<RolesUsuarios />} />
       </Route>

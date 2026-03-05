@@ -97,6 +97,7 @@ const menuItems = [
       { path: '/app/configuracion/usuarios-permisos', label: 'Usuarios y permisos' },
       { path: '/app/configuracion/subscripciones', label: 'Subscripciones' },
       { path: '/app/configuracion/imagenes', label: 'Imágenes almacenadas' },
+      { path: '/app/configuracion/impresion', label: 'Impresión' },
     ],
   },
 ]
