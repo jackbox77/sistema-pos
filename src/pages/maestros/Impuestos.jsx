@@ -191,15 +191,15 @@ export default function Impuestos() {
             </tr>
           </thead>
           <tbody>
-            {impuestos.length === 0 && loading ? (
+            {loading ? (
               <tr>
-                <td data-label="Código">—</td>
-                <td data-label="Nombre">—</td>
-                <td data-label="Porcentaje">—</td>
-                <td data-label="Descripción">—</td>
-                <td data-label="Estado">
-                  <span className="badge badge-estado-toggle" aria-busy="true">Cargando</span>
+                <td colSpan={5} className="page-module-table-loading" data-label="">
+                  Cargando…
                 </td>
+              </tr>
+            ) : impuestos.length === 0 ? (
+              <tr>
+                <td colSpan={5} data-label="">No hay impuestos registrados.</td>
               </tr>
             ) : (
               impuestos.map((imp) => (

@@ -1,4 +1,4 @@
-import { Image as ImageIcon } from 'lucide-react'
+import MenuImage from './MenuImage'
 import MenuHeader from './MenuHeader'
 import MenuContactBar from './MenuContactBar'
 import './MenuPreviewPlatosHorizontal.css'
@@ -80,16 +80,12 @@ export default function MenuPreviewPlatosHorizontal({ categorias, apariencia = a
                       >
                         {mostrarImagenes && (
                           <div className="menu-preview-platos-h-card-img">
-                            {item.imagen ? (
-                              <img src={item.imagen} alt="" />
-                            ) : (
-                              <span
-                                className="menu-preview-platos-h-card-img-sin"
-                                style={{ color: `${colorTexto}40` }}
-                              >
-                                <ImageIcon size={32} />
-                              </span>
-                            )}
+                            <MenuImage
+                              src={item.imagen}
+                              wrapperClassName="menu-preview-platos-h-card-img-sin"
+                              style={{ color: `${colorTexto}40` }}
+                              iconSize={32}
+                            />
                           </div>
                         )}
                         <div className="menu-preview-platos-h-card-content">

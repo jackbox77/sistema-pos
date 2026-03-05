@@ -7,6 +7,7 @@ import MenuContactBar from './MenuContactBar'
 import { updateProfileUseCase, updateContactUseCase } from '../../feature/menu-config'
 import { validateBucketUseCase, getBucketUseCase, createBucketUseCase, createFolderUseCase, uploadFileUseCase } from '../../feature/storage/use-case'
 import { Trash2, Settings, Image as ImageIcon, FolderOpen, Plus, ChevronRight, Upload, X, MapPin, Phone, Mail, MessageCircle, Clock, CalendarDays, Eye } from 'lucide-react'
+import MenuImage from './MenuImage'
 import './Menu.css'
 import './ConfigurarEmpresa.css'
 import '../../components/FormularioProductos/FormularioProductos.css'
@@ -479,11 +480,11 @@ export default function Menu() {
                         <h4 className="config-empresa-card-title">Logo de la empresa</h4>
                         <div className="config-empresa-logo-wrap">
                           <div className="config-empresa-logo-preview">
-                            {empresaInfo.logoUrl ? (
-                              <img src={empresaInfo.logoUrl} alt="Logo" />
-                            ) : (
-                              <span className="config-empresa-logo-placeholder">Logo</span>
-                            )}
+                            <MenuImage
+                              src={empresaInfo.logoUrl}
+                              wrapperClassName="config-empresa-logo-placeholder"
+                              iconSize={32}
+                            />
                           </div>
                           <button type="button" className="config-empresa-btn-upload" onClick={() => setShowLogoBucketBrowser(true)}>
                             <ImageIcon size={16} /> Elegir imagen
@@ -544,11 +545,11 @@ export default function Menu() {
                         <h4 className="config-empresa-card-title">Imagen de fondo del encabezado</h4>
                         <div className="config-empresa-logo-wrap">
                           <div className="config-empresa-logo-preview config-empresa-header-fondo-preview">
-                            {apariencia.imagenHeaderFondo ? (
-                              <img src={apariencia.imagenHeaderFondo} alt="Fondo del encabezado" />
-                            ) : (
-                              <span className="config-empresa-logo-placeholder">Imagen de fondo</span>
-                            )}
+                            <MenuImage
+                              src={apariencia.imagenHeaderFondo}
+                              wrapperClassName="config-empresa-logo-placeholder"
+                              iconSize={32}
+                            />
                           </div>
                           <input type="file" accept=".png,.jpg,.jpeg" className="config-empresa-input-file" id="header-fondo" onChange={handleHeaderFondoChange} />
                           <label htmlFor="header-fondo" className="config-empresa-btn-upload">Seleccionar imagen</label>

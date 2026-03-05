@@ -199,6 +199,13 @@
   background: #f9fafb;
 }
 
+.page-module-table-loading {
+  text-align: center;
+  padding: 24px 16px !important;
+  color: #6b7280;
+  font-size: 14px;
+}
+
 .page-module-empty {
   padding: 48px;
   text-align: center;

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Image as ImageIcon } from 'lucide-react'
+import MenuImage from './MenuImage'
 import MenuHeader from './MenuHeader'
 import MenuContactBar from './MenuContactBar'
 import './MenuPreviewTarjetas.css'
@@ -98,13 +98,12 @@ export default function MenuPreviewTarjetas({ categorias, apariencia = aparienci
                 <li key={item.id} className={`menu-preview-tarjetas-card ${!mostrarImagenes ? 'menu-preview-tarjetas-card-solo-texto' : ''}`} style={{ backgroundColor: colorContenido, borderColor: `${colorAcento}40` }}>
                   {mostrarImagenes && (
                     <div className="menu-preview-tarjetas-card-img">
-                      {item.imagen ? (
-                        <img src={item.imagen} alt="" />
-                      ) : (
-                        <span className="menu-preview-tarjetas-card-img-sin" style={{ color: `${colorTexto}35` }}>
-                          <ImageIcon size={32} />
-                        </span>
-                      )}
+                      <MenuImage
+                        src={item.imagen}
+                        wrapperClassName="menu-preview-tarjetas-card-img-sin"
+                        style={{ color: `${colorTexto}35` }}
+                        iconSize={32}
+                      />
                     </div>
                   )}
                   <div className="menu-preview-tarjetas-card-content">

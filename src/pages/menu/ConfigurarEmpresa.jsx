@@ -3,6 +3,7 @@ import PageModule from '../../components/PageModule/PageModule'
 import { Image, FolderOpen, Trash2, Settings, Type } from 'lucide-react'
 import { getProfileUseCase, updateProfileUseCase } from '../../feature/menu-config'
 import { useMenu } from './MenuContext'
+import MenuImage from './MenuImage'
 import './ConfigurarEmpresa.css'
 
 export default function ConfigurarEmpresa() {
@@ -110,11 +111,11 @@ export default function ConfigurarEmpresa() {
                 </h3>
                 <div className="config-empresa-logo-wrap">
                   <div className="config-empresa-logo-preview">
-                    {logoUrl ? (
-                      <img src={logoUrl} alt="Logo" />
-                    ) : (
-                      <span className="config-empresa-logo-placeholder">Logo</span>
-                    )}
+                    <MenuImage
+                      src={logoUrl}
+                      wrapperClassName="config-empresa-logo-placeholder"
+                      iconSize={32}
+                    />
                   </div>
                   <input
                     type="file"
@@ -159,7 +160,12 @@ export default function ConfigurarEmpresa() {
                       />
                       {fotos[i] ? (
                         <div className="config-empresa-foto-preview">
-                          <img src={fotos[i]} alt="" />
+                          <MenuImage
+                            src={fotos[i]}
+                            className="config-empresa-foto-img"
+                            wrapperClassName="config-empresa-foto-placeholder"
+                            iconSize={28}
+                          />
                         </div>
                       ) : (
                         <label htmlFor={`foto-empresa-${i}`} className="config-empresa-foto-upload">

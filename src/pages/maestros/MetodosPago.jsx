@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { X, AlertCircle } from 'lucide-react'
+import { AlertCircle } from 'lucide-react'
 import PageModule from '../../components/PageModule/PageModule'
 import ApiErrorRecargar from '../../components/ApiErrorRecargar/ApiErrorRecargar'
 import TableResponsive from '../../components/TableResponsive/TableResponsive'
@@ -41,8 +41,6 @@ export default function MetodosPago() {
   const [updatingEstadoId, setUpdatingEstadoId] = useState(null)
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [formError, setFormError] = useState(null)
-  const [listaPrecios, setListaPrecios] = useState('general')
-  const [filtrosActivos, setFiltrosActivos] = useState([{ id: 'estado', label: 'Estado: activos' }])
   const [showInfoSoporte, setShowInfoSoporte] = useState(false)
 
   const cargarMetodos = useCallback(async () => {
@@ -65,10 +63,6 @@ export default function MetodosPago() {
   useEffect(() => {
     cargarMetodos()
   }, [cargarMetodos])
-
-  const quitarFiltro = (id) => {
-    setFiltrosActivos((prev) => prev.filter((f) => f.id !== id))
-  }
 
   const cambiarEstado = async (m) => {
     const nuevoEstado = m.estado === 'Activo' ? 'inactive' : 'active'
@@ -106,38 +100,8 @@ export default function MetodosPago() {
             </button>
           </div>
         </div>
-        <div className="maestro-encabezado-filtros">
-          <div className="maestro-encabezado-filtros-left">
-            <label className="maestro-encabezado-label">Lista de precios</label>
-            <select
-              className="maestro-encabezado-select"
-              value={listaPrecios}
-              onChange={(e) => setListaPrecios(e.target.value)}
-            >
-              <option value="general">General</option>
-              <option value="mayorista">Mayorista</option>
-              <option value="especial">Especial</option>
-            </select>
-          </div>
-          <div className="maestro-encabezado-filtros-right">
-            <span className="maestro-encabezado-label">Filtros Activos:</span>
-            {filtrosActivos.length > 0 ? (
-              filtrosActivos.map((f) => (
-                <span key={f.id} className="maestro-filtro-tag">
-                  {f.label}
-                  <button type="button" onClick={() => quitarFiltro(f.id)} aria-label="Quitar filtro">
-                    <X size={14} />
-                  </button>
-                </span>
-              ))
-            ) : (
-              <span className="maestro-filtro-sin">Ninguno</span>
-            )}
-          </div>
-        </div>
       </header>
-      <div className="page-module-toolbar" style={{ marginTop: '16px', display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-        <input type="search" className="input-search" placeholder="Buscar métodos de pago..." style={{ flex: '1', minWidth: '200px' }} />
+      <div className="page-module-toolbar" style={{ marginTop: '16px', display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
         <button
           type="button"
           onClick={() => setShowInfoSoporte(true)}
@@ -181,14 +145,15 @@ export default function MetodosPago() {
             </tr>
           </thead>
           <tbody>
-            {metodos.length === 0 && loading ? (
+            {loading ? (
               <tr>
-                <td data-label="Código">—</td>
-                <td data-label="Método de pago">—</td>
-                <td data-label="Descripción">—</td>
-                <td data-label="Estado">
-                  <span className="badge badge-estado-toggle" aria-busy="true">Cargando</span>
+                <td colSpan={4} className="page-module-table-loading" data-label="">
+                  Cargando…
                 </td>
+              </tr>
+            ) : metodos.length === 0 ? (
+              <tr>
+                <td colSpan={4} data-label="">No hay métodos de pago registrados.</td>
               </tr>
             ) : (
               metodos.map((m) => (

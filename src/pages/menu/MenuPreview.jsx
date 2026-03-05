@@ -1,4 +1,4 @@
-import { Image as ImageIcon } from 'lucide-react'
+import MenuImage from './MenuImage'
 import MenuPreviewTarjetas from './MenuPreviewTarjetas'
 import MenuPreviewCategoriasPrimero from './MenuPreviewCategoriasPrimero'
 import MenuPreviewPlatosHorizontal from './MenuPreviewPlatosHorizontal'
@@ -93,13 +93,12 @@ export default function MenuPreview({ categorias, apariencia = aparienciaDefault
                       >
                         <div className="menu-preview-item-content">
                           {mostrarImagenes && (
-                            item.imagen ? (
-                              <img src={item.imagen} alt="" className="menu-preview-item-img" />
-                            ) : (
-                              <span className="menu-preview-item-img-sin">
-                                <ImageIcon size={24} />
-                              </span>
-                            )
+                            <MenuImage
+                              src={item.imagen}
+                              className="menu-preview-item-img"
+                              wrapperClassName="menu-preview-item-img-sin"
+                              iconSize={24}
+                            />
                           )}
                           <div className="menu-preview-item-texto">
                             <span

@@ -370,6 +370,7 @@ export default function Facturar() {
                   <div className="facturar-skeleton-input" />
                   <p className="facturar-skeleton-actualizado">Actualizado —</p>
                 </div>
+                <div className="facturar-productos-scroll">
                 <div className="facturar-productos-grid">
                   {Array.from({ length: 12 }, (_, i) => (
                     <div key={i} className="facturar-skeleton-card">
@@ -379,6 +380,7 @@ export default function Facturar() {
                       <div className="facturar-skeleton-card-line facturar-skeleton-card-line--price" />
                     </div>
                   ))}
+                </div>
                 </div>
               </div>
               <div className="facturar-panel-factura" style={{ minHeight: 320 }} />
@@ -421,6 +423,7 @@ export default function Facturar() {
                   )}
                 </div>
 
+                <div className="facturar-productos-scroll">
                 <div className="facturar-productos-grid">
                   {filteredProducts.length === 0 ? (
                     <p className="facturar-empty">
@@ -478,6 +481,7 @@ export default function Facturar() {
                       )
                     })
                   )}
+                </div>
                 </div>
               </div>
 
@@ -607,6 +611,25 @@ export default function Facturar() {
                           </div>
                         </div>
                       )}
+                    </div>
+
+                    <div style={{ width: '100%', marginTop: '12px' }}>
+                      <label style={{ fontSize: '12px', color: '#6b7280', display: 'block', marginBottom: '4px' }}>Método de pago</label>
+                      <select
+                        value={currentPedido?.paymentMethodId ?? ''}
+                        onChange={(e) => updateCurrentPedidoField('paymentMethodId', e.target.value || '')}
+                        style={{
+                          width: '100%', minHeight: '36px', padding: '6px 10px', background: '#fff', border: '1px solid #d1d5db',
+                          borderRadius: '6px', fontSize: '13px', color: '#111827', cursor: 'pointer'
+                        }}
+                      >
+                        <option value="">Seleccionar método</option>
+                        {Array.isArray(paymentMethods) && paymentMethods
+                          .filter(p => p.status !== 'inactive')
+                          .map((p) => (
+                            <option key={p.id} value={p.id}>{p.method_name ?? p.name ?? p.code ?? 'Método'}</option>
+                          ))}
+                      </select>
                     </div>
                   </div>
 
@@ -868,7 +891,7 @@ function ModalValidarTransaccion({ pedido, subtotal, taxTotal, totalCart, custom
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
               <span style={{ color: '#6b7280' }}>Método de pago:</span>
-              <strong style={{ color: '#111827' }}>{pm ? pm.name : 'Efectivo'}</strong>
+              <strong style={{ color: '#111827' }}>{pm ? (pm.method_name ?? pm.name) : 'Efectivo'}</strong>
             </div>
             <hr style={{ border: 'none', borderTop: '1px solid #e5e7eb', margin: '12px 0' }} />
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>

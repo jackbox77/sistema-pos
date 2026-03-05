@@ -121,32 +121,31 @@
   font-size: 14px;
 }
 
-/* Grid principal: productos (izq) | factura (der) — dos scrolls independientes */
+/* Grid principal: productos (izq) | factura (der). La factura sin scroll y se ve completa. */
 .facturar-grid {
   display: grid;
   grid-template-columns: 1fr 360px;
   gap: 16px;
-  align-items: stretch;
-  height: calc(100vh - 180px);
-  min-height: 420px;
+  align-items: start;
+  min-height: calc(100vh - 180px);
 }
 
 @media (max-width: 960px) {
   .facturar-grid {
     grid-template-columns: 1fr;
-    height: auto;
     min-height: 0;
   }
 }
 
-/* —— Izquierda: productos + categorías (scroll propio) —— */
+/* —— Izquierda: filtros fijos + solo el grid de productos con scroll —— */
 .facturar-productos {
   display: flex;
   flex-direction: column;
   gap: 16px;
   min-height: 0;
-  overflow-y: auto;
-  overflow-x: hidden;
+  max-height: calc(100vh - 180px);
+  overflow: hidden;
+  width: 100%;
 }
 
 @media (max-width: 960px) {
@@ -156,10 +155,24 @@
   }
 }
 
+.facturar-productos-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+@media (max-width: 960px) {
+  .facturar-productos-scroll {
+    overflow: visible;
+  }
+}
+
 .facturar-filtros {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  flex-shrink: 0;
 }
 
 .facturar-categorias-filtro {
@@ -423,7 +436,7 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* —— Derecha: summary / payment (scroll propio) —— */
+/* —— Derecha: factura sin scroll, se muestra completa (la página hace scroll si hace falta) —— */
 .facturar-panel-factura {
   padding: 20px;
   background: #fff;
@@ -431,14 +444,12 @@
   border: 1px solid #e5e7eb;
   display: flex;
   flex-direction: column;
-  min-height: 0;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: visible;
+  width: 100%;
 }
 
 @media (max-width: 960px) {
   .facturar-panel-factura {
-    overflow: visible;
     max-height: none;
   }
 }
@@ -546,7 +557,7 @@
 
 .facturar-carrito-item {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 90px 110px 28px;
+  grid-template-columns: minmax(0, 1fr) 82px 92px 28px;
   align-items: center;
   gap: 10px 12px;
   padding: 10px 0;
@@ -558,9 +569,13 @@
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  line-clamp: 2;
   color: #374151;
   font-weight: 500;
+  line-height: 1.3;
 }
 
 .facturar-carrito-cantidad {
@@ -568,8 +583,8 @@
   align-items: center;
   justify-content: center;
   gap: 4px;
-  width: 90px;
-  min-width: 0;
+  width: 82px;
+  min-width: 82px;
   flex-shrink: 0;
   overflow: hidden;
 }
@@ -614,7 +629,7 @@
   text-align: right;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
-  min-width: 0;
+  min-width: 92px;
 }
 
 .facturar-carrito-quitar {

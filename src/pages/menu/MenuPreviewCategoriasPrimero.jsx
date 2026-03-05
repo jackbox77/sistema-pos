@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { Image as ImageIcon, ChevronLeft, UtensilsCrossed } from 'lucide-react'
+import { ChevronLeft, UtensilsCrossed } from 'lucide-react'
+import MenuImage from './MenuImage'
 import MenuHeader from './MenuHeader'
 import MenuContactBar from './MenuContactBar'
 import './MenuPreviewCategoriasPrimero.css'
@@ -128,13 +129,11 @@ export default function MenuPreviewCategoriasPrimero({ categorias, apariencia = 
                     <li key={item.id} className={`menu-preview-cat-primero-item ${!mostrarImagenes ? 'menu-preview-cat-primero-item-solo-texto' : ''}`} style={{ borderColor: `${colorAcento}20` }}>
                       {mostrarImagenes && (
                         <div className="menu-preview-cat-primero-item-img">
-                          {item.imagen ? (
-                            <img src={item.imagen} alt="" />
-                          ) : (
-                            <span style={{ color: `${colorTexto}50` }}>
-                              <ImageIcon size={24} />
-                            </span>
-                          )}
+                          <MenuImage
+                            src={item.imagen}
+                            style={{ color: `${colorTexto}50` }}
+                            iconSize={24}
+                          />
                         </div>
                       )}
                       <div className="menu-preview-cat-primero-item-content">

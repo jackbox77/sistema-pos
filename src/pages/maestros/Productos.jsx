@@ -4,6 +4,7 @@ import { parsearCSV } from '../../utils/csvMaestros'
 import { descargarDatosExcel, parsearExcel } from '../../utils/excelMaestros'
 import ApiErrorRecargar from '../../components/ApiErrorRecargar/ApiErrorRecargar'
 import PageModule from '../../components/PageModule/PageModule'
+import MaestroThumbImage from './MaestroThumbImage'
 import TableResponsive from '../../components/TableResponsive/TableResponsive'
 import '../../components/TableResponsive/TableResponsive.css'
 import '../../components/FormularioProductos/FormularioProductos.css'
@@ -462,13 +463,7 @@ export default function Productos() {
                 sortedProductos.map((prod) => (
                   <tr key={prod.id}>
                     <td data-label="Imagen">
-                      {prod.imagen ? (
-                        <img src={prod.imagen} alt="" className="categoria-thumb" />
-                      ) : (
-                        <span className="categoria-thumb-sin-imagen" title="Sin imagen">
-                          <ImageIcon size={24} />
-                        </span>
-                      )}
+                      <MaestroThumbImage src={prod.imagen} />
                     </td>
                     <td data-label="Código">{normalizarCodigo(prod.codigo)}</td>
                     <td data-label="Nombre">{prod.nombre}</td>

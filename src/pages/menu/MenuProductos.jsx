@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import PageModule from '../../components/PageModule/PageModule'
-import { Image as ImageIcon } from 'lucide-react'
+import MenuImage from './MenuImage'
 import { useMenu } from './MenuContext'
 import { getProductsAllUseCase, updateProductVisibilityUseCase } from '../../feature/masters/products/use-case'
 import { getCategoriesAllUseCase } from '../../feature/masters/category/use-case'
@@ -23,13 +23,11 @@ export default function MenuProductos() {
       getCategoriesAllUseCase()
         .then((list) => {
           setCategorias(
-            (Array.isArray(list) ? list : [])
-              .filter((c) => c.visibility !== false)
-              .map((c, i) => ({
-                id: c.id,
-                nombre: c.name ?? c.nombre ?? '',
-                orden: i,
-              }))
+            (Array.isArray(list) ? list : []).map((c, i) => ({
+              id: c.id,
+              nombre: c.name ?? c.nombre ?? '',
+              orden: i,
+            }))
           )
         })
         .catch((err) => {
@@ -86,11 +84,10 @@ export default function MenuProductos() {
     [refreshProductos]
   )
 
-  const productosVisibles = productos.filter((p) => p.visibility === true)
   const productosFiltrados =
     categoriaFiltro === 'todas'
-      ? productosVisibles
-      : productosVisibles.filter((p) => String(p.categoriaId) === String(categoriaFiltro))
+      ? productos
+      : productos.filter((p) => String(p.categoriaId) === String(categoriaFiltro))
 
   const getCategoriaNombre = (categoriaId) =>
     categorias.find((c) => String(c.id) === String(categoriaId))?.nombre ?? '—'
@@ -163,8 +160,8 @@ export default function MenuProductos() {
         ) : productosFiltrados.length === 0 ? (
           <p className="menu-productos-vacio">
             {categoriaFiltro === 'todas'
-              ? 'No hay productos visibles. Activa productos en Maestros → Productos (visibilidad en menú).'
-              : 'No hay productos visibles en esta categoría.'}
+              ? 'No hay productos. Añade productos en Almacén → Productos.'
+              : 'No hay productos en esta categoría.'}
           </p>
         ) : (
           productosFiltrados.map((prod) => {
@@ -173,13 +170,12 @@ export default function MenuProductos() {
             return (
               <div key={prod.id} className={`menu-producto-card ${enMenu ? 'menu-producto-card-activa' : ''}`}>
                 <div className="menu-producto-info">
-                  {prod.imagen ? (
-                    <img src={prod.imagen} alt="" className="menu-producto-thumb" />
-                  ) : (
-                    <span className="menu-producto-thumb-sin">
-                      <ImageIcon size={24} />
-                    </span>
-                  )}
+                  <MenuImage
+                    src={prod.imagen}
+                    className="menu-producto-thumb"
+                    wrapperClassName="menu-producto-thumb-sin"
+                    iconSize={24}
+                  />
                   <div>
                     <span className="menu-producto-nombre">{prod.nombre}</span>
                     <span className="menu-producto-meta">
@@ -203,7 +199,7 @@ export default function MenuProductos() {
         )}
       </div>
       <p className="menu-categoria-hint">
-        Las categorías se definen en <Link to="/app/menu/categoria">Categoría</Link>. Los productos en <strong>Maestros → Productos</strong>; solo los visibles aparecen aquí. Aquí activas o ocultas cada uno en el menú.
+        Las categorías se definen en <Link to="/app/menu/categoria">Categoría</Link>. Los productos en <strong>Almacén → Productos</strong>. Aquí eliges cuáles se muestran en el menú; si no los pones visibles desde Almacén, no aparecerán en el menú.
       </p>
         </>
       )}

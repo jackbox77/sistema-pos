@@ -1,6 +1,20 @@
+import { useState } from 'react'
+import { Image as ImageIcon } from 'lucide-react'
 import './MenuHeader.css'
 
 const empresaDefault = { logoUrl: '', nombreEmpresa: '', subtitulo: '' }
+
+function LogoImg({ src }) {
+  const [error, setError] = useState(false)
+  if (!src || error) {
+    return (
+      <span className="menu-header-logo-fallback" aria-hidden>
+        <ImageIcon size={32} />
+      </span>
+    )
+  }
+  return <img src={src} alt="" onError={() => setError(true)} />
+}
 
 /**
  * Encabezado reutilizable del menú con 4 variantes:
@@ -36,7 +50,7 @@ export default function MenuHeader({
         <div className="menu-header-imagen-fondo-content">
           {empresa.logoUrl && (
             <div className="menu-header-imagen-fondo-logo">
-              <img src={empresa.logoUrl} alt="" />
+              <LogoImg src={empresa.logoUrl} />
             </div>
           )}
           <h2 className="menu-header-imagen-fondo-titulo">{empresa.nombreEmpresa || 'Menú'}</h2>
@@ -103,7 +117,7 @@ export default function MenuHeader({
     >
       {empresa.logoUrl ? (
         <div className="menu-header-clasico-logo-img">
-          <img src={empresa.logoUrl} alt="" />
+          <LogoImg src={empresa.logoUrl} />
         </div>
       ) : (
         <div className="menu-header-clasico-logo" style={{ borderColor: `${colorTexto || '#6b7280'}40`, color: colorTexto || '#6b7280' }}>

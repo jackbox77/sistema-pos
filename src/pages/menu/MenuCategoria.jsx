@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import PageModule from '../../components/PageModule/PageModule'
+import MenuImage from './MenuImage'
 import { useMenu } from './MenuContext'
 import { getCategoriesAllUseCase, updateCategoryVisibilityUseCase } from '../../feature/masters/category/use-case'
 import './MenuCategoria.css'
@@ -23,6 +24,7 @@ export default function MenuCategoria() {
             nombre: c.name ?? c.nombre ?? '',
             orden: i,
             visibility: c.visibility !== false,
+            imagen: c.image_url ?? c.imagen ?? '',
           }))
         )
       })
@@ -58,8 +60,6 @@ export default function MenuCategoria() {
     [refreshCategorias]
   )
 
-  const soloVisibles = categorias.filter((c) => c.visibility === true)
-
   return (
     <PageModule
       title="Categorías en el menú"
@@ -91,28 +91,38 @@ export default function MenuCategoria() {
 
       {!loading && !error && (
         <div className="menu-categoria-list">
-          {soloVisibles.map((cat) => {
-          const enMenu = cat.visibility
-          const loading = updatingId === cat.id
-          return (
-            <div key={cat.id} className={`menu-categoria-card ${enMenu ? 'menu-categoria-card-activa' : ''}`}>
-              <div className="menu-categoria-info">
-                <span className="menu-categoria-nombre">{cat.nombre}</span>
-                <span className="menu-categoria-badge">{enMenu ? 'En el menú' : 'Oculta'}</span>
+          {categorias.map((cat) => {
+            const enMenu = cat.visibility
+            const loadingCard = updatingId === cat.id
+            return (
+              <div key={cat.id} className={`menu-categoria-card ${enMenu ? 'menu-categoria-card-activa' : ''}`}>
+                <div className="menu-categoria-info">
+                  <div className="menu-categoria-thumb-wrap">
+                    <MenuImage
+                      src={cat.imagen}
+                      className="menu-categoria-thumb"
+                      wrapperClassName="menu-categoria-thumb-sin"
+                      iconSize={28}
+                    />
+                  </div>
+                  <div>
+                    <span className="menu-categoria-nombre">{cat.nombre}</span>
+                    <span className="menu-categoria-badge">{enMenu ? 'En el menú' : 'Oculta'}</span>
+                  </div>
+                </div>
+                <label className="menu-categoria-toggle">
+                  <input
+                    type="checkbox"
+                    checked={enMenu}
+                    disabled={loadingCard}
+                    onChange={() => handleToggleVisibility(cat)}
+                    aria-label={`${enMenu ? 'Quitar' : 'Incluir'} ${cat.nombre} en el menú`}
+                  />
+                  <span className="menu-categoria-switch" />
+                </label>
               </div>
-              <label className="menu-categoria-toggle">
-                <input
-                  type="checkbox"
-                  checked={enMenu}
-                  disabled={loading}
-                  onChange={() => handleToggleVisibility(cat)}
-                  aria-label={`${enMenu ? 'Quitar' : 'Incluir'} ${cat.nombre} en el menú`}
-                />
-                <span className="menu-categoria-switch" />
-              </label>
-            </div>
-          )
-        })}
+            )
+          })}
         </div>
       )}
 

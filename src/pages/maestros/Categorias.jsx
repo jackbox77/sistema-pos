@@ -1,6 +1,7 @@
 import { useRef, useState, useEffect, useCallback, useMemo, Fragment } from 'react'
 import { Pencil, Trash2, Upload, Download, ChevronDown, ChevronLeft, ChevronRight, Image as ImageIcon, X, Eye, EyeOff, FolderOpen, Plus } from 'lucide-react'
 import PageModule from '../../components/PageModule/PageModule'
+import MaestroThumbImage from './MaestroThumbImage'
 import { parsearCSV } from '../../utils/csvMaestros'
 import { descargarDatosExcel, parsearExcel } from '../../utils/excelMaestros'
 import ApiErrorRecargar from '../../components/ApiErrorRecargar/ApiErrorRecargar'
@@ -346,13 +347,7 @@ export default function Categorias() {
                 categorias.map((cat) => (
                   <tr key={cat.id}>
                     <td data-label="Imagen">
-                      {cat.imagen ? (
-                        <img src={cat.imagen} alt="" className="categoria-thumb" />
-                      ) : (
-                        <span className="categoria-thumb-sin-imagen" title="Sin imagen">
-                          <ImageIcon size={24} />
-                        </span>
-                      )}
+                      <MaestroThumbImage src={cat.imagen} />
                     </td>
                     <td data-label="Código">{normalizarCodigo(cat.codigo)}</td>
                     <td data-label="Nombre">{cat.nombre}</td>
