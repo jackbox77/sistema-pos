@@ -387,7 +387,8 @@ export default function Facturar() {
             </div>
           ) : (
             <div className="facturar-grid">
-              {/* Izquierda: categorías + búsqueda + grid de productos */}
+              {/* Izquierda: categorías + productos + barra Factura 1 (solo en este espacio) */}
+              <div className="facturar-col-productos">
               <div className="facturar-productos">
                 <div className="facturar-filtros">
                   <div className="facturar-categorias-filtro">
@@ -483,6 +484,53 @@ export default function Facturar() {
                   )}
                 </div>
                 </div>
+              </div>
+
+              {/* Barra Factura 1: solo en columna de productos */}
+              <div className="facturar-barra-facturas">
+                <div className="facturar-barra-facturas-inner">
+                  {pedidos.map((p) => {
+                    const itemsCount = p.cart?.length ?? 0
+                    const total = (p.cart ?? []).reduce((sum, it) => sum + it.quantity * it.unit_price + (it.tax_amount ?? 0) * it.quantity, 0)
+                    const isActive = p.id === currentPedidoId
+                    const num = (p.nombre.match(/\d+/) || ['1'])[0]
+                    return (
+                      <button
+                        key={p.id}
+                        type="button"
+                        className={`facturar-factura-pill ${isActive ? 'active' : ''}`}
+                        onClick={() => selectFactura(p.id)}
+                      >
+                        <span className="facturar-factura-pill-badge">F{num}</span>
+                        <div className="facturar-factura-pill-content">
+                          <span className="facturar-factura-pill-nombre">{p.nombre}</span>
+                          <span className="facturar-factura-pill-info">
+                            {itemsCount} {itemsCount === 1 ? 'producto' : 'productos'} · ${total.toLocaleString('es-CO')}
+                          </span>
+                        </div>
+                        {pedidos.length > 1 && (
+                          <button
+                            type="button"
+                            className="facturar-factura-pill-cerrar"
+                            onClick={(e) => { e.stopPropagation(); removeFactura(p.id); }}
+                            aria-label="Cerrar factura"
+                          >
+                            ✕
+                          </button>
+                        )}
+                      </button>
+                    )
+                  })}
+                  <button
+                    type="button"
+                    className="facturar-factura-pill nueva"
+                    onClick={addNuevaFactura}
+                    aria-label="Nueva factura"
+                  >
+                    <Plus size={24} strokeWidth={2.5} />
+                  </button>
+                </div>
+              </div>
               </div>
 
               {/* Derecha: panel de facturación */}
@@ -688,54 +736,6 @@ export default function Facturar() {
                     </div>
                   )}
                 </div>
-              </div>
-            </div>
-          )}
-
-          {/* Barra inferior: otras facturas */}
-          {activeTab === 'facturar' && !loading && (
-            <div className="facturar-barra-facturas">
-              <div className="facturar-barra-facturas-inner">
-                {pedidos.map((p) => {
-                  const itemsCount = p.cart?.length ?? 0
-                  const total = (p.cart ?? []).reduce((sum, it) => sum + it.quantity * it.unit_price + (it.tax_amount ?? 0) * it.quantity, 0)
-                  const isActive = p.id === currentPedidoId
-                  const num = (p.nombre.match(/\d+/) || ['1'])[0]
-                  return (
-                    <button
-                      key={p.id}
-                      type="button"
-                      className={`facturar-factura-pill ${isActive ? 'active' : ''}`}
-                      onClick={() => selectFactura(p.id)}
-                    >
-                      <span className="facturar-factura-pill-badge">F{num}</span>
-                      <div className="facturar-factura-pill-content">
-                        <span className="facturar-factura-pill-nombre">{p.nombre}</span>
-                        <span className="facturar-factura-pill-info">
-                          {itemsCount} {itemsCount === 1 ? 'producto' : 'productos'} · ${total.toLocaleString('es-CO')}
-                        </span>
-                      </div>
-                      {pedidos.length > 1 && (
-                        <button
-                          type="button"
-                          className="facturar-factura-pill-cerrar"
-                          onClick={(e) => { e.stopPropagation(); removeFactura(p.id); }}
-                          aria-label="Cerrar factura"
-                        >
-                          ✕
-                        </button>
-                      )}
-                    </button>
-                  )
-                })}
-                <button
-                  type="button"
-                  className="facturar-factura-pill nueva"
-                  onClick={addNuevaFactura}
-                  aria-label="Nueva factura"
-                >
-                  <Plus size={24} strokeWidth={2.5} />
-                </button>
               </div>
             </div>
           )}

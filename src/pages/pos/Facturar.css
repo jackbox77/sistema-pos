@@ -137,21 +137,30 @@
   }
 }
 
-/* —— Izquierda: filtros fijos + solo el grid de productos con scroll —— */
+/* —— Columna izquierda: productos + barra Factura 1 (no ocupa espacio de factura) —— */
+.facturar-col-productos {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  gap: 0;
+}
+
 .facturar-productos {
   display: flex;
   flex-direction: column;
   gap: 16px;
   min-height: 0;
-  max-height: calc(100vh - 180px);
+  flex: 1;
   overflow: hidden;
   width: 100%;
 }
 
 @media (max-width: 960px) {
+  .facturar-col-productos {
+    max-height: 60vh;
+  }
   .facturar-productos {
     overflow: visible;
-    max-height: 60vh;
   }
 }
 
@@ -436,7 +445,7 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* —— Derecha: factura sin scroll, se muestra completa (la página hace scroll si hace falta) —— */
+/* —— Derecha: factura se ve completa (scroll de página si hace falta) —— */
 .facturar-panel-factura {
   padding: 20px;
   background: #fff;
@@ -551,8 +560,6 @@
   list-style: none;
   padding: 0;
   margin: 0 0 24px 0;
-  max-height: 350px;
-  overflow-y: auto;
 }
 
 .facturar-carrito-item {
@@ -736,17 +743,13 @@
   cursor: not-allowed;
 }
 
-/* Barra inferior: solo en área de contenido (no sobre el sidebar) */
+/* Barra Factura 1: solo en columna de productos, no ocupa espacio de factura */
 .facturar-barra-facturas {
-  position: fixed;
-  bottom: 0;
-  left: var(--pos-bar-left, 64px);
-  right: 0;
+  flex-shrink: 0;
   background: #fff;
   border-top: 1px solid #e5e7eb;
   padding: 12px 16px;
   box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.06);
-  z-index: 100;
 }
 
 .facturar-barra-facturas-inner {
@@ -868,11 +871,4 @@
 .facturar-factura-pill.nueva:hover {
   background: #f0fdfa;
   border-color: #0d9488;
-}
-
-/* Móvil: barra alineada con el contenido (margin del layout) */
-@media (max-width: 768px) {
-  .facturar-barra-facturas {
-    left: 72px;
-  }
 }
