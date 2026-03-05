@@ -1,11 +1,16 @@
 .facturar-page {
   position: relative;
-  min-height: 400px;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
-.facturar-page.facturar-page--con-barra {
-  padding-bottom: 120px;
+.facturar-header {
+  flex-shrink: 0;
 }
+
 
 /* Pestañas POS: Facturar | Historial | Comprobante */
 .pos-tabs {
@@ -121,13 +126,15 @@
   font-size: 14px;
 }
 
-/* Grid principal: productos (izq) | factura (der). La factura sin scroll y se ve completa. */
+/* Grid principal: productos (izq) | factura (der). Columnas estiran a la altura disponible. */
 .facturar-grid {
   display: grid;
   grid-template-columns: 1fr 360px;
   gap: 16px;
-  align-items: start;
-  min-height: calc(100vh - 180px);
+  align-items: stretch;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
 }
 
 @media (max-width: 960px) {
@@ -142,6 +149,7 @@
   display: flex;
   flex-direction: column;
   min-height: 0;
+  overflow: hidden;
   gap: 0;
 }
 
@@ -445,7 +453,7 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* —— Derecha: factura se ve completa (scroll de página si hace falta) —— */
+/* —— Derecha: panel de factura sin scroll; solo los pedidos hacen scroll —— */
 .facturar-panel-factura {
   padding: 20px;
   background: #fff;
@@ -453,7 +461,8 @@
   border: 1px solid #e5e7eb;
   display: flex;
   flex-direction: column;
-  overflow: visible;
+  min-height: 0;
+  overflow: hidden;
   width: 100%;
 }
 
@@ -473,18 +482,19 @@
 .facturar-order-types {
   display: flex;
   background: #f3f4f6;
-  padding: 4px;
-  border-radius: 10px;
-  margin-bottom: 24px;
+  padding: 3px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  flex-shrink: 0;
 }
 
 .facturar-order-type-btn {
   flex: 1;
-  padding: 8px;
+  padding: 5px 8px;
   border: none;
   background: transparent;
-  border-radius: 8px;
-  font-size: 14px;
+  border-radius: 6px;
+  font-size: 13px;
   font-weight: 600;
   color: #6b7280;
   cursor: pointer;
@@ -499,8 +509,11 @@
 
 .facturar-carrito-seccion {
   flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .facturar-no-order {
@@ -563,13 +576,129 @@
 }
 
 .facturar-carrito-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 0;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 14px;
+}
+
+.facturar-carrito-item-main {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 82px 92px 28px;
   align-items: center;
   gap: 10px 12px;
-  padding: 10px 0;
-  border-bottom: 1px solid #e5e7eb;
+}
+
+.facturar-carrito-item-impuesto {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.facturar-carrito-item-impuesto label {
+  font-size: 12px;
+  color: #6b7280;
+  white-space: nowrap;
+}
+
+.facturar-carrito-impuesto-select {
+  flex: 1;
+  min-width: 100px;
+  padding: 4px 8px;
+  font-size: 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.facturar-carrito-impuesto-select:focus {
+  outline: none;
+  border-color: #0d9488;
+}
+
+/* Métodos de pago múltiples */
+.facturar-payments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.facturar-payment-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.facturar-payment-method-select {
+  flex: 1;
+  min-width: 0;
+  padding: 6px 8px;
+  font-size: 13px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.facturar-payment-amount-input {
+  width: 100px;
+  padding: 6px 8px;
+  font-size: 13px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  text-align: right;
+}
+
+.facturar-payment-amount-input:focus {
+  outline: none;
+  border-color: #0d9488;
+}
+
+.facturar-payment-remove {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: #6b7280;
+  cursor: pointer;
   font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.facturar-payment-remove:hover {
+  color: #b91c1c;
+}
+
+.facturar-payment-add {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 6px;
+  font-size: 12px;
+  color: #0d9488;
+  background: transparent;
+  border: 1px dashed #0d9488;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.facturar-payment-add:hover {
+  background: #f0fdfa;
+}
+
+.facturar-payments-error {
+  font-size: 11px;
+  color: #b91c1c;
+  margin: 4px 0 0 0;
 }
 
 .facturar-carrito-nombre {
@@ -662,17 +791,19 @@
 
 /* Detalle de pago */
 .facturar-detalle-pago {
-  padding: 8px 0;
+  padding: 4px 0;
   border-top: 1px solid #e5e7eb;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
+  flex-shrink: 0;
 }
 
 .facturar-detalle-linea {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 10px;
+  align-items: center;
+  margin-bottom: 3px;
   color: #6b7280;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .facturar-detalle-linea span:last-child {
@@ -681,10 +812,11 @@
 }
 
 .facturar-total-linea {
-  margin-top: 12px;
-  padding-top: 12px;
+  margin-top: 6px;
+  padding-top: 6px;
+  margin-bottom: 0;
   border-top: 2px dashed #e5e7eb;
-  font-size: 20px;
+  font-size: 16px;
   color: #111827;
 }
 
@@ -694,7 +826,7 @@
 }
 
 .facturar-total-linea span:last-child {
-  font-size: 24px;
+  font-size: 18px;
   font-weight: 800;
   color: #111827;
 }
@@ -703,6 +835,7 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
+  flex-shrink: 0;
 }
 
 .facturar-btn-secundario {
@@ -720,6 +853,40 @@
 .facturar-btn-secundario:hover {
   background: #f9fafb;
   border-color: #d1d5db;
+}
+
+.facturar-btn-borrar {
+  width: 100%;
+  padding: 10px 16px;
+  background: #dc2626;
+  color: #fff;
+  border: 1px solid #dc2626;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.facturar-btn-borrar:hover {
+  background: #b91c1c;
+  border-color: #b91c1c;
+}
+
+.facturar-btn-guardar {
+  width: 100%;
+  padding: 10px 16px;
+  background: #fff;
+  color: #0d9488;
+  border: 1px solid #0d9488;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.facturar-btn-guardar:hover {
+  background: #f0fdfa;
+  border-color: #0d9488;
 }
 
 .facturar-btn-registrar {
@@ -748,28 +915,28 @@
   flex-shrink: 0;
   background: #fff;
   border-top: 1px solid #e5e7eb;
-  padding: 12px 16px;
+  padding: 8px 16px;
   box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.06);
 }
 
 .facturar-barra-facturas-inner {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   overflow-x: auto;
-  padding-bottom: 4px;
+  padding-bottom: 2px;
   max-width: 1200px;
   margin: 0 auto;
 }
 
-/* Pestañas tipo pill (horizontales, alargadas) */
+/* Pestañas tipo pill (horizontales, compactas) */
 .facturar-factura-pill {
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 12px;
-  min-height: 48px;
-  padding: 0 14px 0 0;
+  gap: 8px;
+  min-height: 36px;
+  padding: 0 10px 0 0;
   border: 1px solid #e5e7eb;
   border-radius: 999px;
   background: #fff;
@@ -793,13 +960,13 @@
 }
 
 .facturar-factura-pill-badge {
-  width: 40px;
-  height: 40px;
-  min-width: 40px;
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
   border-radius: 50%;
   background: #e5e7eb;
   color: #6b7280;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
   display: flex;
   align-items: center;
@@ -820,7 +987,7 @@
 }
 
 .facturar-factura-pill-nombre {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   color: #1a1d21;
   overflow: hidden;
@@ -829,7 +996,7 @@
 }
 
 .facturar-factura-pill-info {
-  font-size: 12px;
+  font-size: 11px;
   color: #6b7280;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -837,8 +1004,8 @@
 }
 
 .facturar-factura-pill-cerrar {
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   border: none;
   background: #e5e7eb;
   color: #6b7280;
@@ -863,8 +1030,8 @@
   color: #0d9488;
   background: transparent;
   padding: 0;
-  width: 48px;
-  min-width: 48px;
+  width: 36px;
+  min-width: 36px;
   justify-content: center;
 }
 

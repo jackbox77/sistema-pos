@@ -10,7 +10,7 @@ function createNuevaFactura(pedidos) {
   const n = pedidos.length + 1
   const id = `f-${Date.now()}-${n}`
   const nombre = `Factura ${n}`
-  return { id, nombre, cart: [], customerId: '', paymentMethodId: '', customTaxStr: '', orderType: 'dine_in' }
+  return { id, nombre, cart: [], customerId: '', payments: [], customTaxStr: '', orderType: 'dine_in' }
 }
 
 const POS_TABS = [
@@ -153,9 +153,17 @@ export default function Facturar() {
         next[i] = { ...next[i], quantity: next[i].quantity + 1 }
         return next
       }
-      return [...prev, { product_id: id, product_name: product.name ?? product.code ?? 'Producto', quantity: 1, unit_price, tax_amount }]
+      return [...prev, { product_id: id, product_name: product.name ?? product.code ?? 'Producto', quantity: 1, unit_price, tax_amount, tax_id: '' }]
     })
   }
+
+  const updateCartItemTax = useCallback((product_id, tax_id) => {
+    updateCurrentPedidoCart((prev) =>
+      prev.map((it) =>
+        it.product_id === product_id ? { ...it, tax_id: tax_id || '' } : it
+      )
+    )
+  }, [updateCurrentPedidoCart])
 
   const updateQuantity = (product_id, delta) => {
     updateCurrentPedidoCart((prev) => {
@@ -234,23 +242,45 @@ export default function Facturar() {
     return `$${num.toLocaleString('es-CO')}`
   }
 
+  /** Impuesto efectivo por unidad para un item: si tiene tax_id usa ese %, sino el tax_amount del producto */
+  const getItemTaxPerUnit = useCallback((it) => {
+    if (taxes?.length > 0 && it.tax_id) {
+      const tax = taxes.find(t => String(t.id) === String(it.tax_id))
+      if (tax) return it.unit_price * (Number(tax.percentage) / 100)
+    }
+    return Number(it.tax_amount ?? 0)
+  }, [taxes])
+
   const subtotal = cart.reduce((sum, it) => sum + it.quantity * it.unit_price, 0)
   const discount = 0
 
-  let taxTotal = 0
-  if (!taxes || taxes.length === 0) {
-    taxTotal = 0
-  } else {
-    const selectedTax = taxes.find(t => String(t.id) === String(currentPedido?.customTaxStr))
-    if (selectedTax) {
-      taxTotal = subtotal * (Number(selectedTax.percentage) / 100)
-    } else {
-      taxTotal = cart.reduce((sum, it) => sum + (it.tax_amount ?? 0) * it.quantity, 0)
-    }
-  }
+  const taxTotal = cart.reduce((sum, it) => sum + getItemTaxPerUnit(it) * it.quantity, 0)
 
   const totalCart = subtotal - discount + taxTotal
   const totalPcs = cart.reduce((sum, it) => sum + it.quantity, 0)
+
+  const payments = currentPedido?.payments ?? []
+  const paymentsSum = payments.reduce((sum, p) => sum + (Number(p.amount) || 0), 0)
+  const allHaveMethod = payments.length === 0 || payments.every(p => p.payment_method_id)
+  const paymentsValid = payments.length > 0 && allHaveMethod && Math.abs(paymentsSum - totalCart) < 0.01
+
+  const addPayment = useCallback(() => {
+    const activeMethods = paymentMethods?.filter(p => p.status !== 'inactive') ?? []
+    const firstId = activeMethods[0]?.id ?? ''
+    const remainder = Math.max(0, totalCart - paymentsSum)
+    updateCurrentPedidoField('payments', [...payments, { payment_method_id: firstId, amount: remainder || 0 }])
+  }, [paymentMethods, payments, paymentsSum, totalCart, updateCurrentPedidoField])
+
+  const updatePayment = useCallback((index, field, value) => {
+    const next = [...payments]
+    if (!next[index]) return
+    next[index] = { ...next[index], [field]: value }
+    updateCurrentPedidoField('payments', next)
+  }, [payments, updateCurrentPedidoField])
+
+  const removePayment = useCallback((index) => {
+    updateCurrentPedidoField('payments', payments.filter((_, i) => i !== index))
+  }, [payments, updateCurrentPedidoField])
 
   const handleRegisterSale = async () => {
     if (!currentShiftId) {
@@ -259,6 +289,10 @@ export default function Facturar() {
     }
     if (cart.length === 0) {
       setSaleError('Agrega al menos un producto al pedido.')
+      return
+    }
+    if (!paymentsValid) {
+      setSaleError('Configura los métodos de pago. La suma debe coincidir con el total.')
       return
     }
     setSaleError('')
@@ -270,15 +304,19 @@ export default function Facturar() {
     setSaleError('')
     setSaving(true)
     try {
+      const paymentPayload = payments
+        .filter(p => p.payment_method_id && (Number(p.amount) || 0) > 0)
+        .map(p => ({ payment_method_id: p.payment_method_id, amount: Number(p.amount) || 0 }))
       await registerSale({
         items: cart.map((it) => ({
           product_id: it.product_id,
           quantity: it.quantity,
           unit_price: it.unit_price,
-          tax_amount: it.tax_amount ?? 0,
+          tax_amount: getItemTaxPerUnit(it),
         })),
         customer_id: currentPedido?.customerId || undefined,
-        payment_method_id: currentPedido?.paymentMethodId || undefined,
+        payments: paymentPayload,
+        payment_method_id: paymentPayload[0]?.payment_method_id,
         tax_total: taxTotal,
         total: totalCart
       })
@@ -303,7 +341,7 @@ export default function Facturar() {
 
   return (
     <div className={`facturar-page ${activeTab === 'facturar' ? 'facturar-page--con-barra' : ''}`}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+      <div className="facturar-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
         <div className="pos-tabs" style={{ marginBottom: 0 }}>
           {POS_TABS.map((tab) => (
             <button
@@ -417,11 +455,7 @@ export default function Facturar() {
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                   />
-                  {lastUpdate && (
-                    <p className="facturar-skeleton-actualizado">
-                      Actualizado {lastUpdate.toLocaleString('es-CO', { dateStyle: 'short', timeStyle: 'short' })}
-                    </p>
-                  )}
+                
                 </div>
 
                 <div className="facturar-productos-scroll">
@@ -491,7 +525,7 @@ export default function Facturar() {
                 <div className="facturar-barra-facturas-inner">
                   {pedidos.map((p) => {
                     const itemsCount = p.cart?.length ?? 0
-                    const total = (p.cart ?? []).reduce((sum, it) => sum + it.quantity * it.unit_price + (it.tax_amount ?? 0) * it.quantity, 0)
+                    const total = (p.cart ?? []).reduce((sum, it) => sum + it.quantity * it.unit_price + getItemTaxPerUnit(it) * it.quantity, 0)
                     const isActive = p.id === currentPedidoId
                     const num = (p.nombre.match(/\d+/) || ['1'])[0]
                     return (
@@ -527,7 +561,7 @@ export default function Facturar() {
                     onClick={addNuevaFactura}
                     aria-label="Nueva factura"
                   >
-                    <Plus size={24} strokeWidth={2.5} />
+                    <Plus size={18} strokeWidth={2.5} />
                   </button>
                 </div>
               </div>
@@ -568,16 +602,35 @@ export default function Facturar() {
                     <ul className="facturar-carrito-lista">
                       {cart.map((it) => (
                         <li key={it.product_id} className="facturar-carrito-item">
-                          <span className="facturar-carrito-nombre">{it.product_name}</span>
-                          <div className="facturar-carrito-cantidad">
-                            <button type="button" onClick={() => updateQuantity(it.product_id, -1)} aria-label="Menos">−</button>
-                            <span>{it.quantity}</span>
-                            <button type="button" onClick={() => updateQuantity(it.product_id, 1)} aria-label="Más">+</button>
+                          <div className="facturar-carrito-item-main">
+                            <span className="facturar-carrito-nombre">{it.product_name}</span>
+                            <div className="facturar-carrito-cantidad">
+                              <button type="button" onClick={() => updateQuantity(it.product_id, -1)} aria-label="Menos">−</button>
+                              <span>{it.quantity}</span>
+                              <button type="button" onClick={() => updateQuantity(it.product_id, 1)} aria-label="Más">+</button>
+                            </div>
+                            <span className="facturar-carrito-precio">
+                              ${(it.quantity * it.unit_price).toLocaleString('es-CO')}
+                            </span>
+                            <button type="button" className="facturar-carrito-quitar" onClick={() => removeFromCart(it.product_id)} aria-label="Quitar">✕</button>
                           </div>
-                          <span className="facturar-carrito-precio">
-                            ${(it.quantity * it.unit_price).toLocaleString('es-CO')}
-                          </span>
-                          <button type="button" className="facturar-carrito-quitar" onClick={() => removeFromCart(it.product_id)} aria-label="Quitar">✕</button>
+                          {taxes && taxes.length > 0 && (
+                            <div className="facturar-carrito-item-impuesto">
+                              <label>Impuesto:</label>
+                              <select
+                                value={it.tax_id ?? ''}
+                                onChange={(e) => updateCartItemTax(it.product_id, e.target.value)}
+                                className="facturar-carrito-impuesto-select"
+                              >
+                                <option value="">Por defecto</option>
+                                {taxes.filter(t => t.name && t.name.trim() !== '').map((t) => (
+                                  <option key={t.id} value={t.id}>
+                                    {t.name} ({t.percentage}%)
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                          )}
                         </li>
                       ))}
                     </ul>
@@ -585,7 +638,7 @@ export default function Facturar() {
                 </div>
 
                 <div className="facturar-detalle-pago">
-                  <div className="facturar-detalle-linea" style={{ borderBottom: '1px solid #e5e7eb', paddingBottom: '12px', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
+                  <div className="facturar-detalle-linea facturar-cliente-pago" style={{ borderBottom: '1px solid #e5e7eb', paddingBottom: '8px', marginBottom: '8px', flexWrap: 'wrap', gap: '6px' }}>
                     <div style={{ width: '100%', position: 'relative' }} ref={customerDropdownRef}>
                       <label style={{ fontSize: '12px', color: '#6b7280', display: 'block', marginBottom: '4px' }}>Cliente</label>
                       <div
@@ -661,23 +714,58 @@ export default function Facturar() {
                       )}
                     </div>
 
-                    <div style={{ width: '100%', marginTop: '12px' }}>
-                      <label style={{ fontSize: '12px', color: '#6b7280', display: 'block', marginBottom: '4px' }}>Método de pago</label>
-                      <select
-                        value={currentPedido?.paymentMethodId ?? ''}
-                        onChange={(e) => updateCurrentPedidoField('paymentMethodId', e.target.value || '')}
-                        style={{
-                          width: '100%', minHeight: '36px', padding: '6px 10px', background: '#fff', border: '1px solid #d1d5db',
-                          borderRadius: '6px', fontSize: '13px', color: '#111827', cursor: 'pointer'
-                        }}
-                      >
-                        <option value="">Seleccionar método</option>
-                        {Array.isArray(paymentMethods) && paymentMethods
-                          .filter(p => p.status !== 'inactive')
-                          .map((p) => (
-                            <option key={p.id} value={p.id}>{p.method_name ?? p.name ?? p.code ?? 'Método'}</option>
-                          ))}
-                      </select>
+                    <div style={{ width: '100%', marginTop: '8px' }}>
+                      <label style={{ fontSize: '12px', color: '#6b7280', display: 'block', marginBottom: '4px' }}>Métodos de pago</label>
+                      <div className="facturar-payments-list">
+                        {payments.map((p, idx) => (
+                          <div key={idx} className="facturar-payment-row">
+                            <select
+                              value={p.payment_method_id ?? ''}
+                              onChange={(e) => updatePayment(idx, 'payment_method_id', e.target.value || '')}
+                              className="facturar-payment-method-select"
+                            >
+                              <option value="">Seleccionar</option>
+                              {Array.isArray(paymentMethods) && paymentMethods
+                                .filter(pm => pm.status !== 'inactive')
+                                .map((pm) => (
+                                  <option key={pm.id} value={pm.id}>{pm.method_name ?? pm.name ?? pm.code ?? 'Método'}</option>
+                                ))}
+                            </select>
+                            <input
+                              type="number"
+                              min="0"
+                              step="1"
+                              placeholder="Monto"
+                              value={p.amount != null ? p.amount : ''}
+                              onChange={(e) => updatePayment(idx, 'amount', e.target.value ? Number(e.target.value) : 0)}
+                              className="facturar-payment-amount-input"
+                            />
+                            {payments.length > 1 && (
+                              <button
+                                type="button"
+                                className="facturar-payment-remove"
+                                onClick={() => removePayment(idx)}
+                                aria-label="Quitar método"
+                              >
+                                ✕
+                              </button>
+                            )}
+                          </div>
+                        ))}
+                        <button
+                          type="button"
+                          className="facturar-payment-add"
+                          onClick={addPayment}
+                          disabled={!paymentMethods?.length || paymentMethods.every(p => p.status === 'inactive')}
+                        >
+                          <Plus size={14} /> Añadir método
+                        </button>
+                      </div>
+                      {payments.length > 0 && !paymentsValid && (
+                        <p className="facturar-payments-error">
+                          Suma (${paymentsSum.toLocaleString('es-CO')}) debe ser ${totalCart.toLocaleString('es-CO')}
+                        </p>
+                      )}
                     </div>
                   </div>
 
@@ -687,23 +775,7 @@ export default function Facturar() {
                   </div>
                   <div className="facturar-detalle-linea">
                     <span>Impuestos</span>
-                    <select
-                      className="input-select"
-                      style={{ width: '150px', padding: '2px 8px', minHeight: '28px', fontSize: '12px', border: 'none', textAlign: 'right', background: 'transparent' }}
-                      value={currentPedido?.customTaxStr ?? ''}
-                      onChange={(e) => updateCurrentPedidoField('customTaxStr', e.target.value)}
-                    >
-                      {(!taxes || taxes.length === 0) ? (
-                        <option value="">0% (Default)</option>
-                      ) : (
-                        <>
-                          <option value="">Por prod. (${cart.reduce((sum, it) => sum + (it.tax_amount ?? 0) * it.quantity, 0).toLocaleString('es-CO')})</option>
-                          {taxes.filter(t => t.name && t.name.trim() !== '').map(t => (
-                            <option key={t.id} value={t.id}>{t.name} ({t.percentage}%)</option>
-                          ))}
-                        </>
-                      )}
-                    </select>
+                    <span>${taxTotal.toLocaleString('es-CO')}</span>
                   </div>
                   <div className="facturar-detalle-linea">
                     <span>Descuento</span>
@@ -720,17 +792,17 @@ export default function Facturar() {
                     type="button"
                     className="facturar-btn-registrar"
                     onClick={handleRegisterSale}
-                    disabled={cart.length === 0 || saving || !currentShiftId}
+                    disabled={cart.length === 0 || saving || !currentShiftId || !paymentsValid}
                     style={{ width: '100%', padding: '16px' }}
                   >
                     {saving ? 'Registrando...' : 'Procesar Pago'}
                   </button>
                   {cart.length > 0 && (
                     <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
-                      <button type="button" className="facturar-btn-secundario" onClick={clearOrder} style={{ flex: 1, padding: '10px' }}>
+                      <button type="button" className="facturar-btn-borrar" onClick={clearOrder} style={{ flex: 1, padding: '10px' }}>
                         Borrar
                       </button>
-                      <button type="button" className="facturar-btn-secundario" style={{ flex: 1, padding: '10px' }}>
+                      <button type="button" className="facturar-btn-guardar" style={{ flex: 1, padding: '10px' }}>
                         Guardar
                       </button>
                     </div>
@@ -874,7 +946,7 @@ function ModalFormClienteRapido({ tiposDocumento, onClose, onGuardar, error: api
 
 function ModalValidarTransaccion({ pedido, subtotal, taxTotal, totalCart, customers, paymentMethods, onClose, onConfirm }) {
   const customer = customers.find(c => String(c.id) === String(pedido.customerId))
-  const pm = paymentMethods.find(p => String(p.id) === String(pedido.paymentMethodId))
+  const paymentsList = pedido?.payments ?? []
 
   return (
     <div className="form-overlay" onClick={onClose} style={{ zIndex: 9999 }}>
@@ -887,11 +959,23 @@ function ModalValidarTransaccion({ pedido, subtotal, taxTotal, totalCart, custom
           <div style={{ background: '#f9fafb', padding: '16px', borderRadius: '8px', marginBottom: '20px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
               <span style={{ color: '#6b7280' }}>Cliente:</span>
-              <strong style={{ color: '#111827' }}>{customer ? customer.name : 'Consumidor Final'}</strong>
+              <strong style={{ color: '#111827' }}>{customer ? (customer.full_name ?? customer.name) : 'Consumidor Final'}</strong>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-              <span style={{ color: '#6b7280' }}>Método de pago:</span>
-              <strong style={{ color: '#111827' }}>{pm ? (pm.method_name ?? pm.name) : 'Efectivo'}</strong>
+            <div style={{ marginBottom: '8px' }}>
+              <span style={{ color: '#6b7280', display: 'block', marginBottom: '4px' }}>Métodos de pago:</span>
+              {paymentsList.length > 0 ? (
+                paymentsList.filter(p => p.payment_method_id).map((p, i) => {
+                  const pm = paymentMethods?.find(m => String(m.id) === String(p.payment_method_id))
+                  return (
+                    <div key={i} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
+                      <span style={{ color: '#374151' }}>{pm ? (pm.method_name ?? pm.name ?? pm.code) : 'Método'}</span>
+                      <strong>${(Number(p.amount) || 0).toLocaleString('es-CO')}</strong>
+                    </div>
+                  )
+                })
+              ) : (
+                <strong style={{ color: '#111827' }}>—</strong>
+              )}
             </div>
             <hr style={{ border: 'none', borderTop: '1px solid #e5e7eb', margin: '12px 0' }} />
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>

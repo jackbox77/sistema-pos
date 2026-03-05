@@ -30,10 +30,9 @@
   overflow-y: auto;
 }
 
-/* POS: scroll en página para ver factura completa; productos tienen su propio scroll interno */
+/* POS: sin scroll en página; productos tienen su propio scroll interno */
 .layout--pos .layout-content {
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: hidden;
 }
 
 /* Vista menú completa: sin bordes, toda la página */
